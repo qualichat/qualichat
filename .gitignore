@@ -1,0 +1,6 @@
+# Working files
+.venv
+.vscode
+
+# Documentation files/folders
+docs/_build
