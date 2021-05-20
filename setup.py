@@ -33,6 +33,8 @@ setup(
     long_description=readme,
     long_description_content_type='text/markdown',
     python_requires='>=3.9.0',
+    package_dir={'qualichat': 'qualichat'},
+    package_data={'qualichat': ['books.txt']},
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',

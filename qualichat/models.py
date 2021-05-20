@@ -23,12 +23,27 @@ SOFTWARE.
 '''
 
 import datetime
+import os
+import random
 
 
 time_format = r'%d/%m/%y %H:%M:%S'
 
 def _parse_time(string: str) -> datetime.datetime:
     return datetime.datetime.strptime(string, time_format)
+
+
+_path = os.path.dirname(__file__)
+_books_path = os.path.join(_path, 'books.txt')
+
+with open(_books_path) as f:
+    __books__ = f.read().split('\n')
+
+
+def _get_random_name() -> str:
+    name = random.choice(__books__)
+    __books__.remove(name)
+    return name.strip()
 
 
 class Actor:
@@ -47,9 +62,10 @@ class Actor:
     def __init__(self, contact_name: str):
         self.__contact_name__ = contact_name
         self.messages = []
+        self.display_name = _get_random_name()
 
     def __repr__(self):
-        return f'<Actor messages={len(self.messages)}>'
+        return f'<Actor display_name={self.display_name!r} messages={len(self.messages)}>'
 
 
 class Message:
