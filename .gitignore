@@ -1,6 +1,12 @@
 # Working files
 .venv
 .vscode
+.project
 
 # Documentation files/folders
 docs/_build
+
+# Setuptools building folders
+build
+dist
+*.egg-info

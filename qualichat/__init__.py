@@ -17,6 +17,8 @@ __version__ = '0.1.0a'
 
 from collections import namedtuple
 
+from .core import load_chat
+
 
 VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')
 version_info = VersionInfo(major=0, minor=1, micro=0, releaselevel='alpha', serial=0)
