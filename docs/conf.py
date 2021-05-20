@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = 'Qualichat'
-copyright = '2021, Ernest Manhein'
-author = 'Ernest Manhein'
+copyright = '2021, Ernest Manheim'
+author = 'Ernest Manheim'
 
 
 # -- General configuration ---------------------------------------------------

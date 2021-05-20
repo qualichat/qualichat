@@ -5,14 +5,14 @@ Qualichat
 Open-source linguistic ethnography tool for
 framing public opinion in mediatized groups.
 
-:copyright: (c) 2021-present Ernest Manhein
+:copyright: (c) 2021-present Ernest Manheim
 :license: MIT, see LICENSE for more details.
 '''
 
 __title__ = 'qualichat'
-__author__ = 'Ernest Manhein'
+__author__ = 'Ernest Manheim'
 __license__ = 'MIT'
-__copyright__ = 'Copyright 2021-present Ernest Manhein'
+__copyright__ = 'Copyright 2021-present Ernest Manheim'
 __version__ = '0.1.0a'
 
 from collections import namedtuple
