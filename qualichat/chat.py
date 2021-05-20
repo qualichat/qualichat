@@ -104,3 +104,8 @@ class Qualichat:
 
             self.messages.append(message)
             actor.messages.append(message)
+
+    @property
+    def actors(self) -> list[Actor]:
+        '''list[:class:`.Actor`]: The list of actors present in the chat.'''
+        return list(self._actors.values())
