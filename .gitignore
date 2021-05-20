@@ -10,3 +10,6 @@ docs/_build
 build
 dist
 *.egg-info
+
+# Python folders
+__pycache__
