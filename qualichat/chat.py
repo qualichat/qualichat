@@ -53,7 +53,7 @@ class Qualichat:
     
     Attributes
     -----------
-    messages: list[:class:`Message`]
+    messages: list[:class:`.Message`]
         All messages detected in the chat.
     filename: :class:`str`
         The name of the uploaded file.
