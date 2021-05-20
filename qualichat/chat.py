@@ -44,8 +44,11 @@ def _clean_impurities(chat: str) -> str:
     return chat
 
 
-CHAT_FORMAT_REGEX = re.compile(r'^\[(?P<datetime>.+)\]\s+(?P<content>[\S\s]+?)(?=\n\[.+\]|\Z)', re.M)
-COMMON_MESSAGE_REGEX = re.compile(r'(?P<actor>.*):\s+(?P<message>[\s\S]+)')
+CHAT_FORMAT_REGEX = re.compile(r'''
+    ^\[(?P<datetime>\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\]\s
+    (?P<content>[\S\s]+?)(?=\n\[.+\]|\Z)
+''', re.X | re.M)
+COMMON_MESSAGE_REGEX = re.compile(r'(?P<actor>.*?):\s+(?P<message>[\s\S]+)')
 
 
 class Qualichat:
