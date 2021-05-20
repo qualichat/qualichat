@@ -54,7 +54,7 @@ class Actor:
     display_name: :class:`str`
         A representative name for this actor, this name is 
         not necessarily the user's real name.
-    messages: list[:class:`Message`]
+    messages: List[:class:`Message`]
         A list containing all the messages that this user sent 
         in the chat.
     '''

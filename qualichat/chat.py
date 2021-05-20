@@ -24,7 +24,7 @@ SOFTWARE.
 
 import pathlib
 import re
-from typing import Union
+from typing import Union, List
 
 from .models import Actor, Message
 
@@ -106,6 +106,6 @@ class Qualichat:
             actor.messages.append(message)
 
     @property
-    def actors(self) -> list[Actor]:
-        '''list[:class:`.Actor`]: The list of actors present in the chat.'''
+    def actors(self) -> List[Actor]:
+        '''List[:class:`.Actor`]: The list of actors present in the chat.'''
         return list(self._actors.values())
