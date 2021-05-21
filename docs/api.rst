@@ -63,8 +63,26 @@ Graphs
 Models
 ------
 
+Models are classes created by the library to represent an element of the chat. 
+They are not intended to be instantiated by the user of the library.
+
+.. warning::
+
+    The classes listed below are **not intended to be created by users** and
+    are also **read-only**.
+
+    For example, this means that you should not make your own :class:`.Actor` instances
+    nor should you modify the :class:`.Actor` instance yourself.
+
+
+Actors
+~~~~~~
+
 .. autoclass:: qualichat.models.Actor()
     :members:
+
+Messages
+~~~~~~~~
     
 .. autoclass:: qualichat.models.Message()
     :members:
