@@ -18,6 +18,7 @@ __version__ = '0.1.0a'
 from collections import namedtuple
 
 from .core import load_chat
+from .graphs import GraphGenerator
 
 
 VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')

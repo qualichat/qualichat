@@ -53,6 +53,14 @@ Chat Analyzers
 .. autoclass:: qualichat.chat.Qualichat()
     :members:
 
+
+Graphs
+------
+
+.. autoclass:: GraphGenerator
+    :members:
+
+
 Models
 ------
 
