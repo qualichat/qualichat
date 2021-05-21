@@ -74,7 +74,6 @@ They are not intended to be instantiated by the user of the library.
     For example, this means that you should not make your own :class:`.Actor` instances
     nor should you modify the :class:`.Actor` instance yourself.
 
-
 Actors
 ~~~~~~
 
