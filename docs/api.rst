@@ -24,9 +24,6 @@ There are two main ways to query version information about the library.
     off of :pep:`440`.
 
 
-.. _loaders:
-
-
 Abstract Base Classes
 ---------------------
 
@@ -36,6 +33,8 @@ to get their behaviour. **Abstract base classes should not be instantiated**.
 .. autoclass:: qualichat.abc.Message()
     :members:
 
+
+.. _loaders:
 
 Chat Loaders
 ------------
