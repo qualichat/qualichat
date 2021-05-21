@@ -42,6 +42,8 @@ with open(_books_path) as f:
 
 def _get_random_name() -> str:
     name = random.choice(__books__)
+    # Remove the book from the list so there is no risk that two 
+    # actors have the same display name.
     __books__.remove(name)
     return name.strip()
 
