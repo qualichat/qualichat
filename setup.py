@@ -34,7 +34,10 @@ setup(
     long_description_content_type='text/markdown',
     python_requires='>=3.9.0',
     package_dir={'qualichat': 'qualichat'},
-    package_data={'qualichat': ['books.txt']},
+    package_data={
+        'qualichat': ['books.txt'],
+        '': ['fonts/*.ttf']
+    },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',

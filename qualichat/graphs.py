@@ -23,8 +23,22 @@ SOFTWARE.
 '''
 
 from typing import Union, List
+from pathlib import Path
+
+import matplotlib
+from matplotlib import pyplot as plot
+from matplotlib import font_manager
 
 from .chat import Qualichat
+
+
+# Add ``Inter`` font.
+fonts = Path(__file__).parent / 'fonts'
+
+for font in font_manager.findSystemFonts(str(fonts)):
+    font_manager.fontManager.addfont(font)
+
+matplotlib.rcParams['font.family'] = 'Inter'
 
 
 class GraphGenerator:
