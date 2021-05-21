@@ -90,3 +90,24 @@ class Message:
 
     def __repr__(self):
         return '<Message actor={0.actor} created_at={0.created_at}>'.format(self)
+
+
+class SystemMessage:
+    '''Represents a system message sent in the chat.
+    All of these messages were sent by the WhatsApp app automatically, 
+    that means that no actor sent them.
+
+    Attributes
+    -----------
+    content: :class:`str`
+        The content of the message.
+    created_at: :class:`datetime.datetime`
+        the message's creation time.
+    '''
+    
+    def __init__(self, *, content: str, created_at: str):
+        self.content = content
+        self.created_at = _parse_time(created_at)
+
+    def __repr__(self):
+        return '<SystemMessage created_at={0.created_at}>'.format(self)

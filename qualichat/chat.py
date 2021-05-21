@@ -26,7 +26,7 @@ import pathlib
 import re
 from typing import Union, List
 
-from .models import Actor, Message
+from .models import Actor, Message, SystemMessage
 
 
 def _clean_impurities(chat: str) -> str:
@@ -89,21 +89,22 @@ class Qualichat:
             is_common = COMMON_MESSAGE_REGEX.match(content)
 
             if not is_common:
-                # Probably an user left message.
-                # Let's just ignore it and move on.
-                continue
-                
-            contact_name = is_common.group(1)
-            content = is_common.group(2)
+                # It is a system message, indicating some group 
+                # event (actor left/joined, changed the group icon, etc.)
+                message = SystemMessage(content=content, created_at=created_at)
+                self.messages.append(message)
+            else:
+                contact_name = is_common.group(1)
+                content = is_common.group(2)
 
-            if contact_name not in self._actors:
-                self._actors[contact_name] = Actor(contact_name)
+                if contact_name not in self._actors:
+                    self._actors[contact_name] = Actor(contact_name)
 
-            actor = self._actors[contact_name]
-            message = Message(actor=actor, content=content, created_at=created_at)
+                actor = self._actors[contact_name]
+                message = Message(actor=actor, content=content, created_at=created_at)
 
-            self.messages.append(message)
-            actor.messages.append(message)
+                self.messages.append(message)
+                actor.messages.append(message)
 
     @property
     def actors(self) -> List[Actor]:

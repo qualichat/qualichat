@@ -50,3 +50,6 @@ Models
     
 .. autoclass:: qualichat.models.Message()
     :members:
+
+.. autoclass:: qualichat.models.SystemMessage()
+    :members:
