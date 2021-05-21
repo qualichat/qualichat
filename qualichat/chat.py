@@ -55,7 +55,7 @@ class Qualichat:
     '''Base class for chat analysis.
     
     Attributes
-    -----------
+    ----------
     messages: List[:class:`.abc.Message`]
         All messages detected in the chat.
     filename: :class:`str`
