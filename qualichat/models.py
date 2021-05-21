@@ -26,6 +26,8 @@ import datetime
 import os
 import random
 
+from .abc import Message as BaseMessage
+
 
 time_format = r'%d/%m/%y %H:%M:%S'
 
@@ -70,7 +72,7 @@ class Actor:
         return f'<Actor display_name={self.display_name!r} messages={len(self.messages)}>'
 
 
-class Message:
+class Message(BaseMessage):
     '''Represents a message sent in the chat.
 
     Attributes
@@ -92,7 +94,7 @@ class Message:
         return '<Message actor={0.actor} created_at={0.created_at}>'.format(self)
 
 
-class SystemMessage:
+class SystemMessage(BaseMessage):
     '''Represents a system message sent in the chat.
     All of these messages were sent by the WhatsApp app automatically, 
     that means that no actor sent them.

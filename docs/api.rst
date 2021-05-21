@@ -26,6 +26,17 @@ There are two main ways to query version information about the library.
 
 .. _loaders:
 
+
+Abstract Base Classes
+---------------------
+
+An :term:`abstract base class` (also known as an ``abc``) is a class that models can inherit
+to get their behaviour. **Abstract base classes should not be instantiated**.
+
+.. autoclass:: qualichat.abc.Message()
+    :members:
+
+
 Chat Loaders
 ------------
 
@@ -50,6 +61,8 @@ Models
     
 .. autoclass:: qualichat.models.Message()
     :members:
+    :inherited-members:
 
 .. autoclass:: qualichat.models.SystemMessage()
     :members:
+    :inherited-members:
