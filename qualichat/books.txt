@@ -1,632 +1,826 @@
-Delenda est Carthago! 
-Quatro Novelas 
-Ás Mulheres Portuguêsas 
-Robur, o Conquistador 
-Notas d'arte 
-Musa Cerula 
-Contos 
-Transviado 
-Apotheose Camoneana 
-Folhas Soltas 
-Pátria 
-Flirts 
-Diffinição da sécia 
-Ao Entardecer 
-Carlota Angela 
-Um novo mundo 
-Os Sinos
-Poesia Narrativa 
-Ubirajara: Lenda Tupi 
-Suicida 
-Historias Brazileiras 
-A Paranoia 
-Contos do Norte 
-Lendas e Narrativas 
-Estudo de Guitarra 
-A Senhora Viscondessa 
-Poesias Completas 
-Ambições: Romance 
-Lagrimas Abençoadas 
-Napoleão no Kremlin 
-A Mulher Portugueza 
-Miniaturas Romanticas 
-Elegia 
-Claridades do sul 
-Inscripções portuguezas 
-Nova Castro: tragedia 
-Flores do Campo 
-Leituras Populares 
-O Mandarim 
-Sociologia Chinesa: Autoplastia 
-Cidades e Paisagens 
-A agua profunda 
-Newton: Poema 
-Esau e Jacob 
-Estrellas Funestas 
-Despedidas: 1895-1899 
-Rogações de Eremita 
-Alexandre Herculano 
-13 Sonetos 
-Luar de Janeiro 
-Marilia de Dirceo 
-Fialho d'Almeida 
-Eurico, o presbytero 
-Historia Antiga 
-Sonetos 
-Echos de Pariz 
-Dom Casmurro 
-Miragaia: Romance Popular 
-Os factos 
-O Regicida 
-O Federalismo 
-Christo não volta 
-A Relíquia 
-Amor Crioulovida argentina 
-Soldados da Revolução 
-Habitações Operarias 
-A José Estevão 
-A Primavera 
-Contos e Phantasias 
-Lendas do sul 
-A senhora Rattazzi 
-Lupe 
-Scenas da Aldeia 
-Elegia da solidão 
-Lendas dos Vegetaes 
-Mundanismos 
-Maldita Felicidade 
-Fanny: estudo 
-Quincas Borba 
-Camillo Castello Branco 
-Historia da Grecia 
-Viriatho: Narrativa epo-historica 
-Contos Paraenses 
-Liberdade de Imprensa 
-A Morgadinha dos Cannaviaes
-A Alma Nova 
-O Melro
-Á ventura 
-SurprezaEntre-acto original 
-José Estevão 
-Julio Diniz 
-Ramalho Ortigão 
-José Estevão
-Rainha sem reino 
-Livro de Máguas 
-O poeta Chiado
-Os Simples 
-A Divorciada 
-Testamento Poetico-Anachreontico 
-Cintra 
-Os Cataventos 
-Historias Sem Data 
-O Inferno 
-Pelo mundo fóra 
-Garatujas 
-Cantos Sagrados 
-Ultimatum 
-Aves Migradoras 
-Scenas Contemporaneas 
-Contos d'Aldeia 
-Sinapismos 
-Nas Cinzas 
-Poesias 
-Estrellas Propícias 
-Tres capitaes 
-Salmos do prisioneiro 
-O Arrependimento 
-A Morte Vence 
-Entre as Nymphéas 
-Effeitos do Hypnotismo 
-Cartas de Inglaterra 
-Tribunaes de Arbitros-Avindores 
-Paz e Arbitragem 
-Obras posthumas 
-O Engeitado 
-Noites de Cintra 
-Santarenaida: poema eroi-comico 
-Chronicas de Viagem 
-Amor de Salvação 
-Os Lusíadas 
-Musa Velha 
-Humus 
-Memorial de Ayres 
-Novelas do Minho 
-Voltareis ó Christo? 
-Memórias 
-Elegias 
-Cinco minutos 
-Monólogo do Vaqueiro 
-Só 
-A Pavorosa Illusão 
-A menina Lisa 
-Amôres d'um deputado 
-O trophéo 
-Dôr e Luz
-O congresso de Roma
-Sonetos de Anthero 
-Canções 
-A Gratidão 
-Infelizes: Historias Vividas 
-Othello 
-Papeis Avulsos 
-Contos e Lendas 
-Mysterio do Natal 
-Manhãs de Cascaes 
-A Reforma 
-Scenas da Foz 
-Ao de Leve 
-Nocturnos Contos
-Miragaia: Romance Popular
-Maldita Felicidade
-Historias Sem Data
-Tres capitaes
-Leituras Populares
-Sonetos
-Os Simples
-Humus
-Contos e Lendas
-Memórias
-Canções
-Elegia
-Historia Antiga
-Fialho d'Almeida
-Contos Paraenses
-Contos e Phantasias
-Elegia da solidão
-Obras posthumas
-Musa Velha
-Delenda est Carthago!
-Sociologia Chinesa: Autoplastia
-A Relíquia
-Cartas de Inglaterra
-Ambições: Romance
-Rogações de Eremita
-Lendas e Narrativas
-Manhãs de Cascaes
-Apotheose Camoneana
-Livro de Máguas
-Julio Diniz
-Echos de Pariz
-Marilia de Dirceo
-Nocturnos
-Othello
-Effeitos do Hypnotismo
-Contos d'Aldeia
-Scenas Contemporaneas
-Paz e Arbitragem
-Mundanismos
-Robur, o Conquistador
-A senhora Rattazzi
-Cidades e Paisagens
-Aves Migradoras
-Dôr e Luz
-Sinapismos
-A Senhora Viscondessa
-Pátria
-O Mandarim
-SurprezaEntre-acto original
-Christo não volta
-Á ventura
-Historias Brazileiras
-A Mulher Portugueza
-Fanny: estudo
-Ás Mulheres Portuguêsas
-O Engeitado
-A Reforma
-Amor Crioulovida argentina
-Ao Entardecer
-Alexandre Herculano
-Luar de Janeiro
-Nova Castro: tragedia
-Estudo de Guitarra
-Estrellas Funestas
-José Estevão
-Scenas da Aldeia
-Os Sinos
-Poesia Narrativa
-Claridades do sul
-Chronicas de Viagem
-Newton: Poema
-Só
-Ao de Leve
-O Arrependimento
-13 Sonetos
-Cinco minutos
-Entre as Nymphéas
-Liberdade de Imprensa
-Musa Cerula
-Monólogo do Vaqueiro
-Inscripções portuguezas
-Eurico, o presbytero
-Os factos
-Notas d'arte
-Soldados da Revolução
-A José Estevão
-Noites de Cintra
-Voltareis ó Christo?
-A Morte Vence
-Testamento Poetico-Anachreontico
-O Federalismo
-Flirts
-A Alma Nova
-Santarenaida: poema eroi-comico
-Lagrimas Abençoadas
-Lupe
-Viriatho: Narrativa epo-historica
-A Paranoia
-Novelas do Minho
-Suicida
-Despedidas: 1895-1899
-Lendas dos Vegetaes
-Um novo mundo
-Historia da Grecia
-Ultimatum
-A Primavera
-Garatujas
-Folhas Soltas
-O congresso de Roma
-Transviado
-Miniaturas Romanticas
-Amôres d'um deputado
-Diffinição da sécia
-Cintra
-Memorial de Ayres
-O Regicida
-Esau e Jacob
-A Morgadinha dos Cannaviaes
-O poeta Chiado
-O Melro
-Tribunaes de Arbitros-Avindores
-Rainha sem reino
-Napoleão no Kremlin
-Os Lusíadas
-Carlota Angela
-Contos do Norte
-Lendas do sul
-A Divorciada
-A menina Lisa
-Poesias Completas
-Scenas da Foz
-O trophéo
-Nas Cinzas
-Quatro Novelas
-Amor de Salvação
-A agua profunda
-Os Cataventos
-Habitações Operarias
-A Pavorosa Illusão
-Cantos Sagrados
-Quincas Borba
-Camillo Castello Branco
-Elegias
-Pelo mundo fóra
-Ramalho Ortigão
-Papeis Avulsos
-A Gratidão
-Estrellas Propícias
+O Ateneu
+São João Evangelista
+Profeta Jeremias
+Profeta Baruc
+Profeta Ezequiel
+Profeta Isaías
+Profeta Oséias
+Profeta Daniel
+Profeta Jonas
+Profeta Joel
+Profeta Abdias
+Profeta Habacuc
+Profeta Naum
+Profeta Amós
 Dom Casmurro
-Sonetos de Anthero
-Ubirajara: Lenda Tupi
-Poesias
-Infelizes: Historias Vividas
-Salmos do prisioneiro
-Flores do Campo
-O Inferno
-Mysterio do Natal
-Diffinição da sécia
-Despedidas: 1895-1899
-Contos e Lendas
-A Senhora Viscondessa
-Dom Casmurro
-Carlota Angela
-Inscripções portuguezas
-Newton: Poema
-Historia Antiga
-Camillo Castello Branco
-Transviado
-Pelo mundo fóra
-O Regicida
-Eurico, o presbytero
+Profetas do Aleijadinho
+O Cortiço
+São Marcos
+As primaveras
+Broqueis
+I-Juca Pirama
+A Moreninha
+A Redenção de Cam
+Marília de Dirceu
+O Mequetrefe
+A Marmota
+Revista Popular
+Semana Illustrada: Lanterna Mágica
+Iracema: lenda do Ceará
+História da Literatura Brasileira
+Família em um Terraço
+Arrufos
+Úrsula
+Lira dos 20 Anos
+Ilha da Boa Viagem
+Retrato de Margarida Berna
+Paisagem
+Rochedo da Boa Viagem
+Natureza-Morta: Laranjas e Bananas
+Fazenda Santa Clara
+O Paquete Malange
+Caffé (sic) Torrado
+Retrato de Debret
+Violinista Montenegrina
+A Caboclinha
+Praia de Santa Luzia
+Botes em Toulon (França)
+Rainha Carlota Joaquina
+Calceteiros
+Botica
+O Vitelo
+Juventude
+Iracema
+Dr. Silva Ramos
+Marinha com Barco
+Paisagem da Gamboa
+Praia de Botafogo
+Largo da Glória
+Vista de Botafogo
+Consertador de Porcelanas
+Rancho de Tropeiros
+Cascata da Tijuca
+Pátio
+A Portuguesa
+Velho Artista
+Retrato de uma Senhora
+Menino com Cão
+Lagoa Rodrigo de Freitas
+Fuga de Escravos
+Amor Silencioso
+Praia Nordestina
+Menina ao Piano
+Paisagem Nordestina
+Paisagem Pernambucana - Olinda
+Paisagem (Rio de Janeiro)
+Padaria Francesa em Petrópolis
+Cena Religiosa
+Paisagem
+Paisagem com Rio
+Poço Rico
+Navios Salvando na Guanabara
+O Mendigo
+O Mercado de Escravos
+Ruínas (Itália)
+Trecho de Aldeia (Itália)
+Jardim com Flores
+Menino com Bandolim
+Tropeiros
+Espírito Santo
+A Borrasca
+Vida Nova
+Cena de Anticoli
+Má Colheita
+Desterro
+Paisagem de Petropólis
+Moça na Janela
+Arredores da Tijuca
+Uma Família Brasileira
+Escravos Doentes
+Uma História
+Banhistas
+Ladeira Porto Geral
+Ilha das Cobras
+Ponta do Cavalão
+Orquídeas
+O Caçador de Tigres
+Paisagem, RJ
+Sonho de Catarina Paraguaçu
+Fortaleza Liberta (Painel)
+Vapor de Rodas
+Vila de Cametá (detalhe)
+Vila de Monforte
+Uniformes Militares
+Stella Matutina
+Rua São Clemente, RJ
+Retrato de Mulher
+No Atelier
+Anjos
+Índia Tupi
+Índio Tupi
+Mulher Mameluca
+Francisco Fernandes do Sym
+Anjos
+Dom João VI
+Conde de Bobadela
+Santo Antônio
+Fazenda Motalto
+Passeio Público (Salvador, BA)
+Retrato do Conde d'Eu
+Panteão de Assunção
+Retrato de Menina
+Rua Pharoux
+Parque Cremérie
+Congada (Rio de Janeiro)
+Prefeitura Municipal (Nazaré, BA)
+Ama-de-leite com criança
+Francisco de Caldas Lins
+Paisagem Marítima
+Ponte Provisória no Recife
+Estação Ferroviária de Pirayú
+Igreja Exaltatione, Bolívia
+Retratos de Escrava
+Escravo Confeccionando um Cesto
+Retrato de Escrava
+Dois Escravos se Cumprimentando
+Ilha de Paquetá
+Indumentária dos Caciques Javapery
+Santa Casa de Misericórdia
+Praça 15 de Novembro
+Vista geral da cidade
+Petrópolis
+Retrato de jovem desconhecido
+Retrato do Conde D`Eu
+Retrato de Duas Senhoras
+A Lição
+Nu Feminino Deitado
+Camponesa Italiana
+Chácara
+Lagoa Rodrigo de Freitas
+O Palácio
+Uma Barraca de Feira
+San Bernardo
+Largo de Santa Rita
+São Paulo
+Interior com Orquídeas
+Paisagem Fluvial, MG
+Navio Ancorado
+Morte de Atala
+Retrato de Menina
+Macaco
+Espécime Vegetal
+Imaculada Conceição (painel)
+Santana Mestra
+Santa Bárbara
+Visão de São Bernardo
+Imaculada Conceição (painel)
+Mulher Africana
+Homem Africano
+Mulher tapuia
+Arara azul e amarela
+Carta de profissão
+Anjos (forro da nave)
+São Braz
+Última Ceia
+Última Ceia (painel)
+Crucificação de Cristo (painel)
+Índio Tarairiu (Tapuia)
+São Bento
+Santa Escolástica
+Índia Tarairiu (Tapuia)
+Cena Galante
+Fazenda Veneza
+Ponte de São Cristóvão
+Várzea em Teresópolis
+Vendedora de Fósforos (Itália)
+General Lasalle
+Família Paraguaia
+Retrato da Princesa Isabel
+Elevador Público (Salvador, BA)
+Passeio Público, Salvador BA
+Peça da Coroação [anverso
+Monumento a General Osório
+Grupo Festivo (Baturité, CE)
+Parque Cremérie
+Freitas Guimarães
+Retrato de jovem não-identificada
+Retrato de jovem não-identificada
+Escrava Vendedora Ambulante
+Escravos com Balaios
+Escravo com Balaio
+Escravo Vendedor de Cadeiras
+Escrava Vendedora de Frutas
+As Prateleiras (Itatiaia, RJ)
+Santo Amaro da Purificação
+Rua em Salvador
+Praia de Copacabana
+Rua do Ouvidor
+Colheita de café
+Rua Primeiro de Março
+Largo da Carioca
+Estação Ferroviária
+Cascata dos Correas
+Diploma da Maçonaria (detalhe)
+Grande Cartela com Querubim
+Marinha
+Natureza-Morta
+Ilha de Villegagnon
+Tempestade
+Boqueirão, Minas Gerais
+Vista de Teresópolis
+Cascatinha de Teresópolis
+The Scream
+Nature Morte au Panier
+Porto das Piranhas (Sergipe)
+Rua Direita (Diamantina, MG)
+O Morro do Castelo
+Cajá (sic)-Iri
+Maracujá
+Índios Tupinambás Guerreiros
+Ponte de Santa Ifigênia
+Caboclo
+Casario
+Santo Antonio
+Nossa Senhora das Mercês
+Nossa Senhora da Conceição
+São José de Botas
+São Joaquim
+Nossa Senhora das Dores
+São Pedro de Alcantara
+Nossa Senhora
+Menino Deus
+Interior com Menino Brincando
+Monumento do Ypiranga
+Veneza
+Lagoa Rodrigo de Freitas
+Morro com edificações
+Praia com coqueiros
+Mulher Coletando Água
+Paisagem com Figuras
+Lady of St. Paul's
+Cascata na Floresta
+São Mateus
+Boqueirão, Minas Gerais
+Marinha - Santos, SP
+Carro com bois
+Lavadeiras do Rio Tamanduateí
+Margem do Rio Tietê
+Várzea do Tietê
+Estudo para Lavadeiras
+Casa da Avenida Paulista
+Floresta tropical
+Terraço do Passeio Público
+Retrato de Gonzaga Duque
+Princesa Dona Leopoldina
+O Chafariz de Catumbi
+Sapotaceae - Pouteria Caimito
+Euryzygomatomys Spinosus Guaira
+Philander Opossum
+Cebus Albifrons
+Homme et Femme Bororós
+Costume de S. Paul
+Vochysiaceae - Salvertia convallariaeodora
+Rubiaceae - Psychotria poeppigiana
+District de La Chapada
+Hoplias Malabaricus
+Leguminosae - Clitoria simplicifolia
+Magnoliaceae - Talauma
+Nephila Cruentata Fabricius
+Callithrix Argentata Melanura
+Dasyprocta Azare
+Spectyto Cunicularia
+Otus Choliba
+Tangara Peruviana
+Bothrops Neuwiedi
+Tupinambis Teguixin
+Didelphis Albiventris
+Alouatta Fusca
+Cabassous Tatouay
+Vampyrops Lineatus
+Stephanophorus Diadematus
+Ameiva Ameiva
+Bombacaceae - Chorisia speciosa
+Os Descobridores
+Portrait du Tucan
+Residência von Bullow
+Vista Geral
+Povoação de São Brás
+Rua da Prata
+People of São Paulo
+Praia do Botafogo
+Imbituba
+Salto de Piracicaba
+Rua Dom Afonso
+Serra dos Órgãos
+Largo do Paço
+Vila Velha do Pereira
+Foz do Rio Vermelho
+Coqueiral (Pernambuco)
+Cidade Baixa
+Rua Direita do Palácio
+Vila de Traipu
+Rua da Matriz
+Engenho Bujari (Goiana, PE)
+Sítio da Madalena
+Cascata de Itamaraty
+Ponte Sete de Setembro
+Mercado da Cidade
+Pedra da Itapuca
+Praça Riachuelo (Salvador, BA)
+Mercado Velho
+Cristo da Coluna
+Lagoa Rodrigo de Freitas
+Exéquias de Atalá
+Interior de Atelier
+Mata Reduzida a Carvão
+Iracema
+Vista da Gamboa
+Retrato de Menina
+D. Antônia Alves Carvalho
+Praia da Boa Viagem
+A Pesca
+Morro da Viúva
+Jugurta
+Os Buritis do Parnamirim
+Vaso com Flores
+Engenho de Mandioca
+A Dança das Oréades
+Estudo de Cabeça
+A Tagarela
+Moisés e Jocabed
+Davi e Abisag
+Batalha do Avaí
+No Verão
+Recompensa de São Sebastião
+Gioventú
+A Pompeana
+Narração de Filetas
+Más Notícias
+A Partida de Jacob
+Dorso de Mulher
+Judite e Holofernes
+Desdêmona
+Amuada
+O Último Tamoio
+O Voto de Heloísa
+Marabá
+Maternidade
+Moisés Salvo das Águas
+Descida da Cruz
+Dorso de Mulher
+Santo Estevão
+A Faceira
+Cristo e a Adúltera
+Cascatinha da Tijuca
+Alma Penada
+Bom Tempo
+A Palavra aos Surdos-Mudos
+Sansão e Dalila
+Vista da Mãe D´Água
+Mestre de uma Sumaca
+Paisagem de Sabará
+Arredores de Paris
+Francesca da Rimini
+Paisagem Pernambucana
+Retrato de Moça
+Moema
+O Paraíba do Sul
+João Caetano
+Deusa Ceres
+Retrato de Mulher
+Estudo para Marabá
+Retrato
+39º Batalhão de Infantaria
+Dom Pedro I
+Judite e Holofernes
+Peixes
+O Sepultamento
+São Lucas
+São Mateus
+Ásia
+África
+Oitavo Conde dos Arcos
+Europa
+América
+Ecce Homo
+Busto de Marc Ferrez
+A Morte de Sócrates
+A Hora do Pão
+Porto de Santos
+Porto do Bispo
+Fazenda Monte Alegre, Brotas
+Regata de 1889
+Marinha com sereia
+Nu Deitado
+Fachada com Bandeirinhas
+Barco da Morte
+Mastros
+Casario
+Menina de Bicicleta
+Bandeirinhas
+Arcos e Bandeirinha
+Vaso de Flores
+A Tarde
+Turbínio
+Escola do Ar Livre
+Panorama de Niterói
+Chácara da Consolação
+Le Balcon
+Sacrifício de Manoah
+Paisagem Brasileira com Tatu
+Recife e Itamaracá
+Serinhaém
+Casa de Fazenda
+Engenho de Açúcar
+Índios Caçando e Lutando
+Carro de Bois
+Assentamento no Brasil
+Capela com pórtico
+Paisagem com casa alpendrada
+Engenho de açúcar
+Vista de Olinda
+Panorama Brasileiro
+Engenho de Açúcar
+Marinha
+Menino
+Os Irmãos Munhós
+Recado Difícil
+Pescando
+Descanso do Modelo
+Fuga para o Egito
+Caipiras Negaceando
+O Derrubador Brasileiro
+Ponte da Tabatingüera
+Retrato de Homem
+Garoto com Banana
+Mendigo da Tabatingüera
+O Modelo
+Caipira Pitando
+Depois da Festa
+A Noiva
+Depois do Banho
+Perfil de Mulher
+Aurora
+Apóstolo São Paulo
+As Lavadeiras
+Negra
+Louvre
+Jóquei e Cavalo
+Estudo da Mendiga
+Praia de Botafogo
+Morro da Viúva
+Natureza-Morta
+A Proclamação da Independência
+Independência ou Morte
+Partida da Monção
+Prudente de Morais
+Natureza-Morta
+Ao Gênio do Brasil
+Escadarias do museu
+Salto de Itu
+Senhor dos Martírios
+Polícia acampada em Caraguatatuba
+Largo da Sé
+Nascimento de Cristo
+Cristo coroado de espinhos
+Paisagem de Padova
+Lagoa Rodrigo de Freitas
+A Sege
+Família Brasileira a Passeio
+Vendedora de Abacaxis
+Senhora Viajando de Rede
+Quitandeiras na Feira
+Pedinte de Irmandade
+Serpentina de Luxo
+Negra Vendedora de Quinquilharias
+Gegend von Botafogo
+Kaserne zu Mata Porcos
+Reisender Paulist in Boncho
+Vornehme Portugiesen
+Villa Rica
+Gegend von Laranjeiras
+Eine Negerin wird verkauft
+S. Christoph
+Praia de Botafogo
+Retrato de Maria Elisa
+Retrato
+São Mateus
+David e Abizag
+Estado da Questão Militar
+Judith e Holofernes
+De Volta do Paraguai
+A Carioca
+Arraial de Nazaré
+Docas do Reduto
+Mercado-Ver-o-Peso
+Praça da Independência
+Estrada de São Jerônimo
+Boulevard da República
+Estrada de Nazareth
+Vista de Belém
+Teatro da Paz
+Estudo de Figura
+Paz e Concórdia
+Praia de Botafogo
+Praia de Icaraí, Niterói
+Índios Atravessando um Riacho
+Marinha com Barco
+Niterói
+Paisagem com Jibóia
+Palácio do Governo
+Paisagem (painel da nave)
+Casas
+Lenhador
+Natureza-Morta
+Jovem Adormecida
+Retrato do Aluno Conceição
+Uma Chácara em Niterói
+Lilás
+Paisagem Florestal
+Paisagem Campestre
+A Palha no Campo
+Vista de Dourdan
+Buquê de Flores
+O Girassol
+O Carrinho Tombado
+A Fundição
+Paisagem Marítima
+Canto do Jardim
+Meu Jardim em Creteil
+Paisagem Campestre
+A Roseira do Jardim
+O Pescador
+Dourdan
+O Jardim do Barqueiro
+Natureza-Morta
+Retrato do Pintor Castagneto
+Natureza-Morta
+Araçás
+Orquídeas
+Nêsperas
+Goiabas
+Romãs
+São Marcos
+São João Evangelista
+São Mateus
+Trecho de Paisagem Urbana
+Retrato de Marc Ferrez
+Vista Geral
+Ladeira do Palácio
+Rua da Estação
+Igreja da Sé
+Mulher (anônima)
+Homem (anônimo)
+Rua Marechal Deodoro
+Rua do Comércio
+Rua Direita
+Vista Geral
+Hotel Palm
+Família (anônima)
+D. Pedro II
+Chácara do Brás
+Vista da Rua Direita
+Chacara do Brás
+Brás
+Rua da Constituição
+Rua da Quitanda
+Jardim da Luz
+Rua Direita
+Rua da Cruz Preta
+Sede da Chácara Mauá
+Largo do Bexiga
+Rua da Glória
+Ladeira do Ouvidor
+Dona  Tereza Cristina
+Primeira Missa no Brasil
+Dom Pedro II
+Juramento da Princesa Isabel
+Estudo de Trajes Italianos
+A Bacante
+Estudo de Cabeça Feminina
+Batalha dos Guararapes
+Estudo de Cabeça
+Flagelação de Cristo
+Bandeira do Divino
+Paisagem de Niterói
+Exéquias de Camorim
+O Mascate
+O Carregamento da Cruz
+Monte das Oliveiras
+Cristo é Aprisionado
+Colocação na Cruz
+Ceia
+Coroação de Espinhos
+Flagelação
+Retrato de Zulmira Freire
+Abolição da Escravatura
+Violeiro na Janela (estudo)
+Porto de Santos
+Busto de D.João VI
+São Vicente
+A Estrada
+Guerra dos Mascates
+Porto de Santos
+Povoado numa Planície Arborizada
+Floresta Virgem do Brasil
+Itapema - Santos
+Cozinha de Maloca
+Índio Amaúa
+Jacaré
+Vila Rica
+Dom Pedro de Alcântara
+Capa da Revista Illustrada
+Nossa Senhora da Conceição
+Irmão Pedinte
+D. Maria II
+Gragoatá Depois da Trovoada
+A Pintura
+Batismo de Jesus
+Olevano
+Paisagem Fluvial
+Amolação Interrompida
+Arredores de Paris
+Criação da Vovó
+Saudades de Nápoles
+Mulata quitandeira
+Apertando o Lombilho
+Caipira Picando Fumo (estudo)
+Praia de Icaraí, Niterói
+Passagem de Humaitá (Estudo)
+Nhá Chica
+Leitura
+Paisagem (Friburgo)
+Rua de Túnis
+Tarde em Toulon (França)
+Cozinha Caipira
+O Importuno
+O Violeiro
+Manhã de Inverno
+Cozinha na Roça
+Saudades
+Rua 25 de Março
+Infância de Giotto
+Escrava Romana
+Rua da Itália
+Retrato de Senhora
+A Providência Guia Cabral
+Coronel Domingos Pires Carvalho
 Marilia de Dirceo
-Historia da Grecia
-Lendas e Narrativas
-Cantos Sagrados
-Contos e Phantasias
-Pátria
-O Melro
-Esau e Jacob
-SurprezaEntre-acto original
-Julio Diniz
-Historias Brazileiras
-Tribunaes de Arbitros-Avindores
-O Engeitado
-Flores do Campo
-Nas Cinzas
-Chronicas de Viagem
-Cartas de Inglaterra
-Contos d'Aldeia
-Memorial de Ayres
-Manhãs de Cascaes
-Os Cataventos
-O trophéo
-Ao Entardecer
-A Morte Vence
-Aves Migradoras
-Contos Paraenses
-Nova Castro: tragedia
-Ambições: Romance
-Othello
-Cidades e Paisagens
-Santarenaida: poema eroi-comico
-Estrellas Funestas
-Leituras Populares
-Folhas Soltas
-Elegia
-Voltareis ó Christo?
-Ubirajara: Lenda Tupi
-A Alma Nova
-O Federalismo
-Apotheose Camoneana
-A José Estevão
-Amor de Salvação
-A Pavorosa Illusão
-Estudo de Guitarra
-Á ventura
-Elegias
-Soldados da Revolução
-Os factos
-A Primavera
-Só
-Memórias
-Fanny: estudo
-Christo não volta
-Lendas dos Vegetaes
-Ultimatum
-Amôres d'um deputado
-Lupe
-A Divorciada
-Contos do Norte
-Testamento Poetico-Anachreontico
-Tres capitaes
-Novelas do Minho
-Habitações Operarias
-Poesias Completas
-Delenda est Carthago!
-Scenas da Foz
-Salmos do prisioneiro
-Musa Cerula
-Ramalho Ortigão
-Obras posthumas
-Dôr e Luz
-Suicida
-A Mulher Portugueza
-Liberdade de Imprensa
-José Estevão
-Miragaia: Romance Popular
-Claridades do sul
-Rogações de Eremita
-Miniaturas Romanticas
-Infelizes: Historias Vividas
-Os Simples
-Ás Mulheres Portuguêsas
-O poeta Chiado
-Fialho d'Almeida
-Sociologia Chinesa: Autoplastia
-Garatujas
-A Paranoia
-O Inferno
-Canções
-Flirts
-Os Sinos
-Poesia Narrativa
-Effeitos do Hypnotismo
-Os Lusíadas
-Robur, o Conquistador
-Lagrimas Abençoadas
+Cartas da Independência
+Primeiros Cantos
 Quincas Borba
-Quatro Novelas
-Sinapismos
-Sonetos de Anthero
-Napoleão no Kremlin
-Alexandre Herculano
-Scenas da Aldeia
-Estrellas Propícias
-Luar de Janeiro
-Poesias
-Paz e Arbitragem
-Noites de Cintra
-A Gratidão
-Entre as Nymphéas
-Mundanismos
-Lendas do sul
-Monólogo do Vaqueiro
-Nocturnos
-A Morgadinha dos Cannaviaes
-Ao de Leve
-A menina Lisa
-Mysterio do Natal
-Scenas Contemporaneas
-Notas d'arte
-Um novo mundo
-Maldita Felicidade
-A Reforma
-Historias Sem Data
-Papeis Avulsos
-Musa Velha
-A Relíquia
-O Arrependimento
-A agua profunda
-Livro de Máguas
-Amor Crioulovida argentina
-Contos
-O congresso de Roma
-Echos de Pariz
-Cintra
-Elegia da solidão
-A senhora Rattazzi
-Rainha sem reino
-Humus
-Cinco minutos
-O Mandarim
-Viriatho: Narrativa epo-historica
-Sonetos
-13 Sonetos
-Historias Brazileiras
-Lendas e Narrativas
-O Arrependimento
-Scenas Contemporaneas
-Suicida
-Noites de Cintra
-13 Sonetos
-A Pavorosa Illusão
-Camillo Castello Branco
-Novelas do Minho
-Manhãs de Cascaes
-Christo não volta
-A Mulher Portugueza
-A menina Lisa
-Contos d'Aldeia
-Newton: Poema
-A Morte Vence
-Elegia
-Ambições: Romance
-Elegias
-O trophéo
-Viriatho: Narrativa epo-historica
-Miragaia: Romance Popular
-Livro de Máguas
-Musa Cerula
-Memórias
-Nas Cinzas
-Scenas da Foz
-A Morgadinha dos Cannaviaes
-Fialho d'Almeida
-Ao de Leve
-Luar de Janeiro
-Tribunaes de Arbitros-Avindores
-A Senhora Viscondessa
-Só
-Aves Migradoras
-A Relíquia
-O Mandarim
-A senhora Rattazzi
-Transviado
-Os Simples
-A Gratidão
-Nocturnos
-Rogações de Eremita
-Quincas Borba
-Mysterio do Natal
-Ultimatum
-Dôr e Luz
-Contos Paraenses
-O Engeitado
-Nova Castro: tragedia
-Os Lusíadas
-O poeta Chiado
-Os factos
-Amor Crioulovida argentina
-Contos
-Um novo mundo
-Delenda est Carthago!
-Poesias
-Estrellas Propícias
-Fanny: estudo
-Os Sinos
-Poesia Narrativa
-Apotheose Camoneana
-Flores do Campo
-Soldados da Revolução
-Amor de Salvação
-Testamento Poetico-Anachreontico
-A Paranoia
-Diffinição da sécia
-Quatro Novelas
-Sinapismos
-O congresso de Roma
-Inscripções portuguezas
-Cinco minutos
-Despedidas: 1895-1899
-Historias Sem Data
-Lendas do sul
-Contos e Lendas
-A agua profunda
-Maldita Felicidade
-Notas d'arte
-Santarenaida: poema eroi-comico
-Alexandre Herculano
-Folhas Soltas
-Elegia da solidão
-Cartas de Inglaterra
-Effeitos do Hypnotismo
-A José Estevão
-O Inferno
-Echos de Pariz
-Carlota Angela
-O Melro
+Quasi Ministro
+Chrysalidas
+Os Deuses de Casaca
+Cena de Costumes
+Entrada do Passeio Público
+Cantos Tropicais
+Fanfarras
+Obras Completas
+Relicário: versos
+Ardentias: versos
+Guarani: romance brasileiro
+A Viuvinha. Cinco Minutos
+Cinco Minutos
+Diva: perfil de mulher
+Ubirajara: lenda tupi
+Encarnação
+O Sistema Representativo
+Ao Imperador: cartas
+Ao Marquês de Olinda
+Ao Redator do Diário
+Memórias de Marta: narrativa
+A Família Medeiros
+Mármores
+Rumorejos
+Os Escravos: poema brasileiro
+Espumas Flutuantes
+Os Escravos: poesias
+Livro da Infância
+Cartas Chilenas
+Marilia di Dirceo
+Contos Infantis
+Traços e Iluminuras
+Livro das Noivas
+A Machadada: poema fantástico
+Porangaba: lenda americana
+Prelúdios Poéticos
+Folhetins de Silvanus
+Canções da Escola
+Lira Cearense
+Cenas Populares
+Mineradores
+Carregadores de Água
+Castigos Domésticos
+Paisagem com cavaleiro
+Mercado de Escravos
+Castigo Público
+Casal negro numa fazenda
+Rio Parahyba
+Botocudos
+Botafogo
+O Índio Afonso
+Phalenas
+Brazões
+Várias Histórias
+O Conde Lopo
+Demônios
+Scenas da Vida Amazonica
+O Coruja
+A Mortalha de Alzira
+A Comedia dos Deuses
+Evocações
+Pegadas
+Helena
+Ubirajara. Lenda Tupi
+O Mulato
+Cincinato Quebra-Louça
+Cantos e Fantasias
+Histórias sem Data
+Papéis Avulsos
+A Carne
+Contos Fluminenses
 Dom Casmurro
-A Divorciada
-Habitações Operarias
-Esau e Jacob
-Cidades e Paisagens
-Napoleão no Kremlin
-Obras posthumas
-Lupe
-Á ventura
-Sonetos de Anthero
-Flirts
-Liberdade de Imprensa
-Estudo de Guitarra
-Rainha sem reino
-Memorial de Ayres
-Monólogo do Vaqueiro
-Ás Mulheres Portuguêsas
-A Alma Nova
-Amôres d'um deputado
-Contos e Phantasias
-SurprezaEntre-acto original
-Sociologia Chinesa: Autoplastia
-Leituras Populares
-Claridades do sul
-Papeis Avulsos
-Voltareis ó Christo?
-Pelo mundo fóra
-Contos do Norte
-Ramalho Ortigão
-Lagrimas Abençoadas
-Tres capitaes
-Ao Entardecer
-Paz e Arbitragem
-Cantos Sagrados
-Salmos do prisioneiro
-Musa Velha
-Scenas da Aldeia
-Os Cataventos
-Infelizes: Historias Vividas
-Robur, o Conquistador
-Eurico, o presbytero
-Canções
-Othello
-Poesias Completas
-José Estevão
-Garatujas
-Marilia de Dirceo
-Sonetos
-A Reforma
-Pátria
-Historia da Grecia
-Cintra
-Ubirajara: Lenda Tupi
-Humus
-O Federalismo
-Miniaturas Romanticas
-Historia Antiga
-Entre as Nymphéas
-Julio Diniz
-O Regicida
-A Primavera
-Estrellas Funestas
-Chronicas de Viagem
-Mundanismos
-Lendas dos Vegetaes
+Americanas
+A Escrava Isaura
+As Vítimas-Algozes
+O Missionário
+O Cabeleira
+Obras Poéticas
+Missal
+A Noite na Taverna
+Poesias
+O Tronco do Ipê
+Versos e Versões
+Espumas Flutuantes
+O Sertanejo
+Cascata da Tijuca
+Desembarque
+Rua Direita
+Cachoeira de Ouro Preto
+Villa Rica
+Capitão do Mato
+Casa de Negros
+Dom Pedro II
+La Siesta
+Derrubada de uma Floresta
+Serra dos Órgãos
+Casal de Negros
+Jogar Capoeira
+Sâo Cristovão
+Aldeia de Tapuias
+Índios Flechando uma Onça
+Costumes de São Paulo
+Batuque
+Negros Novos
+Guerrilha
+Cristo Escarnecido pelos Judeus
+Paisagem
+Fazenda Flores do Paraíso
+Ao Correr da Pena
+Trecho de Paisagem Urbana
+Mesa do Imperador
+Rua do Rosário
+Pescadores
+Porto de Cabedelo
+O Mosquito
+Chasseur Indien
+O Regio Saltimbanco
+Opalas
+Ateliê em Paris
+Vozes d'América
+A Casca da Canelleira
+Desencantos
+O Guarany
+A Confederação dos Tamoyos
+Glaura: Poemas Eróticos
+Almanak das Musas
+Caramuru
+Poesias
+Quitubia
+O Uraguay
+Obras
+Claustro Franciscano de Igaraçu
+Paisagem com Tamanduá-i
+Forte dos Reis Magos
+Cachoeira de Paulo Afonso
+Imaculada Conceição
+Procissão marítima
+Iguana Iguana
+Caipira Picando Fumo
+Efeitos de Sol (Itália)
+O Óbulo da Viúva
+Vista do Cavalão
+A Caridade
+Jesus em Kafarnaum (estudo)
+Estudo de Mulher
+Trecho de Sena
+Messalina
+A Tarantela
+Rabequista Árabe
+Cego com Criança
+Sertanejas
+A Carioca
+Moema
+Mamão e Melancia
+Figura de Mulher
