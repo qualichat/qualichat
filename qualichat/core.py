@@ -47,7 +47,7 @@ def load_chat(path: Union[str, pathlib.Path], *, encoding: str = 'utf-8') -> Qua
 
     Raises
     ------
-    RuntimeError
+    :class:`FileNotFoundError`
         If the file has not been found.
     '''
     return Qualichat(path, encoding=encoding)

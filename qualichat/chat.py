@@ -67,7 +67,7 @@ class Qualichat:
             path = pathlib.Path(path)
 
         if not path.is_file():
-            raise RuntimeError('invalid file path')
+            raise FileNotFoundError(f'no such file: {str(path)!r}')
 
         encoding = kwargs.pop('encoding', 'utf-8')
         raw_data = _clean_impurities(path.read_text(encoding=encoding))
