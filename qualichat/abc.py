@@ -61,3 +61,8 @@ class Message:
     def urls(self) -> List[str]:
         '''List[:class:`str`]: Returns all the URLs contained in the message content.'''
         return []
+
+    @property
+    def numbers(self) -> List[str]:
+        '''List[:class:`str`]: Returns all the numbers contained in the message content.'''
+        return []

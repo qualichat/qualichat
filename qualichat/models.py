@@ -53,6 +53,7 @@ def _get_random_name() -> str:
 
 
 URL_REGEX = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+NUMBERS_REGEX = re.compile(r'\d+')
 
 
 class Actor:
@@ -105,6 +106,15 @@ class Message(BaseMessage):
     @property
     def urls(self) -> List[str]:
         return URL_REGEX.findall(self.content)
+
+    @property
+    def numbers(self) -> List[str]:
+        content = self.content
+
+        for url in self.urls:
+            content = content.replace(url, '')
+
+        return NUMBERS_REGEX.findall(content)
 
 
 class SystemMessage(BaseMessage):
