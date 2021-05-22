@@ -56,3 +56,8 @@ class Message:
     def emojis(self) -> List[str]:
         '''List[:class:`str`]: Returns all the emojis contained in the message content.'''
         return []
+
+    @property
+    def urls(self) -> List[str]:
+        '''List[:class:`str`]: Returns all the URLs contained in the message content.'''
+        return []

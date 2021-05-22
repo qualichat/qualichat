@@ -25,6 +25,7 @@ SOFTWARE.
 import datetime
 import os
 import random
+import re
 from typing import List
 
 from .abc import Message as BaseMessage
@@ -49,6 +50,9 @@ def _get_random_name() -> str:
     # actors have the same display name.
     __books__.remove(name)
     return name.strip()
+
+
+URL_REGEX = re.compile(r'(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)')
 
 
 class Actor:
@@ -97,6 +101,10 @@ class Message(BaseMessage):
     @property
     def emojis(self) -> List[str]:
         return list(emojis.iter(self.content))
+
+    @property
+    def urls(self) -> List[str]:
+        return URL_REGEX.findall(self.content)
 
 
 class SystemMessage(BaseMessage):
