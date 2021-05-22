@@ -38,6 +38,8 @@ intersphinx_mapping = {
     'py': ('https://docs.python.org/3', None),
 }
 
+autodoc_mock_imports = ['emojis']
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

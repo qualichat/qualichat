@@ -23,6 +23,9 @@ SOFTWARE.
 '''
 
 import datetime
+from typing import List
+
+import emojis
 
 
 class Message:
@@ -50,3 +53,8 @@ class Message:
     def weekday(self) -> str:
         ''':class:`str`: The weekday on which the message was sent.'''
         return self.created_at.strftime('%A')
+
+    @property
+    def emojis(self) -> List[str]:
+        '''List[:class:`str`]: Returns all the emojis contained in the message content.'''
+        return list(emojis.iter(self.content))
