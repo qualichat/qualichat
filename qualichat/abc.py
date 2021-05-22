@@ -25,8 +25,6 @@ SOFTWARE.
 import datetime
 from typing import List
 
-import emojis
-
 
 class Message:
     '''An ABC that details the common operations on a message.
@@ -57,4 +55,4 @@ class Message:
     @property
     def emojis(self) -> List[str]:
         '''List[:class:`str`]: Returns all the emojis contained in the message content.'''
-        return list(emojis.iter(self.content))
+        return []

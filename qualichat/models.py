@@ -25,6 +25,7 @@ SOFTWARE.
 import datetime
 import os
 import random
+from typing import List
 
 from .abc import Message as BaseMessage
 
@@ -92,6 +93,10 @@ class Message(BaseMessage):
 
     def __repr__(self):
         return '<Message actor={0.actor} created_at={0.created_at}>'.format(self)
+
+    @property
+    def emojis(self) -> List[str]:
+        return list(emojis.iter(self.content))
 
 
 class SystemMessage(BaseMessage):
