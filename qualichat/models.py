@@ -55,6 +55,7 @@ def _get_random_name() -> str:
 URL_REGEX = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
 NUMBERS_REGEX = re.compile(r'\d+')
 LAUGHS_REGEX = re.compile(r'\s((?:he|ha|hi|hu){2,}|(?:hh){1,}|(?:ja|je|ka){2,}|(?:kk|rs){1,})')
+SYMBOLS_REGEX = re.compile(r'(?:!|\?)+')
 
 
 class Actor:
@@ -128,7 +129,16 @@ class Message(BaseMessage):
         for url in self.urls:
             content = content.replace(url, '')
 
-        return LAUGHS_REGEX.findall(content)        
+        return LAUGHS_REGEX.findall(content)
+
+    @property
+    def symbols(self) -> List[str]:
+        content = self.content
+
+        for url in self.urls:
+            content = content.replace(url, '')
+
+        return SYMBOLS_REGEX.findall(content)
 
 
 class SystemMessage(BaseMessage):

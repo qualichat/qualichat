@@ -73,3 +73,10 @@ class Message:
         This essentially checks for laughs like `haha`, `kkkk`, `hehe`, etc.
         '''
         return []
+
+    @property
+    def symbols(self) -> List[str]:
+        '''Dict[:class:`str`, List[:class:`str`]]: Returns all exclamation and question 
+        marks contained in the message content.
+        '''
+        return []
