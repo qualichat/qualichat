@@ -147,6 +147,21 @@ class Message(BaseMessage):
 
         return SYMBOLS_REGEX.findall(content)
 
+    @property
+    def liquid(self) -> str:
+        content = self.content
+
+        for url in self.urls:
+            content = content.replace(url, '')
+
+        for email in self.emails:
+            content = content.replace(email, '')
+
+        for emoji in self.emojis:
+            content = content.replace(emoji, '')
+
+        return content
+
 
 class SystemMessage(BaseMessage):
     '''Represents a system message sent in the chat.

@@ -85,3 +85,10 @@ class Message:
         marks contained in the message content.
         '''
         return []
+
+    @property
+    def liquid(self) -> str:
+        ''':class:`str`: Returns the net content of the message, removing URLs, emails 
+        and emojis.
+        '''
+        return ''
