@@ -70,6 +70,8 @@ class Actor:
         in the chat.
     '''
 
+    __slots__ = ('__contact_name__', 'messages', 'display_name')
+
     def __init__(self, contact_name: str):
         self.__contact_name__ = contact_name
         self.messages = []
@@ -91,6 +93,8 @@ class Message(BaseMessage):
     created_at: :class:`datetime.datetime`
         The message's creation time.
     '''
+
+    __slots__ = ('actor', 'content', 'created_at')
 
     def __init__(self, *, actor: Actor, content: str, created_at: str):
         self.actor = actor
@@ -139,6 +143,8 @@ class SystemMessage(BaseMessage):
     created_at: :class:`datetime.datetime`
         the message's creation time.
     '''
+
+    __slots__ = ('content', 'created_at')
     
     def __init__(self, *, content: str, created_at: str):
         self.content = content

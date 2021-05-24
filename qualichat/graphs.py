@@ -49,6 +49,7 @@ class GraphGenerator:
     chats: List[:class:`.Qualichat`]
         The list of chats to be analyzed.
     '''
+    __slots__ = ('chats',)
 
     def __init__(self, chats: Union[Qualichat, List[Qualichat]]):
         if isinstance(chats, Qualichat):

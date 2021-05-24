@@ -62,6 +62,8 @@ class Qualichat:
         The name of the uploaded file.
     '''
 
+    __slots__ = ('messages', 'filename', '_actors')
+
     def __init__(self, path: Union[str, pathlib.Path], **kwargs):
         if not isinstance(path, pathlib.Path):
             path = pathlib.Path(path)
