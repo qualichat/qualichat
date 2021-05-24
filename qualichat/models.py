@@ -28,6 +28,8 @@ import random
 import re
 from typing import List
 
+import emojis
+
 from .abc import Message as BaseMessage
 
 
