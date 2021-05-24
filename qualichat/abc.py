@@ -66,3 +66,10 @@ class Message:
     def numbers(self) -> List[str]:
         '''List[:class:`str`]: Returns all the numbers contained in the message content.'''
         return []
+
+    @property
+    def laughs(self) -> List[str]:
+        '''List[:class:`str`]: Returns all the laughs contained in the message content.
+        This essentially checks for laughs like `haha`,` kkkk`, `hehe`, etc.
+        '''
+        return []
