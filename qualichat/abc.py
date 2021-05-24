@@ -63,6 +63,11 @@ class Message:
         return []
 
     @property
+    def emails(self) -> List[str]:
+        '''List[:class:`str`]: Returns all the e-mails contained in the message content.'''
+        return []
+
+    @property
     def numbers(self) -> List[str]:
         '''List[:class:`str`]: Returns all the numbers contained in the message content.'''
         return []

@@ -53,6 +53,7 @@ def _get_random_name() -> str:
 
 
 URL_REGEX = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+EMAIL_REGEX = re.compile(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', re.I)
 NUMBERS_REGEX = re.compile(r'\d+')
 LAUGHS_REGEX = re.compile(r'\s((?:he|ha|hi|hu){2,}|(?:hh){1,}|(?:ja|je|ka){2,}|(?:kk|rs){1,})')
 SYMBOLS_REGEX = re.compile(r'(?:!|\?)+')
@@ -112,6 +113,10 @@ class Message(BaseMessage):
     @property
     def urls(self) -> List[str]:
         return URL_REGEX.findall(self.content)
+
+    @property
+    def emails(self) -> List[str]:
+        return EMAIL_REGEX.findall(self.content)
 
     @property
     def numbers(self) -> List[str]:
