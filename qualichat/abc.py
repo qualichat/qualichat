@@ -70,6 +70,6 @@ class Message:
     @property
     def laughs(self) -> List[str]:
         '''List[:class:`str`]: Returns all the laughs contained in the message content.
-        This essentially checks for laughs like `haha`,` kkkk`, `hehe`, etc.
+        This essentially checks for laughs like `haha`, `kkkk`, `hehe`, etc.
         '''
         return []
