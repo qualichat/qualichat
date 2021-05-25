@@ -81,7 +81,7 @@ class Message:
 
     @property
     def symbols(self) -> List[str]:
-        '''Dict[:class:`str`, List[:class:`str`]]: Returns all exclamation and question 
+        '''List[:class:`str`]: Returns all exclamation and question 
         marks contained in the message content.
         '''
         return []
