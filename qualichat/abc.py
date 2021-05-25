@@ -92,3 +92,8 @@ class Message:
         and emojis.
         '''
         return ''
+
+    @property
+    def pure_text(self) -> str:
+        ''':class:`str`: Returns the pure content of the message.'''
+        return ''

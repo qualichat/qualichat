@@ -162,6 +162,21 @@ class Message(BaseMessage):
 
         return content
 
+    @property
+    def pure_text(self) -> str:
+        content = self.liquid
+
+        for laugh in self.laughs:
+            content = content.replace(laugh, '')
+
+        for symbol in self.symbols:
+            content = content.replace(symbol, '')
+
+        for number in self.numbers:
+            content = content.replace(number, '')
+
+        return content
+
 
 class SystemMessage(BaseMessage):
     '''Represents a system message sent in the chat.
