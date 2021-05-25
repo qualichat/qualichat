@@ -88,7 +88,7 @@ class Message:
 
     @property
     def liquid(self) -> str:
-        ''':class:`str`: Returns the net content of the message, removing URLs, emails 
+        ''':class:`str`: Returns the liquid content of the message, removing URLs, emails 
         and emojis.
         '''
         return ''
