@@ -22,12 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
+import datetime
 from typing import Union, List
 from pathlib import Path
+from collections import defaultdict
 
 import matplotlib
 from matplotlib import pyplot as plot
 from matplotlib import font_manager
+from pandas import DataFrame
 
 from .chat import Qualichat
 
@@ -56,3 +59,53 @@ class GraphGenerator:
             chats = [chats]
 
         self.chats = chats
+
+    def by_messages_per_year(self):
+        '''Shows the number of messages per day. Shows the number of liquid characters
+        and the number of text characters.
+        '''
+        fig, ax = plot.subplots()
+        chat = self.chats[0]
+
+        dates = []
+        columns = ['QTD_Liquido', 'QTD_Texto', 'QTD_Mensagens']
+
+        messages_creations = [m.created_at for m in chat.messages]
+        rows = []
+
+        min_date = min(messages_creations)
+        max_date = max(messages_creations)
+
+        delta = max_date - min_date
+
+        for i in range(delta.days + 1):
+            date = min_date + datetime.timedelta(days=i)
+            dates.append(date.replace(hour=0, minute=0, second=0))
+
+            liquid = 0
+            text = 0
+            messages = 0
+
+            for message in chat.messages:
+                same_month = message.created_at.month == date.month
+                same_day = message.created_at.day == date.day
+
+                if not (same_day and same_month):
+                    continue
+
+                text += len(message.pure_text)
+                liquid += len(message.liquid)
+                messages += 25
+
+            rows.append([liquid, text, messages])
+
+        dataframe = DataFrame(rows, index=dates, columns=columns)
+        ax2 = ax.twiny()
+
+        bars = dataframe.drop(columns='QTD_Mensagens')
+        bars.plot.bar(ax=ax)
+
+        messages = dataframe['QTD_Mensagens']
+        messages.plot(ax=ax2, secondary_y=True, legend=True, color='#000000')
+
+        plot.show()
