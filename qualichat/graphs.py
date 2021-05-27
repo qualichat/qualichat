@@ -26,6 +26,7 @@ import datetime
 from typing import Union, List
 from pathlib import Path
 from collections import defaultdict
+from itertools import cycle, islice
 
 import matplotlib
 from matplotlib import pyplot as plot
@@ -44,6 +45,9 @@ for font in font_manager.findSystemFonts(str(fonts)):
 matplotlib.rcParams['font.family'] = 'Inter'
 
 
+DEFAULT_COLORS = cycle(['#08bcac', '#38444c'])
+
+
 class GraphGenerator:
     '''This class provides the ability to generate graphs.
     
@@ -60,52 +64,33 @@ class GraphGenerator:
 
         self.chats = chats
 
-    def by_messages_per_year(self):
-        '''Shows the number of messages per day. Shows the number of liquid characters
+    def by_messages_per_month(self):
+        '''Shows the number of messages per month. Shows the number of liquid characters
         and the number of text characters.
         '''
-        fig, ax = plot.subplots()
         chat = self.chats[0]
+        data = defaultdict(list)
 
-        dates = []
-        columns = ['QTD_Liquido', 'QTD_Texto', 'QTD_Mensagens']
-
-        messages_creations = [m.created_at for m in chat.messages]
+        columns = ['QTD_Liquido', 'QTD_Texto']
         rows = []
 
-        min_date = min(messages_creations)
-        max_date = max(messages_creations)
+        for message in chat.messages:
+            index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+            strftime = index.strftime('%B %Y')
+            data[strftime].append(message)
 
-        delta = max_date - min_date
-
-        for i in range(delta.days + 1):
-            date = min_date + datetime.timedelta(days=i)
-            dates.append(date.replace(hour=0, minute=0, second=0))
-
+        for messages in data.values():
             liquid = 0
             text = 0
-            messages = 0
 
-            for message in chat.messages:
-                same_month = message.created_at.month == date.month
-                same_day = message.created_at.day == date.day
-
-                if not (same_day and same_month):
-                    continue
-
-                text += len(message.pure_text)
+            for message in messages:
                 liquid += len(message.liquid)
-                messages += 25
+                text += len(message.pure_text)
 
-            rows.append([liquid, text, messages])
+            rows.append([liquid, text])
 
-        dataframe = DataFrame(rows, index=dates, columns=columns)
-        ax2 = ax.twiny()
+        dataframe = DataFrame(rows, index=data.keys(), columns=columns)
+        color = list(islice(DEFAULT_COLORS, None, len(dataframe)))
 
-        bars = dataframe.drop(columns='QTD_Mensagens')
-        bars.plot.bar(ax=ax)
-
-        messages = dataframe['QTD_Mensagens']
-        messages.plot(ax=ax2, secondary_y=True, legend=True, color='#000000')
-
+        dataframe.plot.bar(rot=0, title='Amount by Month', color=color, grid='--')
         plot.show()
