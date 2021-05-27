@@ -101,11 +101,12 @@ class GraphGenerator:
         color = list(islice(DEFAULT_COLORS, None, len(dataframe)))
 
         bars = dataframe.drop(columns='QTD_Mensagens')
-        bars.plot.bar(ax=ax, rot=0, color=color)
+        ax2 = bars.plot.bar(ax=ax, rot=0, color=color)
 
         messages = dataframe['QTD_Mensagens']
+        ax3 = messages.plot(ax=ax.twiny(), secondary_y=True, color=DEFAULT_LINE_COLOR)
         
-        ax2 = messages.plot(ax=ax.twiny(), secondary_y=True, color=DEFAULT_LINE_COLOR)
         ax2.legend(loc='upper left')
+        ax3.legend(loc='upper right')
 
         plot.show()
