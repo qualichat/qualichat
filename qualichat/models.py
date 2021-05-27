@@ -26,7 +26,7 @@ import datetime
 import os
 import random
 import re
-from typing import List
+from typing import List, Dict
 
 import emojis
 
@@ -58,7 +58,7 @@ URL_REGEX = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9
 EMAIL_REGEX = re.compile(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', re.I)
 NUMBERS_REGEX = re.compile(r'\d+')
 LAUGHS_REGEX = re.compile(r'\s((?:he|ha|hi|hu){2,}|(?:hh){1,}|(?:ja|je|ka){2,}|(?:kk|rs){1,})')
-SYMBOLS_REGEX = re.compile(r'(?:!|\?)+')
+MARKS_REGEX = re.compile(r'(?:!|\?)+')
 
 
 class Actor:
@@ -139,13 +139,22 @@ class Message(BaseMessage):
         return LAUGHS_REGEX.findall(content)
 
     @property
-    def symbols(self) -> List[str]:
+    def marks(self) -> Dict[str, List[str]]:
         content = self.content
 
         for url in self.urls:
             content = content.replace(url, '')
 
-        return SYMBOLS_REGEX.findall(content)
+        ret = {'question': [], 'exclamation': []}
+        all_marks = MARKS_REGEX.findall(content)
+
+        for mark in all_marks:
+            if mark == '?':
+                ret['question'].append('?')
+            else:
+                ret['exclamation'].append('!')
+
+        return ret
 
     @property
     def liquid(self) -> str:
@@ -169,8 +178,9 @@ class Message(BaseMessage):
         for laugh in self.laughs:
             content = content.replace(laugh, '')
 
-        for symbol in self.symbols:
-            content = content.replace(symbol, '')
+        for marks in self.marks.values():
+            for mark in marks:
+                content = content.replace(mark, '')
 
         for number in self.numbers:
             content = content.replace(number, '')

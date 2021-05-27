@@ -23,7 +23,7 @@ SOFTWARE.
 '''
 
 import datetime
-from typing import List
+from typing import List, Dict
 
 
 class Message:
@@ -80,11 +80,11 @@ class Message:
         return []
 
     @property
-    def symbols(self) -> List[str]:
-        '''List[:class:`str`]: Returns all exclamation and question 
+    def marks(self) -> Dict[str, List[str]]:
+        '''Dict[:class:`str`, List[:class:`str`]]: Returns all exclamation and question 
         marks contained in the message content.
         '''
-        return []
+        return {}
 
     @property
     def liquid(self) -> str:
