@@ -106,7 +106,7 @@ class GraphGenerator:
         messages = dataframe['QTD_Mensagens']
         ax3 = messages.plot(ax=ax.twiny(), secondary_y=True, color=DEFAULT_LINE_COLOR)
         
-        ax2.legend(loc='upper left')
-        ax3.legend(loc='upper right')
+        ax2.legend(loc='upper right')
+        ax3.legend(loc='upper left')
 
         plot.show()
