@@ -46,6 +46,7 @@ matplotlib.rcParams['font.family'] = 'Inter'
 
 
 DEFAULT_COLORS = cycle(['#08bcac', '#38444c'])
+DEFAULT_LINE_COLOR = '#ff645c'
 
 
 class GraphGenerator:
@@ -68,10 +69,15 @@ class GraphGenerator:
         '''Shows the number of messages per month. Shows the number of liquid characters
         and the number of text characters.
         '''
+        fig, ax = plot.subplots()
+
+        ax.grid(True, linestyle='--')
+        ax.set_title('Amount by Month')
+
         chat = self.chats[0]
         data = defaultdict(list)
 
-        columns = ['QTD_Liquido', 'QTD_Texto']
+        columns = ['QTD_Liquido', 'QTD_Texto', 'QTD_Mensagens']
         rows = []
 
         for message in chat.messages:
@@ -79,18 +85,27 @@ class GraphGenerator:
             strftime = index.strftime('%B %Y')
             data[strftime].append(message)
 
-        for messages in data.values():
+        for values in data.values():
             liquid = 0
             text = 0
+            messages = 0
 
-            for message in messages:
+            for message in values:
                 liquid += len(message.liquid)
                 text += len(message.pure_text)
+                messages += 1
 
-            rows.append([liquid, text])
+            rows.append([liquid, text, messages])
 
         dataframe = DataFrame(rows, index=data.keys(), columns=columns)
         color = list(islice(DEFAULT_COLORS, None, len(dataframe)))
 
-        dataframe.plot.bar(rot=0, title='Amount by Month', color=color, grid='--')
+        bars = dataframe.drop(columns='QTD_Mensagens')
+        bars.plot.bar(ax=ax, rot=0, color=color)
+
+        messages = dataframe['QTD_Mensagens']
+        
+        ax2 = messages.plot(ax=ax.twiny(), secondary_y=True, color=DEFAULT_LINE_COLOR)
+        ax2.legend(loc='upper left')
+
         plot.show()
