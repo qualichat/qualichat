@@ -87,6 +87,20 @@ class Message:
         return {}
 
     @property
+    def exclamation_marks(self) -> List[str]:
+        '''List[:class:`str`]: Returns all exclamation marks contained in the message
+        content.
+        '''
+        return []
+
+    @property
+    def question_marks(self) -> List[str]:
+        '''List[:class:`str`]: Returns all question marks contained in the message
+        content.
+        '''
+        return []
+
+    @property
     def liquid(self) -> str:
         ''':class:`str`: Returns the liquid content of the message, removing URLs, emails 
         and emojis.

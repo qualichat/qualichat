@@ -58,7 +58,8 @@ URL_REGEX = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9
 EMAIL_REGEX = re.compile(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', re.I)
 NUMBERS_REGEX = re.compile(r'\d+')
 LAUGHS_REGEX = re.compile(r'\s((?:he|ha|hi|hu){2,}|(?:hh){1,}|(?:ja|je|ka){2,}|(?:kk|rs){1,})', re.I)
-MARKS_REGEX = re.compile(r'(?:!|\?)+')
+EXCLAMATION_MARK_REGEX = re.compile(r'!+')
+QUESTION_MARK_REGEX = re.compile(r'\?+')
 
 
 class Actor:
@@ -140,21 +141,30 @@ class Message(BaseMessage):
 
     @property
     def marks(self) -> Dict[str, List[str]]:
+        marks = {
+            'question_marks': self.question_marks,
+            'exclamation_mark': self.exclamation_marks
+        }
+
+        return marks
+
+    @property
+    def exclamation_marks(self) -> List[str]:
         content = self.content
 
         for url in self.urls:
             content = content.replace(url, '')
 
-        ret = {'question': [], 'exclamation': []}
-        all_marks = MARKS_REGEX.findall(content)
+        return EXCLAMATION_MARK_REGEX.findall(content)
 
-        for mark in all_marks:
-            if mark == '?':
-                ret['question'].append('?')
-            else:
-                ret['exclamation'].append('!')
+    @property
+    def question_marks(self) -> List[str]:
+        content = self.content
 
-        return ret
+        for url in self.urls:
+            content = content.replace(url, '')
+
+        return QUESTION_MARK_REGEX.findall(content)
 
     @property
     def liquid(self) -> str:
@@ -178,9 +188,11 @@ class Message(BaseMessage):
         for laugh in self.laughs:
             content = content.replace(laugh, '')
 
-        for marks in self.marks.values():
-            for mark in marks:
-                content = content.replace(mark, '')
+        for exclamation_mark in self.exclamation_marks:
+            content = content.replace(exclamation_mark, '')
+
+        for question_mark in self.question_marks:
+            content = content.replace(question_mark, '')
 
         for number in self.numbers:
             content = content.replace(number, '')
