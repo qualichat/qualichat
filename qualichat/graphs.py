@@ -45,7 +45,8 @@ for font in font_manager.findSystemFonts(str(fonts)):
 matplotlib.rcParams['font.family'] = 'Inter'
 
 
-DEFAULT_COLORS = cycle(['#08bcac', '#38444c'])
+DEFAULT_COLORS     = ['#08bcac', '#38444c']
+SECONDARY_COLORS   = ['#f2c80f', '#fd625e', '#8ad4eb', '#b887ad']
 DEFAULT_LINE_COLOR = '#ff645c'
 
 
@@ -98,14 +99,62 @@ class GraphGenerator:
             rows.append([liquid, text, messages])
 
         dataframe = DataFrame(rows, index=data.keys(), columns=columns)
-        color = list(islice(DEFAULT_COLORS, None, len(dataframe)))
 
         bars = dataframe.drop(columns='QTD_Mensagens')
-        ax2 = bars.plot.bar(ax=ax, rot=0, color=color)
+        ax2 = bars.plot.bar(ax=ax, rot=0, color=DEFAULT_COLORS)
 
         messages = dataframe['QTD_Mensagens']
         ax3 = messages.plot(ax=ax.twiny(), secondary_y=True, color=DEFAULT_LINE_COLOR)
         
+        ax2.legend(loc='upper right')
+        ax3.legend(loc='upper left')
+
+        plot.show()
+
+    def by_message_aspects(self):
+        '''Shows the messages aspects per month. Shows the number of laughs, marks, emojis
+        and numbers characters sent per month.
+        '''
+        fig, ax = plot.subplots()
+
+        ax.grid(True, linestyle='--')
+        ax.set_title('Amount by Month')
+
+        chat = self.chats[0]
+        data = defaultdict(list)
+
+        columns = ['QTD_Riso', 'QTD_Pontuacao', 'QTD_Emoji', 'QTD_Numeros', 'QTD_Mensagens']
+        rows = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+            strftime = index.strftime('%B %Y')            
+            data[strftime].append(message)
+
+        for values in data.values():
+            laughs = 0
+            marks = 0
+            emojis = 0
+            numbers = 0
+            messages = 0
+
+            for message in values:
+                laughs += len(message.laughs)
+                marks += len(message.question_marks) + len(message.exclamation_marks)
+                emojis += len(message.emojis)
+                numbers += len(message.numbers)
+                messages += 1
+                
+            rows.append([laughs, marks, emojis, numbers, messages])
+
+        dataframe = DataFrame(rows, index=data.keys(), columns=columns)
+
+        bars = dataframe.drop(columns='QTD_Mensagens')
+        ax2 = bars.plot.bar(ax=ax, rot=0, color=SECONDARY_COLORS)
+
+        messages = dataframe['QTD_Mensagens']
+        ax3 = messages.plot(ax=ax.twiny(), secondary_y=True, color='#000000')
+
         ax2.legend(loc='upper right')
         ax3.legend(loc='upper left')
 
