@@ -42,7 +42,7 @@ def load_chat(path: Union[str, pathlib.Path], *, encoding: str = 'utf-8') -> Qua
 
     Returns
     -------
-    :class:`Qualichat`
+    :class:`.Qualichat`
         The object that will be used for analysis of the chat.
 
     Raises
