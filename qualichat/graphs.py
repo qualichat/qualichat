@@ -71,8 +71,6 @@ class GraphGenerator:
         and the number of text characters.
         '''
         fig, ax = plot.subplots()
-
-        ax.grid(True, linestyle='--')
         ax.set_title('Amount by Month')
 
         chat = self.chats[0]
@@ -106,6 +104,7 @@ class GraphGenerator:
         messages = dataframe['QTD_Mensagens']
         ax3 = messages.plot(ax=ax.twiny(), secondary_y=True, color=DEFAULT_LINE_COLOR)
         
+        ax.grid(axis='y', linestyle='solid')
         ax2.legend(loc='upper right')
         ax3.legend(loc='upper left')
 
@@ -116,8 +115,6 @@ class GraphGenerator:
         and numbers characters sent per month.
         '''
         fig, ax = plot.subplots()
-
-        ax.grid(True, linestyle='--')
         ax.set_title('Amount by Month')
 
         chat = self.chats[0]
@@ -155,6 +152,7 @@ class GraphGenerator:
         messages = dataframe['QTD_Mensagens']
         ax3 = messages.plot(ax=ax.twiny(), secondary_y=True, color='#000000')
 
+        ax.grid(axis='y', linestyle='solid')
         ax2.legend(loc='upper right')
         ax3.legend(loc='upper left')
 
