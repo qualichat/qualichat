@@ -206,3 +206,32 @@ class GraphGenerator:
         ax3.legend(loc='upper left')
 
         plot.show()
+
+    def by_message_period(self):
+        '''Shows which periods are more active.'''
+        fig, ax = plot.subplots()
+        ax.set_title('Amount by Month')
+
+        chat = self.chats[0]
+        data = defaultdict(list)
+
+        columns = ['Dawn', 'Morning', 'Evening', 'Night']
+        rows = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+            strftime = index.strftime('%B %Y')
+            data[strftime].append(message)
+
+        for values in data.values():
+            periods = {'Dawn': 0, 'Morning': 0, 'Evening': 0, 'Night': 0}
+
+            for message in values:
+                periods[message.period.value] += 1
+
+            rows.append(list(periods.values()))
+
+        dataframe = DataFrame(rows, index=data.keys(), columns=columns)
+        dataframe.plot(ax=ax, rot=0, color=SECONDARY_COLORS)
+
+        plot.show()
