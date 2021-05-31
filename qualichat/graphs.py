@@ -47,6 +47,7 @@ matplotlib.rcParams['font.family'] = 'Inter'
 
 DEFAULT_COLORS     = ['#08bcac', '#38444c']
 SECONDARY_COLORS   = ['#f2c80f', '#fd625e', '#8ad4eb', '#b887ad']
+TERTIARY_COLORS    = ['#796408', '#374649', '#808080', '#a66999', '#fe9666', '#fae99f', '#f5d33f']
 DEFAULT_LINE_COLOR = '#ff645c'
 
 
@@ -151,6 +152,54 @@ class GraphGenerator:
 
         messages = dataframe['QTD_Mensagens']
         ax3 = messages.plot(ax=ax.twiny(), secondary_y=True, color='#000000')
+
+        ax.grid(axis='y', linestyle='solid')
+        ax2.legend(loc='upper right')
+        ax3.legend(loc='upper left')
+
+        plot.show()
+
+    def by_weekday(self):
+        '''Shows which weekdays are more active.'''
+        fig, ax = plot.subplots()
+        ax.set_title('Amount by Month')
+
+        chat = self.chats[0]
+        data = defaultdict(list)
+
+        columns = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'QTD_Liquido']
+        rows = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+            strftime = index.strftime('%B %Y')
+            data[strftime].append(message)
+
+        for values in data.values():
+            liquid = 0
+            weekdays = {
+                'Sunday': 0,
+                'Monday': 0,
+                'Tuesday': 0,
+                'Wednesday': 0,
+                'Thursday': 0,
+                'Friday': 0,
+                'Saturday': 0
+            }
+
+            for message in values:
+                liquid += 1
+                weekdays[message.weekday] += 1
+
+            rows.append([*weekdays.values(), liquid])
+
+        dataframe = DataFrame(rows, index=data.keys(), columns=columns)
+
+        bars = dataframe.drop(columns='QTD_Liquido')
+        ax2 = bars.plot.bar(ax=ax, rot=0, color=TERTIARY_COLORS)
+
+        messages = dataframe['QTD_Liquido']
+        ax3 = messages.plot(ax=ax.twiny(), secondary_y=True, color='#01b8aa')
 
         ax.grid(axis='y', linestyle='solid')
         ax2.legend(loc='upper right')
