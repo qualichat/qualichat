@@ -100,7 +100,7 @@ class Message(BaseMessage):
         The message's creation time.
     '''
 
-    __slots__ = ('actor', 'content', 'created_at')
+    __slots__ = ('actor', 'content', 'created_at', 'period')
 
     def __init__(self, *, actor: Actor, content: str, created_at: str):
         self.actor = actor
@@ -215,7 +215,7 @@ class SystemMessage(BaseMessage):
         the message's creation time.
     '''
 
-    __slots__ = ('content', 'created_at')
+    __slots__ = ('content', 'created_at', 'period')
     
     def __init__(self, *, content: str, created_at: str):
         self.content = content
