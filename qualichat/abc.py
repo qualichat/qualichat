@@ -25,7 +25,7 @@ SOFTWARE.
 import datetime
 from typing import List, Dict
 
-from .enums import Period
+from .enums import Period, SubPeriod
 
 
 class Message:
@@ -44,6 +44,8 @@ class Message:
         The message's creation time.
     period: :class:`Period`
         The period in which the message was sent. For more information see :class:`.Period`.
+    sub_period:
+        The sub-period in which the message was sent. For more information see :class:`.SubPeriod`.
     '''
 
     __slots__ = ()
@@ -51,6 +53,7 @@ class Message:
     content: str
     created_at: datetime.datetime
     period: Period
+    sub_period: SubPeriod
 
     @property
     def weekday(self) -> str:

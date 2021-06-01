@@ -33,6 +33,16 @@ class Period(Enum):
     night   = 'Night'
 
 
+class SubPeriod(Enum):
+    resting            = 'Resting'
+    transport_morning  = 'Transport (morning)'
+    work_morning       = 'Work (morning)'
+    lunch              = 'Lunch'
+    work_evening       = 'Work (evening)'
+    transport_evening  = 'Transport (evening)'
+    second_office_hour = 'Second Office Hour'
+
+
 def _get_period(created_at: datetime.datetime) -> Period:
     if 0 <= created_at.hour < 6:
         period = Period.dawn
@@ -44,3 +54,23 @@ def _get_period(created_at: datetime.datetime) -> Period:
         period = Period.night
 
     return period
+
+
+def _get_sub_period(created_at: datetime.datetime) -> SubPeriod:
+    if 0 <= created_at.hour < 6:
+        sub_period = SubPeriod.resting
+    elif 6 <= created_at.hour < 9:
+        sub_period = SubPeriod.transport_morning
+    elif 9 <= created_at.hour < 12:
+        sub_period = SubPeriod.work_morning
+    elif 12 <= created_at.hour < 15:
+        sub_period = SubPeriod.lunch
+    elif 15 <= created_at.hour < 18:
+        sub_period = SubPeriod.work_evening
+    elif 18 <= created_at.hour < 21:
+        sub_period = SubPeriod.transport_evening
+    else:
+        sub_period = SubPeriod.second_office_hour
+
+    return sub_period
+

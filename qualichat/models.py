@@ -31,7 +31,7 @@ from typing import List, Dict
 import emojis
 
 from .abc import Message as BaseMessage
-from .enums import _get_period
+from .enums import _get_period, _get_sub_period
 
 
 time_format = r'%d/%m/%y %H:%M:%S'
@@ -97,6 +97,7 @@ class Message(BaseMessage):
         self.content = content
         self.created_at = _parse_time(created_at)
         self.period = _get_period(self.created_at)
+        self.sub_period = _get_sub_period(self.created_at)
 
     def __repr__(self):
         return '<Message actor={0.actor} created_at={0.created_at}>'.format(self)
@@ -204,6 +205,7 @@ class SystemMessage(BaseMessage):
         self.content = content
         self.created_at = _parse_time(created_at)
         self.period = _get_period(self.created_at)
+        self.sub_period = _get_sub_period(self.created_at)
 
     def __repr__(self):
         return '<SystemMessage created_at={0.created_at}>'.format(self)
