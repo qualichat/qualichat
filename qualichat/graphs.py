@@ -34,7 +34,7 @@ from matplotlib import font_manager
 from pandas import DataFrame
 
 from .chat import Qualichat
-from .enums import SubPeriod
+from .enums import Period, SubPeriod
 
 
 # Add ``Inter`` font.
@@ -216,7 +216,7 @@ class GraphGenerator:
         chat = self.chats[0]
         data = defaultdict(list)
 
-        columns = ['Dawn', 'Morning', 'Evening', 'Night']
+        columns = [c.value for c in Period]
         rows = []
 
         for message in chat.messages:
@@ -225,7 +225,7 @@ class GraphGenerator:
             data[strftime].append(message)
 
         for values in data.values():
-            periods = {'Dawn': 0, 'Morning': 0, 'Evening': 0, 'Night': 0}
+            periods = {c.value: 0 for c in Period}
 
             for message in values:
                 periods[message.period.value] += 1
