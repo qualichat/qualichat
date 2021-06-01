@@ -90,7 +90,7 @@ class Actor:
 class Message(BaseMessage):
     '''Represents a message sent in the chat.'''
 
-    __slots__ = ('actor', 'content', 'created_at', 'period')
+    __slots__ = ('actor', 'content', 'created_at', 'period', 'sub_period')
 
     def __init__(self, *, actor: Actor, content: str, created_at: str):
         self.actor = actor
@@ -199,7 +199,7 @@ class SystemMessage(BaseMessage):
     that means that no actor sent them.
     '''
 
-    __slots__ = ('content', 'created_at', 'period')
+    __slots__ = ('content', 'created_at', 'period', 'sub_period')
     
     def __init__(self, *, content: str, created_at: str):
         self.content = content
