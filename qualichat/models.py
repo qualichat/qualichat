@@ -88,17 +88,7 @@ class Actor:
 
 
 class Message(BaseMessage):
-    '''Represents a message sent in the chat.
-
-    Attributes
-    -----------
-    actor: :class:`Actor`
-        The actor who sent the message.
-    content: :class:`str`
-        The content of the message.
-    created_at: :class:`datetime.datetime`
-        The message's creation time.
-    '''
+    '''Represents a message sent in the chat.'''
 
     __slots__ = ('actor', 'content', 'created_at', 'period')
 
@@ -206,13 +196,6 @@ class SystemMessage(BaseMessage):
     '''Represents a system message sent in the chat.
     All of these messages were sent by the WhatsApp app automatically, 
     that means that no actor sent them.
-
-    Attributes
-    -----------
-    content: :class:`str`
-        The content of the message.
-    created_at: :class:`datetime.datetime`
-        the message's creation time.
     '''
 
     __slots__ = ('content', 'created_at', 'period')
