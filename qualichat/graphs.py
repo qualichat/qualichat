@@ -34,6 +34,7 @@ from matplotlib import font_manager
 from pandas import DataFrame
 
 from .chat import Qualichat
+from .enums import SubPeriod
 
 
 # Add ``Inter`` font.
@@ -230,6 +231,35 @@ class GraphGenerator:
                 periods[message.period.value] += 1
 
             rows.append(list(periods.values()))
+
+        dataframe = DataFrame(rows, index=data.keys(), columns=columns)
+        dataframe.plot(ax=ax, rot=0, color=SECONDARY_COLORS)
+
+        plot.show()
+
+    def by_message_sub_period(self):
+        '''...'''
+        fig, ax = plot.subplots()
+        ax.set_title('Amount by Month')
+
+        chat = self.chats[0]
+        data = defaultdict(list)
+
+        columns = [c.value for c in SubPeriod]
+        rows = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+            strftime = index.strftime('%B %Y')
+            data[strftime].append(message)
+
+        for values in data.values():
+            sub_periods = {c.value: 0 for c in SubPeriod}
+
+            for message in values:
+                sub_periods[message.sub_period.value] += 1
+
+            rows.append(list(sub_periods.values()))
 
         dataframe = DataFrame(rows, index=data.keys(), columns=columns)
         dataframe.plot(ax=ax, rot=0, color=SECONDARY_COLORS)
