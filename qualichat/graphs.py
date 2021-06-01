@@ -238,7 +238,7 @@ class GraphGenerator:
         plot.show()
 
     def by_message_sub_period(self):
-        '''...'''
+        '''Shows which sub-periods are more active.'''
         fig, ax = plot.subplots()
         ax.set_title('Amount by Month')
 
