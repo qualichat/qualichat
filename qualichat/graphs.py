@@ -265,3 +265,42 @@ class GraphGenerator:
         dataframe.plot(ax=ax, rot=0, color=SECONDARY_COLORS)
 
         plot.show()
+
+    def by_users_activity(self):
+        '''Shows which users are more active in the chat.'''
+        fig, ax = plot.subplots()
+        ax.set_title('Amount by User')
+
+        chat = self.chats[0]
+        data = {}
+
+        columns = ['QTD_Liquido', 'QTD_Texto', 'QTD_Mensagens']
+        rows = []
+
+        for actor in chat.actors:
+            data[actor.display_name] = actor.messages
+
+        for values in data.values():
+            liquid = 0
+            pure_text = 0
+            
+            for message in values:
+                liquid += len(message.liquid)
+                pure_text += len(message.pure_text)
+
+            rows.append([liquid, pure_text, len(values)])
+
+        temp = DataFrame(rows, index=data.keys(), columns=columns)[:10]
+        dataframe = temp.sort_values(columns, ascending=False)
+
+        bars = dataframe.drop(columns='QTD_Mensagens')
+        ax2 = bars.plot.bar(ax=ax, rot=0, color=DEFAULT_COLORS)
+
+        messages = dataframe['QTD_Mensagens']
+        ax3 = messages.plot(ax=ax.twiny(), secondary_y=True, color=DEFAULT_LINE_COLOR)
+
+        ax.grid(axis='y', linestyle='solid')
+        ax2.legend(loc='upper right')
+        ax3.legend(loc='upper left')
+
+        plot.show()
