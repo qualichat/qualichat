@@ -304,3 +304,54 @@ class GraphGenerator:
         ax3.legend(loc='upper left')
 
         plot.show()
+
+    def by_users_messages_aspects(self):
+        '''Shows the messages aspects per user. Shows the number of laughs, marks, 
+        numbers characters sent per user.'''
+        fig, ax = plot.subplots()
+        ax.set_title('Amount by User')
+
+        chat = self.chats[0]
+        data = {}
+
+        columns = ['QTD_Numero', 'QTD_Pontuacao', 'QTD_Riso', 'QTD_Mensagens']
+        rows = []
+
+        for actor in chat.actors:
+            data[actor.display_name] = actor.messages
+
+        for values in data.values():
+            laughs = 0
+            marks = 0
+            numbers = 0
+
+            for message in values:
+                for number in message.numbers:
+                    numbers += len(number)
+
+                for exclamation_mark in message.exclamation_marks:
+                    marks += len(exclamation_mark)
+
+                for question_mark in message.question_marks:
+                    marks += len(question_mark)
+                
+                for laugh in message.laughs:
+                    laughs += len(laugh)
+
+            rows.append([numbers, marks, laughs, len(values)])
+
+        temp = DataFrame(rows, index=data.keys(), columns=columns)[:10]
+        dataframe = temp.sort_values(columns, ascending=False)
+
+        bars = dataframe.drop(columns='QTD_Mensagens')
+        ax2 = bars.plot.bar(ax=ax, rot=0, color=SECONDARY_COLORS)
+
+        messages = dataframe['QTD_Mensagens']
+        ax3 = messages.plot(ax=ax.twiny(), secondary_y=True, color='#000000')
+
+        ax.grid(axis='y', linestyle='solid')
+        ax2.legend(loc='upper right')
+        ax3.legend(loc='upper left')
+
+        plot.show()
+            
