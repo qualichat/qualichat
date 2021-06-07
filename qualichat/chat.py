@@ -57,12 +57,14 @@ class Qualichat:
     Attributes
     ----------
     messages: List[:class:`.abc.Message`]
-        All messages detected in the chat.
+        All user messages detected in the chat.
+    system_messages: List[:class:`.abc.SystemMessage`]
+        All system messages detected in the chat.
     filename: :class:`str`
         The name of the uploaded file.
     '''
 
-    __slots__ = ('messages', 'filename', '_actors')
+    __slots__ = ('messages', 'system_messages', 'filename', '_actors')
 
     def __init__(self, path: Union[str, pathlib.Path], **kwargs):
         if not isinstance(path, pathlib.Path):
@@ -75,6 +77,7 @@ class Qualichat:
         raw_data = _clean_impurities(path.read_text(encoding=encoding))
 
         self.messages = []
+        self.system_messages = []
         self.filename = path.name
 
         self._actors = {}
@@ -94,7 +97,7 @@ class Qualichat:
                 # It is a system message, indicating some group 
                 # event (actor left/joined, changed the group icon, etc.)
                 message = SystemMessage(content=content, created_at=created_at)
-                self.messages.append(message)
+                self.system_messages.append(message)
             else:
                 contact_name = is_common.group(1)
                 content = is_common.group(2)
