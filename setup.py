@@ -32,7 +32,7 @@ setup(
     description="Groups' frames of relevance",
     long_description=readme,
     long_description_content_type='text/markdown',
-    python_requires='>=3.9.0',
+    python_requires='>=3.7.1',
     package_dir={'qualichat': 'qualichat'},
     package_data={
         'qualichat': ['books.txt'],
@@ -46,6 +46,8 @@ setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Internet',
         'Topic :: Software Development :: Libraries',
         'Topic :: Utilities',
