@@ -13,7 +13,7 @@ __title__ = 'qualichat'
 __author__ = 'Ernest Manheim'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2021-present Ernest Manheim'
-__version__ = '0.1.0a'
+__version__ = '1.0.0'
 
 from collections import namedtuple
 
@@ -22,4 +22,4 @@ from .graphs import GraphGenerator
 
 
 VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')
-version_info = VersionInfo(major=0, minor=1, micro=0, releaselevel='alpha', serial=0)
+version_info = VersionInfo(major=1, minor=0, micro=0, releaselevel='stable', serial=0)
