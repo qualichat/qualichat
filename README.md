@@ -30,7 +30,7 @@ Qualichat is not available on PyPI yet.
 
 ### Quickstart
 
-To use this library, you need a plain WhatsApp chat text file, following this format:
+To use this library, you need a plain chat text file, following this format:
 
 ```
 [dd/mm/yy hh:mm:ss] <contact name>: <message>
