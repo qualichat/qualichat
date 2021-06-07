@@ -15,6 +15,7 @@ __license__ = 'MIT'
 __copyright__ = 'Copyright 2021-present Ernest Manheim'
 __version__ = '1.0.0'
 
+
 from collections import namedtuple
 
 from .core import load_chat
