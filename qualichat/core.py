@@ -29,7 +29,7 @@ from .chat import Qualichat
 
 
 def load_chat(path: Union[str, pathlib.Path], *, encoding: str = 'utf-8') -> Qualichat:
-    '''Loads a chat from a plain text file.
+    """Loads a chat from a plain text file.
 
     Parameters
     ----------
@@ -49,5 +49,5 @@ def load_chat(path: Union[str, pathlib.Path], *, encoding: str = 'utf-8') -> Qua
     ------
     :class:`FileNotFoundError`
         If the file has not been found.
-    '''
+    """
     return Qualichat(path, encoding=encoding)

@@ -1,4 +1,4 @@
-'''
+"""
 Qualichat
 ~~~~~~~~~
 
@@ -7,7 +7,7 @@ framing public opinion in mediatized groups.
 
 :copyright: (c) 2021-present Ernest Manheim
 :license: MIT, see LICENSE for more details.
-'''
+"""
 
 __title__ = 'qualichat'
 __author__ = 'Ernest Manheim'
