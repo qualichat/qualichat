@@ -26,11 +26,19 @@ import pathlib
 import re
 from typing import Union, List
 
-from .models import Actor, Message, SystemMessage
+from .models import Message, SystemMessage, Actor
+
+
+CHAT_REGEX = re.compile(r'''
+    ^\[(?P<datetime>\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\]\s
+    (?P<rest>[\S\s]+?)(?=\n\[.+\]|\Z)
+''', re.M | re.X)
+COMMON_MESSAGE_REGEX = re.compile(r'(?P<actor>.*?):\s+(?P<message>[\s\S]+)')
 
 
 def _clean_impurities(chat: str) -> str:
-    # Regex will not be used since ``str.replace`` is faster and simpler.
+    # Regex will not be used since ``str.replace`` is faster and
+    # simpler.
 
     # Cleaning empty characters.
     chat = chat.replace('\u200e', '')
@@ -44,27 +52,11 @@ def _clean_impurities(chat: str) -> str:
     return chat
 
 
-CHAT_FORMAT_REGEX = re.compile(r'''
-    ^\[(?P<datetime>\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\]\s
-    (?P<content>[\S\s]+?)(?=\n\[.+\]|\Z)
-''', re.X | re.M)
-COMMON_MESSAGE_REGEX = re.compile(r'(?P<actor>.*?):\s+(?P<message>[\s\S]+)')
-
-
 class Qualichat:
-    '''Base class for chat analysis.
-    
-    Attributes
-    ----------
-    messages: List[:class:`.abc.Message`]
-        All user messages detected in the chat.
-    system_messages: List[:class:`.abc.SystemMessage`]
-        All system messages detected in the chat.
-    filename: :class:`str`
-        The name of the uploaded file.
-    '''
+    """Base class for chat analysis."""
 
-    __slots__ = ('messages', 'system_messages', 'filename', '_actors')
+    __slots__ = ('filename', 'messages', 'system_messages',
+                 '_actors', 'graphs')
 
     def __init__(self, path: Union[str, pathlib.Path], **kwargs):
         if not isinstance(path, pathlib.Path):
@@ -76,29 +68,25 @@ class Qualichat:
         encoding = kwargs.pop('encoding', 'utf-8')
         raw_data = _clean_impurities(path.read_text(encoding=encoding))
 
+        self.filename = path.name
+
         self.messages = []
         self.system_messages = []
-        self.filename = path.name
 
         self._actors = {}
 
-        for match in CHAT_FORMAT_REGEX.finditer(raw_data):
+        for match in CHAT_REGEX.finditer(raw_data):
             if not match:
-                # An unknown message? 
+                # An unknown message?
                 # Anyway, let's just ignore it and move on.
                 continue
 
             created_at = match.group(1)
-            content = match.group(2)
+            rest = match.group(2)
 
-            is_common = COMMON_MESSAGE_REGEX.match(content)
+            is_common = COMMON_MESSAGE_REGEX.match(rest)
 
-            if not is_common:
-                # It is a system message, indicating some group 
-                # event (actor left/joined, changed the group icon, etc.)
-                message = SystemMessage(content=content, created_at=created_at)
-                self.system_messages.append(message)
-            else:
+            if is_common:
                 contact_name = is_common.group(1)
                 content = is_common.group(2)
 
@@ -106,12 +94,19 @@ class Qualichat:
                     self._actors[contact_name] = Actor(contact_name)
 
                 actor = self._actors[contact_name]
-                message = Message(actor=actor, content=content, created_at=created_at)
+                message = Message(actor, content, created_at)
 
                 self.messages.append(message)
-                actor.messages.append(message)
+            else:
+                # It is a system message, indicating some group 
+                # event (actor left/joined, changed the group icon,
+                # etc.)
+                message = SystemMessage(rest, created_at)
+                self.system_messages.append(message)
 
     @property
     def actors(self) -> List[Actor]:
-        '''List[:class:`.Actor`]: The list of actors present in the chat.'''
+        """List[:class:`.Actor`]: The list of actors present in the
+        chat.
+        """
         return list(self._actors.values())

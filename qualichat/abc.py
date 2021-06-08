@@ -23,99 +23,25 @@ SOFTWARE.
 '''
 
 import datetime
-from typing import List, Dict
-
-from .enums import Period, SubPeriod
 
 
-class Message:
-    '''An ABC that details the common operations on a message.
-
+class BaseMessage:
+    """An ABC that details the common operations on a message.
+    
     The following implement this ABC:
 
     - :class:`.Message`
     - :class:`.SystemMessage`
 
     Attributes
-    -----------
+    ----------
     content: :class:`str`
-        The content of the mes
+        The content of the message.
     created_at: :class:`datetime.datetime`
         The message's creation time.
-    period: :class:`Period`
-        The period in which the message was sent. For more information see :class:`.Period`.
-    sub_period:
-        The sub-period in which the message was sent. For more information see :class:`.SubPeriod`.
-    '''
+    """
 
     __slots__ = ()
 
     content: str
     created_at: datetime.datetime
-    period: Period
-    sub_period: SubPeriod
-
-    @property
-    def weekday(self) -> str:
-        ''':class:`str`: The weekday on which the message was sent.'''
-        return self.created_at.strftime('%A')
-
-    @property
-    def emojis(self) -> List[str]:
-        '''List[:class:`str`]: Returns all the emojis contained in the message content.'''
-        return []
-
-    @property
-    def urls(self) -> List[str]:
-        '''List[:class:`str`]: Returns all the URLs contained in the message content.'''
-        return []
-
-    @property
-    def emails(self) -> List[str]:
-        '''List[:class:`str`]: Returns all the e-mails contained in the message content.'''
-        return []
-
-    @property
-    def numbers(self) -> List[str]:
-        '''List[:class:`str`]: Returns all the numbers contained in the message content.'''
-        return []
-
-    @property
-    def laughs(self) -> List[str]:
-        '''List[:class:`str`]: Returns all the laughs contained in the message content.
-        This essentially checks for laughs like `haha`, `kkkk`, `hehe`, etc.
-        '''
-        return []
-
-    @property
-    def marks(self) -> Dict[str, List[str]]:
-        '''Dict[:class:`str`, List[:class:`str`]]: Returns all exclamation and question 
-        marks contained in the message content.
-        '''
-        return {}
-
-    @property
-    def exclamation_marks(self) -> List[str]:
-        '''List[:class:`str`]: Returns all exclamation marks contained in the message
-        content.
-        '''
-        return []
-
-    @property
-    def question_marks(self) -> List[str]:
-        '''List[:class:`str`]: Returns all question marks contained in the message
-        content.
-        '''
-        return []
-
-    @property
-    def liquid(self) -> str:
-        ''':class:`str`: Returns the liquid content of the message, removing URLs, emails 
-        and emojis.
-        '''
-        return ''
-
-    @property
-    def pure_text(self) -> str:
-        ''':class:`str`: Returns the pure content of the message.'''
-        return ''
