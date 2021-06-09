@@ -161,6 +161,8 @@ class GraphGenerator:
         columns = ['QTD_Riso', 'QTD_Pontuacao', 'QTD_Emoji', 'QTD_Numeros', 'QTD_Mensagens']
         rows = []
 
+        get_length = lambda x: len(''.join(x))
+
         for message in chat.messages:
             index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
             data[index.strftime('%B %Y')].append(message)
@@ -173,10 +175,10 @@ class GraphGenerator:
             messages = 0
 
             for message in values:
-                laughs += len(''.join(message['Qntd_Caract_Risos']))
-                marks += len(''.join(message['Qntd_Caract_Pontuacao']))
-                emojis += len(''.join(message['Qntd_Caract_Emoji']))
-                numbers += len(''.join(message['Qntd_Caract_Numeros']))
+                laughs += get_length(message['Qntd_Caract_Risos'])
+                marks += get_length(message['Qntd_Caract_Pontuacao'])
+                emojis += get_length(message['Qntd_Caract_Emoji'])
+                numbers += get_length(message['Qntd_Caract_Numeros'])
                 messages += 1
                 
             rows.append([laughs, marks, emojis, numbers, messages])
