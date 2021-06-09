@@ -214,3 +214,31 @@ class GraphGenerator:
             rows.append([*weekdays.values(), net_content])
 
         return DataFrame(rows, index=data.keys(), columns=columns)
+
+    @generate_graph(
+        bars=['QTD_Liquido', 'QTD_Texto'],
+        lines=['QTD_Mensagens'],
+        title='Amount by User'
+    )
+    def users_activity(self):
+        """..."""
+        chat = self.chats[0]
+        data = {}
+
+        columns = ['QTD_Liquido', 'QTD_Texto', 'QTD_Mensagens']
+        indexes = [actor.display_name for actor in chat.actors]
+        
+        rows = []
+
+        for actor in chat.actors:
+            net_content = 0
+            pure_content = 0
+
+            for message in actor.messages:
+                net_content += len(message['Qntd_Caract_Liquido'])
+                pure_content += len(message['Qntd_Caract_Texto'])
+
+            rows.append([net_content, pure_content, len(actor.messages)])
+
+        dataframe = DataFrame(rows, index=indexes, columns=columns)
+        return dataframe[:10].sort_values(columns, ascending=False)
