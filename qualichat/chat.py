@@ -97,6 +97,7 @@ class Qualichat:
                 message = Message(actor, content, created_at)
 
                 self.messages.append(message)
+                actor.messages.append(message)
             else:
                 # It is a system message, indicating some group 
                 # event (actor left/joined, changed the group icon,
