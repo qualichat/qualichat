@@ -44,16 +44,22 @@ for font in font_manager.findSystemFonts(str(fonts)):
 matplotlib.rcParams['font.family'] = 'Inter'
 
 
+# Colors
 BARS_COLORS = {
     2: ['#08bcac', '#38444c'],
-    4: ['#f2c80f', '#fd625e', '#8ad4eb', '#b887ad']
+    4: ['#f2c80f', '#fd625e', '#8ad4eb', '#b887ad'],
+    7: ['#796408', '#374649', '#808080', '#a66999', '#fe9666', '#fae99f', '#f5d33f']
 }
 
 LINE_COLORS = {
     0: '#ff645c',
     2: '#ff645c',
-    4: '#000000'
+    4: '#000000',
+    7: '#01b8aa'
 }
+
+
+WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 
 def generate_graph(
@@ -174,5 +180,35 @@ class GraphGenerator:
                 messages += 1
                 
             rows.append([laughs, marks, emojis, numbers, messages])
+
+        return DataFrame(rows, index=data.keys(), columns=columns)
+
+    @generate_graph(
+        bars=WEEKDAYS,
+        lines=['QTD_Liquido'],
+        title='Amount by Month'
+    )
+    def weekdays(self):
+        """Shows which days of the week have the most active chat."""
+        chat = self.chats[0]
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        columns = WEEKDAYS.copy()
+        columns.append('QTD_Liquido')
+        rows = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+            data[index.strftime('%B %Y')].append(message)
+
+        for values in data.values():
+            net_content = 0
+            weekdays = {w: 0 for w in WEEKDAYS}
+
+            for message in values:
+                net_content += len(message['Qntd_Caract_Liquido'])
+                weekdays[message.created_at.strftime('%A')] += 1
+
+            rows.append([*weekdays.values(), net_content])
 
         return DataFrame(rows, index=data.keys(), columns=columns)
