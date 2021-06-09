@@ -154,6 +154,9 @@ class Message(BaseMessage):
             are difficult to detect as it does not follow an open
             pattern.
 
+    - ``Qntd_Caract_Pontuacao``: List[:class:`str`]
+        The union of ``Qntd_Caract_!`` and ``Qntd_Caract_?``.
+
     - ``Qntd_Caract_Liquido``: :class:`str`
         Represents the net content of the message. This removes all
         URLs, emails and emojis from the message content.
@@ -200,10 +203,8 @@ class Message(BaseMessage):
         data['Qntd_Caract_Numeros'] = NUMBERS_REGEX.findall(content)
         data['Qntd_Caract_Risos'] = LAUGHS_REGEX.findall(content)
 
-        data['Qntd_Caract_Pontuacao'] = {
-            '!': data['Qntd_Caract_!'],
-            '?': data['Qntd_Caract_?']
-        }
+        marks = data['Qntd_Caract_!'] + data['Qntd_Caract_?']
+        data['Qntd_Caract_Pontuacao'] = marks
 
         net_text_incidences = [
             'Qntd_Caract_Links',
