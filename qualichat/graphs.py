@@ -79,7 +79,7 @@ def generate_graph(
                 color = BARS_COLORS[len(bars)]
 
                 bars_dataframe = dataframe.filter(bars)
-                ax2 = bars_dataframe.plot.bar(ax=ax, rot=0, color=color)
+                bars_dataframe.plot.bar(ax=ax, rot=0, color=color)
 
             if lines:
                 color = LINE_COLORS[len(bars)]
@@ -88,8 +88,6 @@ def generate_graph(
                 lines_dataframe.plot(ax=ax, secondary_y=True, color=color)
 
             ax.grid(axis='y', linestyle='solid')
-            ax.legend(loc='upper right')
-            
             plot.show()
 
         return wrapped
