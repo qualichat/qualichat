@@ -67,7 +67,7 @@ def generate_graph(
         bars: List[str] = [],
         lines: List[str] = [],
         title: str = None
-    ):
+):
     def decorator(method: Callable[[], DataFrame]):
         def wrapped(*args, **kwargs):
             fig, ax = plot.subplots()
