@@ -114,8 +114,8 @@ class GraphGenerator:
         self.chats = chats
 
     @generate_graph(
-        bars=['QTD_Liquido', 'QTD_Texto'],
-        lines=['QTD_Mensagens'],
+        bars=['Qty_char_net', 'Qty_char_text'],
+        lines=['Qty_messages'],
         title='Amount by Month'
     )
     def messages_per_month(self):
@@ -125,7 +125,7 @@ class GraphGenerator:
         chat = self.chats[0]
         data: DefaultDict[str, List[Message]] = defaultdict(list)
 
-        columns = ['QTD_Liquido', 'QTD_Texto', 'QTD_Mensagens']
+        columns = ['Qty_char_net', 'Qty_char_text', 'Qty_messages']
         rows = []
 
         for message in chat.messages:
@@ -138,8 +138,8 @@ class GraphGenerator:
             messages = 0
 
             for message in values:
-                net_content += len(message['Qntd_Caract_Liquido'])
-                pure_content += len(message['Qntd_Caract_Texto'])
+                net_content += len(message['Qty_char_net'])
+                pure_content += len(message['Qty_char_text'])
                 messages += 1
 
             rows.append([net_content, pure_content, messages])
@@ -147,8 +147,11 @@ class GraphGenerator:
         return DataFrame(rows, index=data.keys(), columns=columns)
 
     @generate_graph(
-        bars=['QTD_Riso', 'QTD_Pontuacao', 'QTD_Emoji', 'QTD_Numeros'],
-        lines=['QTD_Mensagens'],
+        bars=[
+            'Qty_char_laughs', 'Qty_char_marks',
+            'Qty_char_emoji', 'Qty_char_numbers'
+        ],
+        lines=['Qty_messages'],
         title='Amount by Month'
     )
     def message_aspects(self):
@@ -158,7 +161,11 @@ class GraphGenerator:
         chat = self.chats[0]
         data: DefaultDict[str, List[Message]] = defaultdict(list)
 
-        columns = ['QTD_Riso', 'QTD_Pontuacao', 'QTD_Emoji', 'QTD_Numeros', 'QTD_Mensagens']
+        columns = [
+            'Qty_char_laughs', 'Qty_char_marks',
+            'Qty_char_emoji', 'Qty_char_numbers',
+            'Qty_messages'
+        ]
         rows = []
 
         get_length = lambda x: len(''.join(x))
@@ -175,10 +182,10 @@ class GraphGenerator:
             messages = 0
 
             for message in values:
-                laughs += get_length(message['Qntd_Caract_Risos'])
-                marks += get_length(message['Qntd_Caract_Pontuacao'])
-                emojis += get_length(message['Qntd_Caract_Emoji'])
-                numbers += get_length(message['Qntd_Caract_Numeros'])
+                laughs += get_length(message['Qty_char_laughs'])
+                marks += get_length(message['Qty_char_marks'])
+                emojis += get_length(message['Qty_char_emoji'])
+                numbers += get_length(message['Qty_char_numbers'])
                 messages += 1
                 
             rows.append([laughs, marks, emojis, numbers, messages])
@@ -187,7 +194,7 @@ class GraphGenerator:
 
     @generate_graph(
         bars=WEEKDAYS,
-        lines=['QTD_Liquido'],
+        lines=['Qty_char_net'],
         title='Amount by Month'
     )
     def weekdays(self):
@@ -196,7 +203,7 @@ class GraphGenerator:
         data: DefaultDict[str, List[Message]] = defaultdict(list)
 
         columns = WEEKDAYS.copy()
-        columns.append('QTD_Liquido')
+        columns.append('Qty_char_net')
         rows = []
 
         for message in chat.messages:
@@ -208,7 +215,7 @@ class GraphGenerator:
             weekdays = {w: 0 for w in WEEKDAYS}
 
             for message in values:
-                net_content += len(message['Qntd_Caract_Liquido'])
+                net_content += len(message['Qty_char_net'])
                 weekdays[message.created_at.strftime('%A')] += 1
 
             rows.append([*weekdays.values(), net_content])
@@ -216,8 +223,8 @@ class GraphGenerator:
         return DataFrame(rows, index=data.keys(), columns=columns)
 
     @generate_graph(
-        bars=['QTD_Liquido', 'QTD_Texto'],
-        lines=['QTD_Mensagens'],
+        bars=['Qty_char_net', 'Qty_char_text'],
+        lines=['Qty_messages'],
         title='Amount by User'
     )
     def users_activity(self):
@@ -227,7 +234,7 @@ class GraphGenerator:
         chat = self.chats[0]
         data = {}
 
-        columns = ['QTD_Liquido', 'QTD_Texto', 'QTD_Mensagens']
+        columns = ['Qty_char_net', 'Qty_char_text', 'Qty_messages']
         indexes = [actor.display_name for actor in chat.actors]
         
         rows = []
@@ -237,8 +244,8 @@ class GraphGenerator:
             pure_content = 0
 
             for message in actor.messages:
-                net_content += len(message['Qntd_Caract_Liquido'])
-                pure_content += len(message['Qntd_Caract_Texto'])
+                net_content += len(message['Qty_char_net'])
+                pure_content += len(message['Qty_char_text'])
 
             rows.append([net_content, pure_content, len(actor.messages)])
 
