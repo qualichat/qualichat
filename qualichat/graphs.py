@@ -249,3 +249,44 @@ class GraphGenerator:
 
         dataframe = DataFrame(rows, index=indexes, columns=columns)
         return dataframe[:10].sort_values(columns, ascending=False)
+
+    @generate_graph(
+        bars=[
+            'Qty_char_laughs', 'Qty_char_marks',
+            'Qty_char_emoji', 'Qty_char_numbers'
+        ],
+        lines=['Qty_messages'],
+        title='Amount by User'
+    )
+    def users_messages_aspects(self):
+        """Shows message aspects by user.
+        It only shows the 10 most active actors.
+        """
+        chat = self.chats[0]
+        data = {}
+
+        columns = [
+            'Qty_char_laughs', 'Qty_char_marks',
+            'Qty_char_emoji', 'Qty_char_numbers',
+            'Qty_messages'
+        ]
+        indexes = [actor.display_name for actor in chat.actors]
+
+        rows = []
+
+        for actor in chat.actors:
+            laughs = 0
+            marks = 0
+            emojis = 0
+            numbers = 0
+
+            for message in actor.messages:
+                laughs += len(''.join(message['Qty_char_laughs']))
+                marks += len(''.join(message['Qty_char_marks']))
+                emojis += len(''.join(message['Qty_char_emoji']))
+                numbers += len(''.join(message['Qty_char_numbers']))
+
+            rows.append([laughs, marks, emojis, numbers, len(actor.messages)])
+
+        dataframe = DataFrame(rows, index=indexes, columns=columns)
+        return dataframe[:10].sort_values(columns, ascending=False)
