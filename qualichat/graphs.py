@@ -221,7 +221,9 @@ class GraphGenerator:
         title='Amount by User'
     )
     def users_activity(self):
-        """..."""
+        """Shows the number of messages per user.
+        It only shows the 10 most active actors.
+        """
         chat = self.chats[0]
         data = {}
 
