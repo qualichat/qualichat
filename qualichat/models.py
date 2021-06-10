@@ -117,35 +117,35 @@ class Message(BaseMessage):
     content. To get information about the data from this interface, you
     should use :meth:`object.__getitem__`, e. g. ::
 
-        message['Qntd_Caract_Total']
+        message['Qty_char_total']
 
     These are the data currently available:
 
-    - ``Qntd_Caract_Total``: :class:`int`
+    - ``Qty_char_total``: :class:`int`
         Shows the total number of characters in the message content.
         This is the same thing as doing: ::
 
             len(message.content)
 
-    - ``Qntd_Caract_Emoji``: List[:class:`str`]
+    - ``Qty_char_emoji``: List[:class:`str`]
         All unicode emojis present in the message content.
 
-    - ``Qntd_Caract_Links``: List[:class:`str`]
+    - ``Qty_char_links``: List[:class:`str`]
         All URLs present in the message content.
 
-    - ``Qntd_Caract_Emails``: List[:class:`str`]
+    - ``Qty_char_emails``: List[:class:`str`]
         All e-mails present in the message content.
 
-    - ``Qntd_Caract_?``: List[:class:`str`]
+    - ``Qty_char_?``: List[:class:`str`]
         All ``?`` character present in the message content.
 
-    - ``Qntd_Caract_!``: List[:class:`str`]
+    - ``Qty_char_!``: List[:class:`str`]
         All ``!`` character present in the message content.
 
-    - ``Qntd_Caract_Numeros``: List[:class:`str`]
+    - ``Qty_char_numbers``: List[:class:`str`]
         All numbers characters present in the message content.
 
-    - ``Qntd_Caract_Risos``: List[:class:`str`]
+    - ``Qty_char_laughs``: List[:class:`str`]
         All laughs characters present in the message content.
 
         .. warning::
@@ -154,16 +154,16 @@ class Message(BaseMessage):
             are difficult to detect as it does not follow an open
             pattern.
 
-    - ``Qntd_Caract_Pontuacao``: List[:class:`str`]
-        The union of ``Qntd_Caract_!`` and ``Qntd_Caract_?``.
+    - ``Qty_char_marks``: List[:class:`str`]
+        The union of ``Qty_char_!`` and ``Qty_char_?``.
 
-    - ``Qntd_Caract_Liquido``: :class:`str`
+    - ``Qty_char_net``: :class:`str`
         Represents the net content of the message. This removes all
         URLs, emails and emojis from the message content.
 
-    - ``Qntd_Caract_Texto``: :class:`str`
+    - ``Qty_char_text``: :class:`str`
         Represents the pure content of the message. This takes the net
-        content (via ``Qntd_Caract_Liquido``) and removes laughs,
+        content (via ``Qty_char_net``) and removes laughs,
         marks and numbers from this content.
     
     Attributes
@@ -188,44 +188,44 @@ class Message(BaseMessage):
         self.created_at = parse_time(created_at)
 
         data = {}
-        data['Qntd_Caract_Total'] = len(self.content)
-        data['Qntd_Caract_Emoji'] = list(emojis.iter(self.content))
-        data['Qntd_Caract_Links'] = URL_REGEX.findall(self.content)
-        data['Qntd_Caract_Emails'] = EMAIL_REGEX.findall(self.content)
+        data['Qty_char_total'] = len(self.content)
+        data['Qty_char_emoji'] = list(emojis.iter(self.content))
+        data['Qty_char_links'] = URL_REGEX.findall(self.content)
+        data['Qty_char_emails'] = EMAIL_REGEX.findall(self.content)
 
         # We create a copy of the content (since we don't want to
         # change the original content) and then remove all URLs present
         # in the message, to avoid ambiguity.
-        content = _remove_all_incidences(self.content, data['Qntd_Caract_Links'])
+        content = _remove_all_incidences(self.content, data['Qty_char_links'])
 
-        data['Qntd_Caract_?'] = QUESTION_MARK_REGEX.findall(content)
-        data['Qntd_Caract_!'] = EXCLAMATION_MARK_REGEX.findall(content)
-        data['Qntd_Caract_Numeros'] = NUMBERS_REGEX.findall(content)
-        data['Qntd_Caract_Risos'] = LAUGHS_REGEX.findall(content)
+        data['Qty_char_?'] = QUESTION_MARK_REGEX.findall(content)
+        data['Qty_char_!'] = EXCLAMATION_MARK_REGEX.findall(content)
+        data['Qty_char_numbers'] = NUMBERS_REGEX.findall(content)
+        data['Qty_char_laughs'] = LAUGHS_REGEX.findall(content)
 
-        marks = data['Qntd_Caract_!'] + data['Qntd_Caract_?']
-        data['Qntd_Caract_Pontuacao'] = marks
+        marks = data['Qty_char_!'] + data['Qty_char_?']
+        data['Qty_char_marks'] = marks
 
         net_text_incidences = [
-            'Qntd_Caract_Links',
-            'Qntd_Caract_Emails',
-            'Qntd_Caract_Emoji'
+            'Qty_char_links',
+            'Qty_char_emails',
+            'Qty_char_emoji'
         ]
 
         net_iters = [data[i] for i in net_text_incidences]
         net_text = _remove_all_incidences(self.content, net_iters)
 
         pure_text_incidences = [
-            'Qntd_Caract_Risos',
-            'Qntd_Caract_Pontuacao',
-            'Qntd_Caract_Numeros'
+            'Qty_char_laughs',
+            'Qty_char_marks',
+            'Qty_char_numbers'
         ]
 
         pure_iters = [data[i] for i in pure_text_incidences]
         pure_text = _remove_all_incidences(net_text, pure_iters)
 
-        data['Qntd_Caract_Liquido'] = net_text
-        data['Qntd_Caract_Texto'] = pure_text
+        data['Qty_char_net'] = net_text
+        data['Qty_char_text'] = pure_text
 
         self.data = MappingProxyType(data)
 
