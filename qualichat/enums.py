@@ -73,4 +73,3 @@ def _get_sub_period(created_at: datetime.datetime) -> SubPeriod:
         sub_period = SubPeriod.second_office_hour
 
     return sub_period
-
