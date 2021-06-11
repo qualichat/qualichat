@@ -60,38 +60,63 @@ to get their behaviour. **Abstract base classes should not be instantiated**.
     :members:
 
 
-.. Enumerations
-.. ------------
+Enumerations
+------------
 
-.. This library provides some enumerations for certain types. All time formats below are 24-hour
-.. format.
+This library provides some enumerations for certain types. All time formats below are 24-hour
+format.
 
-.. .. class:: qualichat.enums.Period
+.. class:: qualichat.enums.Period
 
-..     Represents the period in which a message was sent.
+    Represents the period in which a message was sent.
 
-..     .. attribute:: dawn
+    .. attribute:: dawn
 
-..         If the message was sent between ``00:00`` and ``05:59``.
+        If the message was sent between ``00:00`` and ``05:59``.
 
-..     .. attribute:: morning
+    .. attribute:: morning
 
-..         If the message was sent between ``06:00`` and ``11.59``.
+        If the message was sent between ``06:00`` and ``11.59``.
 
-..     .. attribute:: evening
+    .. attribute:: evening
 
-..         If the message was sent between ``12:00`` and ``17:59``.
+        If the message was sent between ``12:00`` and ``17:59``.
 
-..     .. attribute:: night
+    .. attribute:: night
 
-..         If the message was sent between ``18:00`` and ``23:59``.
+        If the message was sent between ``18:00`` and ``23:59``.
 
+.. class:: qualichat.enums.SubPeriod
 
-.. Graphs
-.. ------
+    Represents the sub-period in which a message was sent.
 
-.. .. autoclass:: GraphGenerator
-..     :members:
+    .. attribute:: resting
+
+        If the message was sent between ``00:00`` and ``05:59``.
+
+    .. attribute:: transport_morning
+
+        If the message was sent between ``06:00`` and ``08:59``.
+
+    .. attribute:: work_morning
+
+        If the message was sent between ``09:00`` and ``11:59``.
+
+    .. attribute:: lunch
+
+        If the message was sent between ``12:00`` and ``14:59``.
+
+    .. attribute:: work_evening
+
+        If the message was sent between ``15:00`` and ``17:59``.
+
+    .. attribute:: transport_evening
+
+        If the message was sent between ``18:00`` and ``20:59``.
+
+    .. attribute:: second_office_hour
+
+        If the message was sent between ``21:00`` and ``23:59``.
 
 
 Models
