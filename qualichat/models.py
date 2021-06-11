@@ -178,7 +178,7 @@ class Message(BaseMessage):
 
     - ``Day_sub_period``: :class:`str`
         The sub-period of the day the message was sent. These are the
-        available periods (in 24h format):
+        available periods (in 24-hour format):
 
         - ``Resting`` (00:00-05:59)
         - ``Transport (morning)`` (06:00-08:59)
