@@ -33,6 +33,7 @@ from matplotlib import font_manager
 
 from .chat import Qualichat
 from .models import Message
+from .enums import Period, SubPeriod
 
 
 # Add ``Inter`` font.
@@ -60,6 +61,8 @@ LINE_COLORS = {
 
 
 WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+PERIODS = [c.value for c in Period]
+SUB_PERIODS = [c.value for c in SubPeriod]
 
 
 def generate_graph(
@@ -290,3 +293,63 @@ class GraphGenerator:
 
         dataframe = DataFrame(rows, index=indexes, columns=columns)
         return dataframe[:10].sort_values(columns, ascending=False)
+
+    @generate_graph(
+        bars=PERIODS,
+        lines=['Qty_messages'],
+        title='Amount by Month'
+    )
+    def message_period(self):
+        """Shows which periods of the day the chat is most active."""
+        chat = self.chats[0]
+        data = defaultdict(list)
+
+        columns = PERIODS.copy()
+        columns.append('Qty_messages')
+        rows = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+            data[index.strftime('%B %Y')].append(message)
+
+        for values in data.values():
+            messages = 0
+            periods = {c.value: 0 for c in Period}
+
+            for message in values:
+                messages += 1
+                periods[message['Day_period']] += 1
+
+            rows.append([*periods.values(), messages])
+
+        return DataFrame(rows, index=data.keys(), columns=columns)
+
+    @generate_graph(
+        bars=SUB_PERIODS,
+        lines=['Qty_messages'],
+        title='Amount by Month'
+    )
+    def message_sub_period(self):
+        """Shows which sun-periods of the day the chat is most active."""
+        chat = self.chats[0]
+        data = defaultdict(list)
+
+        columns = SUB_PERIODS.copy()
+        columns.append('Qty_messages')
+        rows = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+            data[index.strftime('%B %Y')].append(message)
+
+        for values in data.values():
+            messages = 0
+            periods = {c.value: 0 for c in SubPeriod}
+
+            for message in values:
+                messages += 1
+                periods[message['Day_sub_period']] += 1
+
+            rows.append([*periods.values(), messages])
+
+        return DataFrame(rows, index=data.keys(), columns=columns)
