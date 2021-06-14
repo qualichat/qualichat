@@ -34,6 +34,7 @@ from matplotlib import font_manager
 from .chat import Qualichat
 from .models import Message
 from .enums import Period, SubPeriod
+from .utils import log
 
 
 # Add ``Inter`` font.
@@ -73,6 +74,8 @@ def generate_graph(
 ):
     def decorator(method: Callable[[], DataFrame]):
         def wrapped(*args, **kwargs):
+            log('info', f"Generating a '{method.__name__}' graph...")
+
             fig, ax = plot.subplots()
             dataframe = method(*args, **kwargs)
 
@@ -113,6 +116,9 @@ class GraphGenerator:
             chats = [chats]
 
         self.chats = chats
+
+        term = 'graph' + ('' if len(chats) == 1 else 's')
+        log('info', f'Created a graph generator for {len(chats)} {term}.')
 
     @generate_graph(
         bars=['Qty_char_net', 'Qty_char_text'],

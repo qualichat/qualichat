@@ -27,6 +27,7 @@ import re
 from typing import Union, List
 
 from .models import Message, SystemMessage, Actor
+from .utils import log
 
 
 CHAT_REGEX = re.compile(r'''
@@ -64,6 +65,8 @@ class Qualichat:
 
         if not path.is_file():
             raise FileNotFoundError(f'no such file: {str(path)!r}')
+
+        log('info', f"Loading '{path}' file...")
 
         encoding = kwargs.pop('encoding', 'utf-8')
         raw_data = _clean_impurities(path.read_text(encoding=encoding))
@@ -104,6 +107,11 @@ class Qualichat:
                 # etc.)
                 message = SystemMessage(rest, created_at)
                 self.system_messages.append(message)
+
+        messages = len(self.messages) + len(self.system_messages)
+        actors = len(self.actors)
+
+        log('info', f'Loaded {messages} messages and {actors} actors.')
 
     @property
     def actors(self) -> List[Actor]:
