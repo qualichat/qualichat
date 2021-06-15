@@ -55,7 +55,7 @@ BARS_COLORS = {
 
 LINE_COLORS = {
     0: '#ff645c',
-    2: '#ff645c',
+    2: ['#ff645c', '#f8cc0c'],
     4: '#000000',
     7: '#01b8aa'
 }
@@ -359,3 +359,41 @@ class GraphGenerator:
             rows.append([*periods.values(), messages])
 
         return DataFrame(rows, index=data.keys(), columns=columns)
+
+    @generate_graph(
+        bars=['Qty_char_!', 'Qty_char_?'],
+        lines=['Qty_char_text', 'Qty_messages'],
+        title='Amount by Month'
+    )
+    def message_marks(self):
+        """Shows the amount of exclamation points and question marks
+        sent in the chat.
+        """
+        chat = self.chats[0]
+        data = defaultdict(list)
+
+        columns = ['Qty_char_!', 'Qty_char_?', 'Qty_char_text', 'Qty_messages']
+        rows = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+            data[index.strftime('%B %Y')].append(message)
+
+        for values in data.values():
+            exclamation_marks = 0
+            question_marks = 0
+            pure_content = 0
+            messages = 0
+
+            for message in values:
+                exclamation_marks += len(''.join(message['Qty_char_!']))
+                question_marks += len(''.join(message['Qty_char_?']))
+                pure_content += len(message['Qty_char_text'])
+                messages += 1
+
+            rows.append(
+                [exclamation_marks, question_marks, pure_content, messages]
+            )
+
+        return DataFrame(rows, index=data.keys(), columns=columns)
+
