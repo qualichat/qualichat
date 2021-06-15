@@ -48,6 +48,7 @@ matplotlib.rcParams['font.family'] = 'Inter'
 
 # Colors
 BARS_COLORS = {
+    1: ['#08bcac'],
     2: ['#08bcac', '#38444c'],
     4: ['#f2c80f', '#fd625e', '#8ad4eb', '#b887ad'],
     7: ['#796408', '#374649', '#808080', '#a66999', '#fe9666', '#fae99f', '#f5d33f']
@@ -55,6 +56,7 @@ BARS_COLORS = {
 
 LINE_COLORS = {
     0: '#ff645c',
+    1: '#000000',
     2: ['#ff645c', '#f8cc0c'],
     4: '#000000',
     7: '#01b8aa'
@@ -152,6 +154,37 @@ class GraphGenerator:
             rows.append([net_content, pure_content, messages])
 
         return DataFrame(rows, index=data.keys(), columns=columns)
+
+    @generate_graph(
+        bars=['Qty_messages'],
+        lines=['Qty_char_net'],
+        title='Amount by Weekday'
+    )
+    def messages_per_weekday(self):
+        """Shows the amount of messages and net content sent per
+        week.
+        """
+        chat = self.chats[0]
+        data = defaultdict(list)
+
+        columns = ['Qty_messages', 'Qty_char_net']
+        rows = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(hour=0, minute=0, second=0)
+            data[index.strftime('%A')].append(message)
+
+        for values in data.values():
+            messages = 0
+            net_content = 0
+
+            for message in values:
+                messages += 1
+                net_content += len(message['Qty_char_net'])
+
+            rows.append([messages, net_content])
+
+        return DataFrame(rows, index=data.keys(), columns=columns)        
 
     @generate_graph(
         bars=[
