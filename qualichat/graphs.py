@@ -50,6 +50,7 @@ matplotlib.rcParams['font.family'] = 'Inter'
 BARS_COLORS = {
     1: ['#08bcac'],
     2: ['#08bcac', '#38444c'],
+    3: ['#fe9666', '#8ad4eb', '#666666'],
     4: ['#f2c80f', '#fd625e', '#8ad4eb', '#b887ad'],
     7: ['#796408', '#374649', '#808080', '#a66999', '#fe9666', '#fae99f', '#f5d33f']
 }
@@ -58,6 +59,7 @@ LINE_COLORS = {
     0: '#ff645c',
     1: '#000000',
     2: ['#ff645c', '#f8cc0c'],
+    3: '#08bcac',
     4: '#000000',
     7: '#01b8aa'
 }
@@ -100,6 +102,10 @@ def generate_graph(
 
         return wrapped
     return decorator
+
+
+def get_length(x: List[str]) -> int:
+    return len(''.join(x))
 
 
 class GraphGenerator:
@@ -207,8 +213,6 @@ class GraphGenerator:
             'Qty_messages'
         ]
         rows = []
-
-        get_length = lambda x: len(''.join(x))
 
         for message in chat.messages:
             index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
@@ -430,3 +434,40 @@ class GraphGenerator:
 
         return DataFrame(rows, index=data.keys(), columns=columns)
 
+    @generate_graph(
+        bars=['Qty_char_emails', 'Qty_char_emoji', 'Qty_char_links'],
+        lines=['Qty_char_net'],
+        title='Amount by Month'
+    )
+    def messages_components(self):
+        """Shows the number of components (such as emails, links and
+        emojis) present in the message content.
+        """
+        chat = self.chats[0]
+        data = defaultdict(list)
+
+        columns = [
+            'Qty_char_emails', 'Qty_char_emoji',
+            'Qty_char_links', 'Qty_char_net'
+        ]
+        rows = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+            data[index.strftime('%B %Y')].append(message)
+
+        for values in data.values():
+            emails = 0
+            emojis = 0
+            links = 0
+            net_content = 0
+
+            for message in values:
+                emails += get_length(message['Qty_char_emails'])
+                emojis += get_length(message['Qty_char_emoji'])
+                links += get_length(message['Qty_char_links'])
+                net_content += len(message['Qty_char_net'])
+
+            rows.append([emails, emojis, links, net_content])
+
+        return DataFrame(rows, index=data.keys(), columns=columns)
