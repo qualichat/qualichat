@@ -16,6 +16,12 @@ Open-source linguistic ethnography tool for framing public opinion in mediatized
 
 To install the library, you can just run the following command:
 ```sh
+$ pip install -U qualichat
+```
+
+
+To install a development version, follow these steps:
+```sh
 $ git clone https://github.com/qualichat/qualichat
 $ cd qualichat
 
@@ -24,9 +30,6 @@ $ python3 -m pip install -U .
 # Windows
 $ py -3 -m pip install -U .
 ```
-
-Qualichat is not available on PyPI yet.
-
 
 ### Quickstart
 
