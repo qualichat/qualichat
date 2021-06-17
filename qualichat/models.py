@@ -58,7 +58,7 @@ def parse_time(string: str) -> datetime.datetime:
 _path = os.path.dirname(__file__)
 _books_path = os.path.join(_path, 'books.txt')
 
-with open(_books_path) as f:
+with open(_books_path, encoding='utf-8') as f:
     __books__ = f.read().split('\n')
 
 
