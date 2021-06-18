@@ -15,7 +15,24 @@ Python 2.7 is not supported. Python 3.6 or lower is not supported due to one of 
 Installing
 ----------
 
-Work in Progress.
+**Python 3.7.1 or higher is required.**
+
+To install the library, you can just run the following command:
+```sh
+$ pip install -U qualichat
+```
+
+
+To install a development version, follow these steps:
+```sh
+$ git clone https://github.com/qualichat/qualichat
+$ cd qualichat
+
+# Linux/MacOS
+$ python3 -m pip install -U .
+# Windows
+$ py -3 -m pip install -U .
+```
 
 
 Basic Concepts
