@@ -75,7 +75,7 @@ def generate_graph(
         bars: List[str] = [],
         lines: List[str] = [],
         title: str = None
-):
+) -> None:
     def decorator(method: Callable[[], DataFrame]):
         def wrapped(*args, **kwargs):
             log('info', f"Generating a '{method.__name__}' graph...")
