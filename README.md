@@ -1,4 +1,8 @@
 # <img alt="Qualichat" src="branding/logo/qualichat-logo.png" height="150">
+<!-- badges -->
+[![Downloads](https://pepy.tech/badge/qualichat)](https://pepy.tech/project/qualichat)
+<img src="https://img.shields.io/github/stars/qualichat/qualichat" />
+<img src="https://img.shields.io/pypi/pyversions/qualichat.svg" >
 
 Open-source linguistic ethnography tool for framing public opinion in mediatized groups.
 
