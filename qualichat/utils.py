@@ -25,18 +25,17 @@ SOFTWARE.
 import logging
 import sys
 
-import colorama
-from colorama import Fore
+from colorama import AnsiToWin32, Fore
 
 
 class ColorStreamHandler(logging.StreamHandler):
-    """Handler that adds color support to the terminal."""
+    """Handler that adds color support to terminal."""
 
     __slots__ = ('prefix',)
 
     def __init__(self) -> None:
         self.prefix = f'{Fore.GREEN}[qualichat]{Fore.RESET}'
-        super().__init__(colorama.AnsiToWin32(sys.stderr))
+        super().__init__(AnsiToWin32(sys.stderr))
 
     def emit(self, record: logging.LogRecord) -> None:
         try:
@@ -56,12 +55,13 @@ logger.addHandler(ColorStreamHandler())
 
 
 def log(level: str, *messages: str) -> None:
-    """Log a message to ``kastle`` logger.
+    """Log a message to ``qualichat`` logger.
+    
     Parameters
     ----------
     level: :class:`str`
         The logger level to send.
-    \*args: :class:`str`
+    *args: :class:`str`
         The log messages to send.
     """
     for message in messages:
