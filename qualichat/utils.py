@@ -28,6 +28,9 @@ import sys
 from colorama import AnsiToWin32, Fore
 
 
+__all__ = ('log',)
+
+
 class ColorStreamHandler(logging.StreamHandler):
     """Handler that adds color support to terminal."""
 
