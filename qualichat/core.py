@@ -46,7 +46,7 @@ class Qualichat:
         self.chats = chats
 
 
-def load_chat( # type: ignore
+def load_chats( # type: ignore
     *paths: Union[str, pathlib.Path],
     **kwargs: Any
 ) -> Qualichat:
