@@ -23,62 +23,70 @@ SOFTWARE.
 '''
 
 import pathlib
-import re
-from typing import Union, List
+from typing import List, Union, Dict
 
-from .models import Message, SystemMessage, Actor
+from colorama import Fore
+
 from .utils import log
+from .regex import CHAT_RE, USER_MESSAGE_RE
+from .models import Actor, Message, SystemMessage
 
 
-CHAT_REGEX = re.compile(r'''
-    ^\[(?P<datetime>\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\]\s
-    (?P<rest>[\S\s]+?)(?=\n\[.+\]|\Z)
-''', re.M | re.X)
-COMMON_MESSAGE_REGEX = re.compile(r'(?P<actor>.*?):\s+(?P<message>[\s\S]+)')
+__all__ = ('Chat',)
 
 
-def _clean_impurities(chat: str) -> str:
-    # Regex will not be used since ``str.replace`` is faster and
-    # simpler.
+def _clean_impurities(text: str) -> str:
+    # Regex will not be used here since 
+    # :meth:`str.replace` is faster and simpler.
+    text = text.replace('\u200e', '')
+    text = text.replace('\u2002', '')
+    text = text.replace('\u202c', '')
 
-    # Cleaning empty characters.
-    chat = chat.replace('\u200e', '')
-    chat = chat.replace('\u202a', '')
-    chat = chat.replace('\u202c', '')
-    # Cleaning false space characters.
-    chat = chat.replace('\xa0', ' ')
-    # Cleaning false hyphen.
-    chat = chat.replace('\u2011', '-')
+    text = text.replace('\xa0', ' ')
+    text = text.replace('\u2011', '-')
 
-    return chat
+    return text
 
 
-class Qualichat:
-    """Base class for chat analysis."""
+class Chat:
+    """Represents an isolated chat.
+    
+    Attributes
+    ----------
+    filename: :class:`str`
+        The filename of the given chat file.
+    messages: List[:class:`.Message`]
+        All the actor messages found by Qualichat.
+    system_messages: List[:class:`.SystemMessage`]
+        All the system messages found by Qualichat.
+    """
 
-    __slots__ = ('filename', 'messages', 'system_messages',
-                 '_actors', 'graphs')
+    __slots__ = ('filename', 'messages', 'system_messages', '_actors')
 
-    def __init__(self, path: Union[str, pathlib.Path], **kwargs):
+    def __init__(self, path: Union[str, pathlib.Path], **kwargs: str) -> None:
         if not isinstance(path, pathlib.Path):
             path = pathlib.Path(path)
 
         if not path.is_file():
             raise FileNotFoundError(f'no such file: {str(path)!r}')
 
-        log('info', f"Loading '{path}' file...")
+        name = f'{Fore.LIGHTGREEN_EX}{str(path)}{Fore.RESET}'
 
+        log('info', f'Reading {name} file content.')
         encoding = kwargs.pop('encoding', 'utf-8')
-        raw_data = _clean_impurities(path.read_text(encoding=encoding))
+        text = path.read_text(encoding=encoding)
 
-        self.filename = path.name
+        log('info', f'File {name} read. Cleaning it.')
+        raw_data = _clean_impurities(text)
 
-        self.messages = []
-        self.system_messages = []
+        self.filename: str = path.name
+        self.messages: List[Message] = []
+        self.system_messages: List[SystemMessage] = []
 
-        self._actors = {}
+        self._actors: Dict[str, Actor] = {}
 
-        for match in CHAT_REGEX.finditer(raw_data):
+        log('info', f'Contents of file {name} cleaned. Parsing it.')
+        for match in CHAT_RE.finditer(raw_data):
             if not match:
                 # An unknown message?
                 # Anyway, let's just ignore it and move on.
@@ -87,11 +95,11 @@ class Qualichat:
             created_at = match.group(1)
             rest = match.group(2)
 
-            is_common = COMMON_MESSAGE_REGEX.match(rest)
+            is_user_message = USER_MESSAGE_RE.match(rest)
 
-            if is_common:
-                contact_name = is_common.group(1)
-                content = is_common.group(2)
+            if is_user_message:
+                contact_name = is_user_message.group(1)
+                content = is_user_message.group(2)
 
                 if contact_name not in self._actors:
                     self._actors[contact_name] = Actor(contact_name)
@@ -111,7 +119,8 @@ class Qualichat:
         messages = len(self.messages) + len(self.system_messages)
         actors = len(self.actors)
 
-        log('info', f'Loaded {messages} messages and {actors} actors.')
+        log('info', f'Loaded {messages:,} messages and {actors:,} actors ' \
+                    f'from {name} file.')
 
     @property
     def actors(self) -> List[Actor]:

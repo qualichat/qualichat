@@ -22,29 +22,68 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-import datetime
+import re
 
 
-__all__ = ('BaseMessage',)
+__all__ = (
+    'CHAT_RE',
+    'USER_MESSAGE_RE',
+    'URL_RE',
+    'EMAIL_RE',
+    'QUESTION_MARK_RE'
+)
 
 
-class BaseMessage:
-    """An ABC that details the common operations on a message.
-    
-    The following implement this ABC:
+CHAT_RE = re.compile(r'''
+    ^\[
+    (?P<datetime>\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})
+    \]\s
+    (?P<rest>[\S\s]+?)
+    (?=\n\[.+\]|\Z)
+''', re.M | re.X)
 
-    - :class:`.Message`
-    - :class:`.SystemMessage`
+USER_MESSAGE_RE = re.compile(r'''
+    (?P<actor>.*?)
+    :\s+
+    (?P<message>[\s\S]+)
+''', re.X)
 
-    Attributes
-    ----------
-    content: :class:`str`
-        The content of the message.
-    created_at: :class:`datetime.datetime`
-        The message's creation time.
-    """
+URL_RE = re.compile(r'''
+    http[s]?://
+    (?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F]))+
+''', re.X)
 
-    __slots__ = ()
+EMAIL_RE = re.compile(r'''
+    \b
+    [A-Z0-9._%+-]+
+    @
+    [A-Z0-9.-]+
+    \.[A-Z]{2,}
+    \b
+''', re.X | re.I)
 
-    content: str
-    created_at: datetime.datetime
+QUESTION_MARK_RE = re.compile(r'''
+    \?+
+''', re.X)
+
+EXCLAMATION_MARK_RE = re.compile(r'''
+    !+
+''', re.X)
+
+MENTION_RE = re.compile(r'''
+    @\d{8,}
+''', re.X)
+
+NUMBERS_RE = re.compile(r'''
+    \d+
+''', re.X)
+
+LAUGHS_RE = re.compile(r'''
+    \s
+    (
+        (?:he|ha|hi|hu){2,}|
+        (?:hh){1,}|
+        (?:ja|je|ka|rs){2,}|
+        (?:k){2,}
+    )
+''', re.X | re.I)

@@ -22,29 +22,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-import os
-import re
-import random
 import datetime
-from typing import Iterable
+import os
+import random
+from typing import List, Dict, Any, Iterable
 from types import MappingProxyType
 
-import emojis
+import emojis # type: ignore
 
 from .abc import BaseMessage
-from .enums import _get_period, _get_sub_period
+from .regex import (
+    URL_RE,
+    EMAIL_RE,
+    QUESTION_MARK_RE,
+    EXCLAMATION_MARK_RE,
+    MENTION_RE,
+    NUMBERS_RE,
+    LAUGHS_RE
+)
+
+
+__all__ = ('Actor', 'Message', 'SystemMessage')
 
 
 TIME_FORMAT = r'%d/%m/%y %H:%M:%S'
 
 def parse_time(string: str) -> datetime.datetime:
-    """Converts the date a message was sent to
-    :class:`datetime.datetime`.
-
+    """Converts the message creation time string to a
+    :class:`datetime.datetime` object.
+    
     Parameters
     ----------
     string: :class:`str`
-        The date the message was sent.
+        The message creation time string.
 
     Returns
     -------
@@ -61,15 +71,6 @@ _books_path = os.path.join(_path, 'books.txt')
 with open(_books_path, encoding='utf-8') as f:
     __books__ = f.read().split('\n')
 
-
-URL_REGEX = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
-LAUGHS_REGEX = re.compile(r'\s((?:he|ha|hi|hu){2,}|(?:hh){1,}|(?:ja|je|ka|rs){2,}|(?:k){2,})', re.I)
-EMAIL_REGEX = re.compile(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', re.I)
-QUESTION_MARK_REGEX = re.compile(r'\?+')
-EXCLAMATION_MARK_REGEX = re.compile(r'!+')
-NUMBERS_REGEX = re.compile(r'\d+')
-
-
 def _get_random_name() -> str:
     name = random.choice(__books__)
     # Remove the book from the list so there is no risk that two 
@@ -78,7 +79,7 @@ def _get_random_name() -> str:
     return name.strip()
 
 
-def _remove_all_incidences(text: str, iterables: Iterable[str]) -> str:
+def _remove_all_incidences(text: str, *iterables: Iterable[str]) -> str:
     for iterable in iterables:
         for incidence in iterable:
             text = text.replace(incidence, '')
@@ -87,7 +88,7 @@ def _remove_all_incidences(text: str, iterables: Iterable[str]) -> str:
 
 
 class Actor:
-    """Represents an actor in the actor.
+    """Represents an actor in the chat.
     
     Attributes
     ----------
@@ -95,28 +96,28 @@ class Actor:
         A representative name for this actor, this name is not
         necessarily the actor's real name.
     messages: List[:class:`.Message`]
-        A list containing all the messages that this user
-        sent in the chat.
+        A list containing all the messages that this user sent in the
+        chat.
     """
 
-    __slots__ = ('_contact_name', 'display_name', 'messages', 'data')
+    __slots__ = ('_contact_name', 'display_name', 'messages')
 
-    def __init__(self, contact_name: str):
-        self._contact_name = contact_name
+    def __init__(self, contact_name: str) -> None:
+        self._contact_name: str = contact_name
 
-        self.display_name = _get_random_name()
-        self.messages = []
+        self.display_name: str = _get_random_name()
+        self.messages: List[Message] = []
 
-    def __repr__(self):
-        return f'<Actor display_name={self.display_name!r} messages={len(self.messages)}>'
+    def __repr__(self) -> str:
+        return f'<Actor {self.display_name=} messages={len(self.messages)}>'
 
 
 class Message(BaseMessage):
     """Represents a message sent in the chat by an actor.
-    
+
     This class has a small linguistic analysis interface for message
     content. To get information about the data from this interface, you
-    should use :meth:`object.__getitem__`, e. g. ::
+    should use :meth:`object.__getitem__`, e.g. ::
 
         message['Qty_char_total']
 
@@ -138,10 +139,10 @@ class Message(BaseMessage):
         All e-mails present in the message content.
 
     - ``Qty_char_?``: List[:class:`str`]
-        All ``?`` character present in the message content.
+        All ``?`` characters present in the message content.
 
     - ``Qty_char_!``: List[:class:`str`]
-        All ``!`` character present in the message content.
+        All ``!`` characters present in the message content.
 
     - ``Qty_char_numbers``: List[:class:`str`]
         All numbers characters present in the message content.
@@ -151,121 +152,105 @@ class Message(BaseMessage):
 
         .. warning::
 
-            This data may not be accurate as, computationally, laughs
+            This data may not accurate as, computationally, laughs
             are difficult to detect as it does not follow an open
             pattern.
 
     - ``Qty_char_marks``: List[:class:`str`]
         The union of ``Qty_char_!`` and ``Qty_char_?``.
 
+    - ``Qty_char_mentions``: List[:class:`str`]
+        All mentions found in the message content.
+
+        .. versionadded:: 1.3
+
     - ``Qty_char_net``: :class:`str`
         Represents the net content of the message. This removes all
-        URLs, emails and emojis from the message content.
+        mentions, URLs, emails and emojis from the message content.
 
     - ``Qty_char_text``: :class:`str`
         Represents the pure content of the message. This takes the net
-        content (via ``Qty_char_net``) and removes laughs,
-        marks and numbers from this content.
-
-    - ``Day_period``: :class:`str`
-        The period of day the message was sent. These are the available
-        periods (in 24h format):
-
-        - ``Dawn`` (00:00-05:59)
-        - ``Morning`` (06:00-11:59)
-        - ``Evening`` (12:00-17:59)
-        - ``Night`` (18:00-23:59)
-
-    - ``Day_sub_period``: :class:`str`
-        The sub-period of the day the message was sent. These are the
-        available periods (in 24-hour format):
-
-        - ``Resting`` (00:00-05:59)
-        - ``Transport (morning)`` (06:00-08:59)
-        - ``Work (morning)`` (09:00-11:59)
-        - ``Lunch`` (12:00-14:59)
-        - ``Work (evening)`` (15:00-17:59)
-        - ``Transport (evening)`` (18:00-20:59)
-        - ``Second Office Hour`` (21:00-23:59)
-    
+        content (via ``Qty_char_net``) and removes laughs, marks and
+        numbers from this content.
+        
     Attributes
     ----------
+    actor: :class:`.Actor`
+        The actor who sent the message.
     content: :class:`str`
         The content of the message.
     created_at: :class:`datetime.datetime`
         The message's creation time.
-    actor: :class:`.Actor`
-        The actor who sent the message.
-    data: Dict[:class:`str`, Any]
-        Where is all the data from the linguistic analysis interface of
-        the message. This dictionary is read-only and must not be
-        changed.
     """
-    
-    __slots__ = ('actor', 'content', 'created_at', 'data')
 
-    def __init__(self, actor: Actor, content: str, created_at: str):
-        self.actor = actor
-        self.content = content
-        self.created_at = parse_time(created_at)
+    __slots__ = ('actor', 'content', 'created_at', '_data')
 
-        data = {}
+    def __init__(self, actor: Actor, content: str, created_at: str) -> None:
+        self.actor: Actor = actor
+        self.content: str = content
+        self.created_at: datetime.datetime = parse_time(created_at)
+
+        data: Dict[str, Any] = {}
         data['Qty_char_total'] = len(self.content)
-        data['Qty_char_emoji'] = list(emojis.iter(self.content))
-        data['Qty_char_links'] = URL_REGEX.findall(self.content)
-        data['Qty_char_emails'] = EMAIL_REGEX.findall(self.content)
+
+        all_emojis = list(emojis.iter(self.content)) # type: ignore
+        data['Qty_char_emoji'] = all_emojis
+        data['Qty_char_links'] = URL_RE.findall(self.content)
+        data['Qty_char_emails'] = EMAIL_RE.findall(self.content)
 
         # We create a copy of the content (since we don't want to
         # change the original content) and then remove all URLs present
         # in the message, to avoid ambiguity.
-        content = _remove_all_incidences(self.content, data['Qty_char_links'])
+        content = _remove_all_incidences(
+            self.content, *data['Qty_char_links']
+        )
 
-        data['Qty_char_?'] = QUESTION_MARK_REGEX.findall(content)
-        data['Qty_char_!'] = EXCLAMATION_MARK_REGEX.findall(content)
-        data['Qty_char_numbers'] = NUMBERS_REGEX.findall(content)
-        data['Qty_char_laughs'] = LAUGHS_REGEX.findall(content)
+        data['Qty_char_?'] = QUESTION_MARK_RE.findall(content)
+        data['Qty_char_!'] = EXCLAMATION_MARK_RE.findall(content)
+        data['Qty_char_mentions'] = MENTION_RE.findall(content)
+        data['Qty_char_numbers'] = NUMBERS_RE.findall(content)
+        data['Qty_char_laughs'] = LAUGHS_RE.findall(content)
 
-        marks = data['Qty_char_!'] + data['Qty_char_?']
-        data['Qty_char_marks'] = marks
+        all_marks = data['Qty_char_?'] + data['Qty_char_!']
+        data['Qty_char_marks'] = all_marks
 
-        net_text_incidences = [
-            'Qty_char_links',
+        net_fields_incidences = [
+            'Qty_char_mentions',
+            'Qty_char_numbers',
             'Qty_char_emails',
             'Qty_char_emoji'
         ]
 
-        net_iters = [data[i] for i in net_text_incidences]
-        net_text = _remove_all_incidences(self.content, net_iters)
+        net_incidences = [data[i] for i in net_fields_incidences]
+        net_text = _remove_all_incidences(self.content, *net_incidences)
 
-        pure_text_incidences = [
+        pure_fields_incidences = [
             'Qty_char_laughs',
             'Qty_char_marks',
             'Qty_char_numbers'
         ]
 
-        pure_iters = [data[i] for i in pure_text_incidences]
-        pure_text = _remove_all_incidences(net_text, pure_iters)
+        pure_incidences = [data[i] for i in pure_fields_incidences]
+        pure_text = _remove_all_incidences(net_text, *pure_incidences)
 
         data['Qty_char_net'] = net_text
         data['Qty_char_text'] = pure_text
 
-        data['Day_period'] = _get_period(self.created_at).value
-        data['Day_sub_period'] = _get_sub_period(self.created_at).value
+        self._data: MappingProxyType[str, Any] = MappingProxyType(data)
 
-        self.data = MappingProxyType(data)
+    def __repr__(self) -> str:
+        return '<Message actor={0.actor} ' \
+               'created_at={0.created_at!r}>'.format(self)
 
-    def __repr__(self):
-        return '<Message actor={0.actor} created_at={0.created_at}>'.format(self)
-
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: Any) -> None:
         if not isinstance(key, str):
             raise TypeError('indices must be strings')
 
-        return self.data[key]
+        return self._data[key]
 
 
 class SystemMessage(BaseMessage):
-    """Represents a message sent in the chat by the system.
+    """"Represents a message sent in the chat by the system.
     
     Attributes
     ----------
@@ -277,9 +262,34 @@ class SystemMessage(BaseMessage):
 
     __slots__ = ('content', 'created_at')
 
-    def __init__(self, content: str, created_at: str):
-        self.content = content
-        self.created_at = parse_time(created_at)
+    def __init__(self, content: str, created_at: str) -> None:
+        self.content: str = content
+        self.created_at: datetime.datetime = parse_time(created_at)
 
-    def __repr__(self):
-        return '<SystemMessage created_at={0.created_at}>'.format(self)
+    def __repr__(self) -> str:
+        return '<SystemMessage created_at={0.created_at!r}>'.format(self)
+
+
+#     - ``Day_period``: :class:`str`
+#         The period of day the message was sent. These are the available
+#         periods (in 24h format):
+
+#         - ``Dawn`` (00:00-05:59)
+#         - ``Morning`` (06:00-11:59)
+#         - ``Evening`` (12:00-17:59)
+#         - ``Night`` (18:00-23:59)
+
+#     - ``Day_sub_period``: :class:`str`
+#         The sub-period of the day the message was sent. These are the
+#         available periods (in 24-hour format):
+
+#         - ``Resting`` (00:00-05:59)
+#         - ``Transport (morning)`` (06:00-08:59)
+#         - ``Work (morning)`` (09:00-11:59)
+#         - ``Lunch`` (12:00-14:59)
+#         - ``Work (evening)`` (15:00-17:59)
+#         - ``Transport (evening)`` (18:00-20:59)
+#         - ``Second Office Hour`` (21:00-23:59)
+    
+#         data['Day_period'] = _get_period(self.created_at).value
+#         data['Day_sub_period'] = _get_sub_period(self.created_at).value

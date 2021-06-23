@@ -13,14 +13,19 @@ __title__ = 'qualichat'
 __author__ = 'Ernest Manheim'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2021-present Ernest Manheim'
-__version__ = '1.2.2'
+__version__ = '1.3.0'
 
 
-from collections import namedtuple
+from typing import NamedTuple
 
-from .core import load_chat
-from .graphs import GraphGenerator
+from .core import load_chat as load_chat
 
 
-VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')
-version_info = VersionInfo(major=1, minor=2, micro=2, releaselevel='stable', serial=0)
+class VersionInfo(NamedTuple):
+    major: int
+    minor: int
+    micro: int
+    releaselevel: str
+    serial: int
+
+version_info = VersionInfo(major=1, minor=3, micro=0, releaselevel='stable', serial=0)

@@ -37,7 +37,7 @@ class ColorStreamHandler(logging.StreamHandler):
     __slots__ = ('prefix',)
 
     def __init__(self) -> None:
-        self.prefix = f'{Fore.GREEN}[qualichat]{Fore.RESET}'
+        self.prefix: str = f'{Fore.GREEN}[qualichat]{Fore.RESET}'
         super().__init__(AnsiToWin32(sys.stderr))
 
     def emit(self, record: logging.LogRecord) -> None:

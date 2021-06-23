@@ -23,22 +23,42 @@ SOFTWARE.
 '''
 
 import pathlib
-from typing import Union
+from typing import Union, List, Any
 
-from .chat import Qualichat
+from .chat import Chat
 
 
-def load_chat(path: Union[str, pathlib.Path], *, encoding: str = 'utf-8') -> Qualichat:
-    """Loads a chat from a plain text file.
+__all__ = ('Qualichat', 'load_chat')
+
+
+class Qualichat:
+    """Represents a set of chats for linguistic analysis.
+    
+    Attributes
+    ----------
+    chats: List[:class:`.Chat`]
+        All chats uploaded and parsed by Qualichat.
+    """
+
+    __slots__ = ('chats',)
+
+    def __init__(self, chats: List[Chat]) -> None:
+        self.chats = chats
+
+
+def load_chat( # type: ignore
+    *paths: Union[str, pathlib.Path],
+    **kwargs: Any
+) -> Qualichat:
+    """Loads the given chats from a plain text files.
 
     Parameters
     ----------
-    path: Union[:class:`str`, :class:`pathlib.Path`]
-        The path to the file.
-        The file must be in plain text format.
-    encoding: :class:`str`
-        The encoding that will be used in the text,
-        by default ``'utf-8'``.
+    *paths: Union[:class:`str`, :class:`pathlib.Path`]
+        The paths to the chat files.
+        The files must be in plain text format.
+    **kwargs: Any
+        Keyword arguments that will be passed to :class:`.Chat`.
 
     Returns
     -------
@@ -48,6 +68,6 @@ def load_chat(path: Union[str, pathlib.Path], *, encoding: str = 'utf-8') -> Qua
     Raises
     ------
     :class:`FileNotFoundError`
-        If the file has not been found.
+        If one of the chat files could not been found.
     """
-    return Qualichat(path, encoding=encoding)
+    return Qualichat([Chat(path, **kwargs) for path in paths])
