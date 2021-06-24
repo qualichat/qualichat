@@ -29,7 +29,7 @@ There are two main ways to query version information about the library.
 Chat Loaders
 ------------
 
-.. autofunction:: load_chat
+.. autofunction:: load_chats
 
 
 Chat Analyzers
