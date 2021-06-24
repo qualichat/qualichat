@@ -24,11 +24,14 @@ SOFTWARE.
 
 import logging
 import sys
+from typing import Dict
+
+from tldextract import extract # type: ignore
 
 from colorama import AnsiToWin32, Fore
 
 
-__all__ = ('log',)
+__all__ = ('log', 'parse_domain')
 
 
 class ColorStreamHandler(logging.StreamHandler):
@@ -69,3 +72,46 @@ def log(level: str, *messages: str) -> None:
     """
     for message in messages:
         getattr(logger, level)(message)
+
+
+domains: Dict[str, str] = {
+    'youtu.be': 'YouTube',
+    'youtube.com': 'YouTube',
+    'whatsapp.com': 'WhatsApp',
+    't.me': 'Twitter',
+    'uol.com.br': 'UOL',
+    'glo.bo': 'Globo',
+    'bit.ly': 'Bitly',
+    'metropoles': 'Metrópoles',
+    'theintercept.com': 'The Intercept',
+    'estadao.com.br': 'Estadão',
+    'diarioonline.com.br': 'Diário Online',
+    'brasildefato.com.br': 'Brasil de Fato',
+    'ig.com.br': 'IG',
+}
+
+
+def parse_domain(url: str) -> str:
+    """Pars a URL to return your sanitized domain.
+
+    Parameters
+    ----------
+    url: :class:`str`
+        The URL to be parsed.
+
+    Returns
+    -------
+    :class:`str`
+        The parsed domain name.
+    """
+    result = extract(url)
+
+    domain: str = result.domain # type: ignore
+    suffix: str = result.suffix # type: ignore
+
+    website = f'{domain}.{suffix}'
+
+    if website in domains:
+        return domains[website]
+
+    return domain.capitalize()

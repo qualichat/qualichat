@@ -2,3 +2,4 @@ matplotlib
 emojis
 pandas
 colorama
+tldextract
