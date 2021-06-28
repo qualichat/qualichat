@@ -112,6 +112,10 @@ def generate_chart(
     return decorator
 
 
+def get_length(obj: List[str]) -> int:
+    return len(''.join(obj))
+
+
 class BaseFeature:
     """Represents the base of a Qualichat feature.
     Generally, you should use the built-in features that Qualichat
@@ -212,5 +216,61 @@ class MessagesFeature(BaseFeature):
                 net_content += len(message['Qty_char_net'])
 
             rows.append([total_messages, net_content])
+
+        return DataFrame(rows, index=index, columns=columns)
+
+    @generate_chart(
+        bars=[
+            'Qty_char_laughs', 'Qty_char_marks',
+            'Qty_char_emoji', 'Qty_char_numbers'
+        ],
+        lines=['Qty_messages'],
+        title='Amount by Month'
+    )
+    def by_aspects(self) -> DataFrame:
+        """Shows what are the most common aspects in messages by month.
+
+        Aspects can be interpreted as:
+
+        - Laughs
+        - Marks
+        - Emojis
+        - Numbers
+        
+        And it will be compared with the total messages sent per month.
+        """
+        chat = self.chats[0]
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        columns = [
+            'Qty_char_laughs', 'Qty_char_marks',
+            'Qty_char_emoji', 'Qty_char_numbers',
+            'Qty_messages'
+        ]
+        rows: List[List[int]] = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(
+                day=1, hour=0, minute=0, second=0
+            )
+            data[index.strftime('%B %Y')].append(message)
+
+        index = list(data.keys())
+
+        for messages in data.values():
+            laughs = 0
+            marks = 0
+            emojis = 0
+            numbers = 0
+            total_messages = 0
+
+            for message in messages:
+                laughs += get_length(message['Qty_char_laughs'])
+                marks += get_length(message['Qty_char_marks'])
+                emojis += get_length(message['Qty_char_emoji'])
+                numbers += get_length(message['Qty_char_numbers'])
+                total_messages += 1
+
+            rows.append([laughs, marks, emojis, numbers, total_messages])
 
         return DataFrame(rows, index=index, columns=columns)
