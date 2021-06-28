@@ -36,6 +36,7 @@ extensions = [
 # Links used for cross-referencing stuff in other documentation
 intersphinx_mapping = {
     'py': ('https://docs.python.org/3', None),
+    'pandas': ('https://pandas.pydata.org/docs', None)
 }
 
 autodoc_mock_imports = ['emojis']
