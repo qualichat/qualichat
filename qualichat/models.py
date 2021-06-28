@@ -40,6 +40,7 @@ from .regex import (
     NUMBERS_RE,
     LAUGHS_RE
 )
+from .enums import get_period, get_sub_period
 
 
 __all__ = ('Actor', 'Message', 'SystemMessage')
@@ -172,7 +173,28 @@ class Message(BaseMessage):
         Represents the pure content of the message. This takes the net
         content (via ``Qty_char_net``) and removes laughs, marks and
         numbers from this content.
-        
+
+    - ``Day_period``: :class:`str`
+        The period of day the message was sent. These are the available
+        periods (in 24h format):
+
+        - ``Dawn`` (00:00-05:59)
+        - ``Morning`` (06:00-11:59)
+        - ``Evening`` (12:00-17:59)
+        - ``Night`` (18:00-23:59)
+
+    - ``Day_sub_period``: :class:`str`
+        The sub-period of the day the message was sent. These are the
+        available periods (in 24-hour format):
+
+        - ``Resting`` (00:00-05:59)
+        - ``Transport (morning)`` (06:00-08:59)
+        - ``Work (morning)`` (09:00-11:59)
+        - ``Lunch`` (12:00-14:59)
+        - ``Work (evening)`` (15:00-17:59)
+        - ``Transport (evening)`` (18:00-20:59)
+        - ``Second Office Hour`` (21:00-23:59)
+
     Attributes
     ----------
     actor: :class:`.Actor`
@@ -236,6 +258,9 @@ class Message(BaseMessage):
         data['Qty_char_net'] = net_text
         data['Qty_char_text'] = pure_text
 
+        data['Day_period'] = get_period(self.created_at)
+        data['Day_sub_period'] = get_sub_period(self.created_at)
+
         self._data: MappingProxyType[str, Any] = MappingProxyType(data)
 
     def __repr__(self) -> str:
@@ -268,28 +293,3 @@ class SystemMessage(BaseMessage):
 
     def __repr__(self) -> str:
         return '<SystemMessage created_at={0.created_at!r}>'.format(self)
-
-
-#     - ``Day_period``: :class:`str`
-#         The period of day the message was sent. These are the available
-#         periods (in 24h format):
-
-#         - ``Dawn`` (00:00-05:59)
-#         - ``Morning`` (06:00-11:59)
-#         - ``Evening`` (12:00-17:59)
-#         - ``Night`` (18:00-23:59)
-
-#     - ``Day_sub_period``: :class:`str`
-#         The sub-period of the day the message was sent. These are the
-#         available periods (in 24-hour format):
-
-#         - ``Resting`` (00:00-05:59)
-#         - ``Transport (morning)`` (06:00-08:59)
-#         - ``Work (morning)`` (09:00-11:59)
-#         - ``Lunch`` (12:00-14:59)
-#         - ``Work (evening)`` (15:00-17:59)
-#         - ``Transport (evening)`` (18:00-20:59)
-#         - ``Second Office Hour`` (21:00-23:59)
-    
-#         data['Day_period'] = _get_period(self.created_at).value
-#         data['Day_sub_period'] = _get_sub_period(self.created_at).value

@@ -26,6 +26,9 @@ import datetime
 from enum import Enum
 
 
+__all__ = ('Period', 'SubPeriod')
+
+
 class Period(Enum):
     dawn    = 'Dawn'
     morning = 'Morning'
@@ -43,7 +46,9 @@ class SubPeriod(Enum):
     second_office_hour = 'Second Office Hour'
 
 
-def _get_period(created_at: datetime.datetime) -> Period:
+def get_period(
+    created_at: datetime.datetime
+) -> Period:
     if 0 <= created_at.hour < 6:
         period = Period.dawn
     elif 6 <= created_at.hour < 12:
@@ -56,7 +61,9 @@ def _get_period(created_at: datetime.datetime) -> Period:
     return period
 
 
-def _get_sub_period(created_at: datetime.datetime) -> SubPeriod:
+def get_sub_period(
+    created_at: datetime.datetime
+) -> SubPeriod:
     if 0 <= created_at.hour < 6:
         sub_period = SubPeriod.resting
     elif 6 <= created_at.hour < 9:
