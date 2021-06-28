@@ -242,7 +242,7 @@ class Message(BaseMessage):
         return '<Message actor={0.actor} ' \
                'created_at={0.created_at!r}>'.format(self)
 
-    def __getitem__(self, key: Any) -> None:
+    def __getitem__(self, key: Any) -> Any:
         if not isinstance(key, str):
             raise TypeError('indices must be strings')
 
