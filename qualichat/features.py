@@ -183,3 +183,34 @@ class MessagesFeature(BaseFeature):
             rows.append([net_content, pure_content, total_messages])
 
         return DataFrame(rows, index=index, columns=columns)
+
+    @generate_chart(
+        bars=['Qty_messages'],
+        lines=['Qty_char_net'],
+        title='Amount by Weekday'
+    )
+    def per_weekday(self) -> DataFrame:
+        """Shows how many messages were sent per weekday."""
+        chat = self.chats[0]
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        columns = ['Qty_messages', 'Qty_char_net']
+        rows: List[List[int]] = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(hour=0, minute=0, second=0)
+            data[index.strftime('%A')].append(message)
+
+        index = list(data.keys())
+
+        for messages in data.values():
+            total_messages = 0
+            net_content = 0
+
+            for message in messages:
+                total_messages += 1
+                net_content += len(message['Qty_char_net'])
+
+            rows.append([total_messages, net_content])
+
+        return DataFrame(rows, index=index, columns=columns)
