@@ -250,7 +250,7 @@ class Message(BaseMessage):
 
 
 class SystemMessage(BaseMessage):
-    """"Represents a message sent in the chat by the system.
+    """Represents a message sent in the chat by the system.
     
     Attributes
     ----------
