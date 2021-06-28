@@ -39,14 +39,22 @@ Chat Analyzers
     These classes are not supposed to be instantiated by yourself. To maintain
     compatibility with the library, choose to use one of the :ref:`loaders`.
 
-.. autoclass:: qualichat.chat.Qualichat()
+.. autoclass:: qualichat.core.Qualichat()
+    :members:
+
+.. autoclass:: qualichat.chat.Chat()
     :members:
 
 
-Graphs
-------
+Features
+--------
 
-.. autoclass:: GraphGenerator()
+.. autofunction:: qualichat.features.generate_chart
+
+.. autoclass:: qualichat.features.BaseFeature
+    :members:
+
+.. autoclass:: qualichat.features.MessagesFeature
     :members:
 
 

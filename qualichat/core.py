@@ -26,6 +26,7 @@ import pathlib
 from typing import Union, List, Any
 
 from .chat import Chat
+from .features import MessagesFeature
 
 
 __all__ = ('Qualichat', 'load_chats')
@@ -38,12 +39,18 @@ class Qualichat:
     ----------
     chats: List[:class:`.Chat`]
         All chats uploaded and parsed by Qualichat.
+    messages: :class:`.MessagesFeature`
+        A feature that adds graphics generator related to chat
+        messages.
     """
 
-    __slots__ = ('chats',)
+    __slots__ = ('chats', 'messages')
 
     def __init__(self, chats: List[Chat]) -> None:
         self.chats = chats
+
+        # Qualichat features
+        self.messages = MessagesFeature(chats)
 
 
 def load_chats( # type: ignore
