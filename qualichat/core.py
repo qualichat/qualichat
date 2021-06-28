@@ -28,7 +28,7 @@ from typing import Union, List, Any
 from .chat import Chat
 
 
-__all__ = ('Qualichat', 'load_chat')
+__all__ = ('Qualichat', 'load_chats')
 
 
 class Qualichat:
