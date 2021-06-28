@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-from typing import List, DefaultDict, Callable, Protocol, Any, Optional
+from typing import List, DefaultDict, Callable, Protocol, Any, Optional, Dict
 from collections import defaultdict
 
 from pandas import DataFrame
@@ -116,6 +116,14 @@ def get_length(obj: List[str]) -> int:
     return len(''.join(obj))
 
 
+WEEKDAYS = [
+    'Sunday', 'Monday',
+    'Tuesday', 'Wednesday',
+    'Thursday', 'Friday',
+    'Saturday'
+]
+
+
 class BaseFeature:
     """Represents the base of a Qualichat feature.
     Generally, you should use the built-in features that Qualichat
@@ -196,7 +204,7 @@ class MessagesFeature(BaseFeature):
     def per_weekday(self) -> DataFrame:
         """Shows how many messages were sent per weekday."""
         chat = self.chats[0]
-        data: DefaultDict[str, List[Message]] = defaultdict(list)
+        data: Dict[str, List[Message]] = {w: [] for w in WEEKDAYS}
 
         columns = ['Qty_messages', 'Qty_char_net']
         rows: List[List[int]] = []
