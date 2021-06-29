@@ -57,6 +57,9 @@ Features
 .. autoclass:: qualichat.features.MessagesFeature
     :members:
 
+.. autoclass:: qualichat.features.UsersFeature
+    :members:
+
 
 Abstract Base Classes
 ---------------------
