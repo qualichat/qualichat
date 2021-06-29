@@ -35,7 +35,7 @@ from typing import (
 from collections import defaultdict
 
 from pandas import DataFrame
-from pandas._typing import NDFrame
+from pandas.core.generic import NDFrame
 import matplotlib.pyplot as plt
 
 from .chat import Chat
@@ -389,6 +389,33 @@ class UsersFeature(BaseFeature):
                 emojis += get_length(message['Qty_char_emoji'])
 
             rows.append([numbers, laughs, marks, emojis, len(actor.messages)])
+
+        dataframe = DataFrame(rows, index=index, columns=columns)
+        return dataframe.sort_values(by=columns, ascending=False)[start:end]
+
+    @generate_chart(
+        bars=['Qty_char_net', 'Qty_char_text'],
+        lines=['Qty_messages'],
+        title='Amount by User'
+    )
+    def by_activity(self, *, start: int = 0, end: int = 10) -> NDFrame:
+        """Shows which users send the most characters in the chat."""
+        chat = self.chats[0]
+
+        columns = ['Qty_char_net', 'Qty_char_text', 'Qty_messages']
+
+        index = [actor.display_name for actor in chat.actors]
+        rows: List[List[int]] = []
+
+        for actor in chat.actors:
+            net_content = 0
+            text_content = 0
+
+            for message in actor.messages:
+                net_content += len(message['Qty_char_net'])
+                text_content += len(message['Qty_char_text'])
+
+            rows.append([net_content, text_content, len(actor.messages)])
 
         dataframe = DataFrame(rows, index=index, columns=columns)
         return dataframe.sort_values(by=columns, ascending=False)[start:end]
