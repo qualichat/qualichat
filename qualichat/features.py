@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-from typing import List, DefaultDict, Callable, Protocol, Any, Optional
+from typing import List, DefaultDict, Callable, Protocol, Any, Optional, Dict
 from collections import defaultdict
 
 from pandas import DataFrame
@@ -200,8 +200,10 @@ class MessagesFeature(BaseFeature):
         lines=['Qty_char_net'],
         title='Amount by Month'
     )
-    def per_weekday(self) -> DataFrame:
-        """Shows how many messages were sent per weekday."""
+    def weekdays_per_month(self) -> DataFrame:
+        """Shows the amount of messages sent per week during the
+        month.
+        """
         chat = self.chats[0]
         data: DefaultDict[str, List[Message]] = defaultdict(list)
 
@@ -224,6 +226,42 @@ class MessagesFeature(BaseFeature):
                 net_content += len(message['Qty_char_net'])
 
             rows.append([*weekdays.values(), net_content])
+
+        return DataFrame(rows, index=index, columns=columns)
+
+    @generate_chart(
+        bars=['Qty_char_net', 'Qty_char_text'],
+        lines=['Qty_messages'],
+        title='Amount by Weekday'
+    )
+    def per_weekday(self) -> DataFrame:
+        """Shows the amount of messages sent per week. The difference
+        between this method and :meth:`.weekdays_per_month` is that
+        this method groups every month.
+        """
+        chat = self.chats[0]
+        data: Dict[str, List[Message]] = {w: [] for w in WEEKDAYS}
+
+        columns = ['Qty_char_net', 'Qty_char_text', 'Qty_messages']
+        rows: List[List[int]] = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(hour=0, minute=0, second=0)
+            data[index.strftime('%A')].append(message)
+
+        index = list(data.keys())
+
+        for messages in data.values():
+            net_content = 0
+            text_content = 0
+            total_messages = 0
+
+            for message in messages:
+                net_content += len(message['Qty_char_net'])
+                text_content += len(message['Qty_char_text'])
+                total_messages += 1
+
+            rows.append([net_content, text_content, total_messages])
 
         return DataFrame(rows, index=index, columns=columns)
 
