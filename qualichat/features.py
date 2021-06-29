@@ -332,8 +332,8 @@ class MessagesFeature(BaseFeature):
         return DataFrame(rows, index=index, columns=columns)
 
 
-class UsersFeature(BaseFeature):
-    """A feature that adds graphics generator related to chat users.
+class ActorsFeature(BaseFeature):
+    """A feature that adds graphics generator related to chat actors.
     
     .. note::
 
@@ -351,10 +351,10 @@ class UsersFeature(BaseFeature):
             'Qty_char_marks', 'Qty_char_laughs'
         ],
         lines=['Qty_messages'],
-        title='Amount by User'
+        title='Amount by Actor'
     )
     def by_aspects(self, *, start: int = 0, end: int = 10) -> NDFrame:
-        """Shows what are the most common aspects in messages per user.
+        """Shows what are the most common aspects in messages per actor.
 
         Aspects can be interpreted as:
 
@@ -363,7 +363,7 @@ class UsersFeature(BaseFeature):
         - Emojis
         - Numbers
         
-        And it will be compared with the total messages sent per user.
+        And it will be compared with the total messages sent per actor.
         """
         chat = self.chats[0]
 
@@ -396,10 +396,10 @@ class UsersFeature(BaseFeature):
     @generate_chart(
         bars=['Qty_char_net', 'Qty_char_text'],
         lines=['Qty_messages'],
-        title='Amount by User'
+        title='Amount by Actor'
     )
     def by_activity(self, *, start: int = 0, end: int = 10) -> NDFrame:
-        """Shows which users send the most characters in the chat."""
+        """Shows which actor send the most characters in the chat."""
         chat = self.chats[0]
 
         columns = ['Qty_char_net', 'Qty_char_text', 'Qty_messages']
