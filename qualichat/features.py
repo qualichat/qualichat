@@ -108,7 +108,6 @@ def generate_chart(
         generator.__annotations__ = method.__annotations__
 
         return generator
-
     return decorator
 
 
