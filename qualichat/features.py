@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-from typing import List, DefaultDict, Callable, Protocol, Any, Optional, Dict
+from typing import List, DefaultDict, Callable, Protocol, Any, Optional
 from collections import defaultdict
 
 from pandas import DataFrame
@@ -196,33 +196,34 @@ class MessagesFeature(BaseFeature):
         return DataFrame(rows, index=index, columns=columns)
 
     @generate_chart(
-        bars=['Qty_messages'],
+        bars=WEEKDAYS,
         lines=['Qty_char_net'],
-        title='Amount by Weekday'
+        title='Amount by Month'
     )
     def per_weekday(self) -> DataFrame:
         """Shows how many messages were sent per weekday."""
         chat = self.chats[0]
-        data: Dict[str, List[Message]] = {w: [] for w in WEEKDAYS}
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
 
-        columns = ['Qty_messages', 'Qty_char_net']
+        columns = WEEKDAYS.copy()
+        columns.append('Qty_char_net')
         rows: List[List[int]] = []
 
         for message in chat.messages:
             index = message.created_at.replace(hour=0, minute=0, second=0)
-            data[index.strftime('%A')].append(message)
+            data[index.strftime('%B %Y')].append(message)
 
         index = list(data.keys())
 
         for messages in data.values():
-            total_messages = 0
+            weekdays = {w: 0 for w in WEEKDAYS}
             net_content = 0
 
             for message in messages:
-                total_messages += 1
+                weekdays[message.created_at.strftime('%A')] += 1
                 net_content += len(message['Qty_char_net'])
 
-            rows.append([total_messages, net_content])
+            rows.append([*weekdays.values(), net_content])
 
         return DataFrame(rows, index=index, columns=columns)
 
