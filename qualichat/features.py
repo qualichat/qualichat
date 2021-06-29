@@ -22,10 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-from typing import List, DefaultDict, Callable, Protocol, Any, Optional, Dict
+from typing import (
+    List,
+    DefaultDict,
+    Callable,
+    Protocol,
+    Any,
+    Optional,
+    Dict,
+    Union
+)
 from collections import defaultdict
 
 from pandas import DataFrame
+from pandas._typing import NDFrame
 import matplotlib.pyplot as plt
 
 from .chat import Chat
@@ -67,7 +77,7 @@ def generate_chart(
         lines = []
 
     def decorator(
-        method: Callable[[FeatureMethodProtocol], DataFrame]
+        method: Callable[[FeatureMethodProtocol], Union[DataFrame, NDFrame]]
     ) -> Callable[[FeatureMethodProtocol], None]:
         def generator(
             self: FeatureMethodProtocol,
@@ -320,3 +330,65 @@ class MessagesFeature(BaseFeature):
             rows.append([laughs, marks, emojis, numbers, total_messages])
 
         return DataFrame(rows, index=index, columns=columns)
+
+
+class UsersFeature(BaseFeature):
+    """A feature that adds graphics generator related to chat users.
+    
+    .. note::
+
+        This feature is already automatically added to Qualichat.
+
+    Attributes
+    ----------
+    chats: List[:class:`.Chat`]
+        All the chats loaded via :meth:`qualichat.load_chats`.
+    """
+
+    @generate_chart(
+        bars=[
+            'Qty_char_numbers', 'Qty_char_emoji',
+            'Qty_char_marks', 'Qty_char_laughs'
+        ],
+        lines=['Qty_messages'],
+        title='Amount by User'
+    )
+    def by_aspects(self, *, start: int = 0, end: int = 10) -> NDFrame:
+        """Shows what are the most common aspects in messages per user.
+
+        Aspects can be interpreted as:
+
+        - Laughs
+        - Marks
+        - Emojis
+        - Numbers
+        
+        And it will be compared with the total messages sent per user.
+        """
+        chat = self.chats[0]
+
+        columns = [
+            'Qty_char_numbers', 'Qty_char_emoji',
+            'Qty_char_marks', 'Qty_char_laughs',
+            'Qty_messages'
+        ]
+
+        index = [actor.display_name for actor in chat.actors]
+        rows: List[List[int]] = []
+
+        for actor in chat.actors:
+            numbers = 0
+            emojis = 0
+            marks = 0
+            laughs = 0
+
+            for message in actor.messages:
+                numbers += get_length(message['Qty_char_numbers'])
+                laughs += get_length(message['Qty_char_laughs'])
+                marks += get_length(message['Qty_char_marks'])
+                emojis += get_length(message['Qty_char_emoji'])
+
+            rows.append([numbers, laughs, marks, emojis, len(actor.messages)])
+
+        dataframe = DataFrame(rows, index=index, columns=columns)
+        return dataframe.sort_values(by=columns, ascending=False)[start:end]
