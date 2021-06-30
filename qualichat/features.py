@@ -337,7 +337,7 @@ class MessagesFeature(BaseFeature):
         lines=['Qty_messages'],
         title='Amount by Month'
     )
-    def laminations(self):
+    def laminations(self) -> DataFrame:
         """Shows what are the most common lamination aspects in
         messages per month.
 
