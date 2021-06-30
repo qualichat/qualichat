@@ -283,10 +283,11 @@ class MessagesFeature(BaseFeature):
         lines=['Qty_messages'],
         title='Amount by Month'
     )
-    def by_aspects(self) -> DataFrame:
-        """Shows what are the most common aspects in messages by month.
+    def fabrications(self) -> DataFrame:
+        """Shows what are the most common fabrications aspects in
+        messages by month.
 
-        Aspects can be interpreted as:
+        Fabrication aspects can be interpreted as:
 
         - Laughs
         - Marks
@@ -353,10 +354,11 @@ class ActorsFeature(BaseFeature):
         lines=['Qty_messages'],
         title='Amount by Actor'
     )
-    def by_aspects(self, *, start: int = 0, end: int = 10) -> NDFrame:
-        """Shows what are the most common aspects in messages per actor.
+    def fabrications(self, *, start: int = 0, end: int = 10) -> NDFrame:
+        """Shows what are the most common fabrications aspects in
+        messages per actor.
 
-        Aspects can be interpreted as:
+        Fabrication aspects can be interpreted as:
 
         - Laughs
         - Marks
