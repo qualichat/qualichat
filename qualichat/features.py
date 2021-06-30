@@ -444,6 +444,50 @@ class ActorsFeature(BaseFeature):
         return dataframe.sort_values(by=columns, ascending=False)[start:end]
 
     @generate_chart(
+        bars=['Qty_char_links', 'Qty_char_emails', 'Qty_char_mentions'],
+        lines=['Qty_messages'],
+        title='Amount by Actor'
+    )
+    def laminations(self, *, start: int = 0, end: int = 10) -> NDFrame:
+        """Shows what are the most common lamination aspects in
+        messages per actor.
+
+        Lamination aspects can be interpreted as:
+
+        - Links/URLs
+        - E-mails
+        - Mentions
+
+        And it will be compared with the total messages sent per actor.
+        """
+        chat = self.chats[0]
+
+        columns = [
+            'Qty_char_links', 'Qty_char_emails',
+            'Qty_char_mentions', 'Qty_messages'
+        ]
+
+        index = [actor.display_name for actor in chat.actors]
+        rows: List[List[int]] = []
+
+        for actor in chat.actors:
+            links = 0
+            emails = 0
+            mentions = 0
+            total_messages = 0
+
+            for message in actor.messages:
+                links += get_length(message['Qty_char_links'])
+                emails += get_length(message['Qty_char_emails'])
+                mentions += get_length(message['Qty_char_mentions'])
+                total_messages += 1
+
+            rows.append([links, emails, mentions, total_messages])
+
+        dataframe = DataFrame(rows, index=index, columns=columns)
+        return dataframe.sort_values(by=columns, ascending=False)
+
+    @generate_chart(
         bars=['Qty_char_net', 'Qty_char_text'],
         lines=['Qty_messages'],
         title='Amount by Actor'
