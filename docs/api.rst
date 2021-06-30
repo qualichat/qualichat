@@ -57,7 +57,7 @@ Features
 .. autoclass:: qualichat.features.MessagesFeature
     :members:
 
-.. autoclass:: qualichat.features.UsersFeature
+.. autoclass:: qualichat.features.ActorsFeature
     :members:
 
 
