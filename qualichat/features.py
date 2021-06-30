@@ -41,7 +41,7 @@ import matplotlib.pyplot as plt
 from .chat import Chat
 from .models import Message
 from .colors import BARS, LINES
-from .enums import Period
+from .enums import Period, SubPeriod
 
 
 __all__ = ('generate_chart', 'BaseFeature', 'MessagesFeature')
@@ -133,6 +133,7 @@ WEEKDAYS = [
     'Saturday'
 ]
 PERIODS = [c.value for c in Period]
+SUB_PERIODS = [c.value for c in SubPeriod]
 
 
 class BaseFeature:
@@ -422,6 +423,54 @@ class MessagesFeature(BaseFeature):
                 total_messages += 1
 
             rows.append([*periods.values(), total_messages])
+
+        return DataFrame(rows, index=index, columns=columns)
+
+    @generate_chart(
+        bars=SUB_PERIODS,
+        lines=['Qty_messages'],
+        title='Amount by Month'
+    )
+    def by_sub_periods(self) -> DataFrame:
+        """Shows which sub-periods of the day the chat is most active.
+        
+        Currently, the sub-periods are:
+
+        - Resting
+        - Transport (morning)
+        - Work (morning)
+        - Lunch
+        - Work (evening)
+        - Transport (evening)
+        - Second Office Hour
+
+        For more information, see :class:`.SubPeriod`.
+        """
+        chat = self.chats[0]
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        columns = SUB_PERIODS.copy()
+        columns.append('Qty_messages')
+
+        rows: List[List[int]] = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(
+                day=1, hour=0, minute=0, second=0
+            )
+            data[index.strftime('%B %Y')].append(message)
+
+        index = list(data.keys())
+
+        for messages in data.values():
+            sub_periods = {v: 0 for v in SUB_PERIODS}
+            total_messages = 0
+
+            for message in messages:
+                sub_periods[message['Day_sub_period'].value] += 1
+                total_messages += 1
+
+            rows.append([*sub_periods.values(), total_messages])
 
         return DataFrame(rows, index=index, columns=columns)
 
