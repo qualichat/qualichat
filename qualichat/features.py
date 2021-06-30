@@ -41,6 +41,7 @@ import matplotlib.pyplot as plt
 from .chat import Chat
 from .models import Message
 from .colors import BARS, LINES
+from .enums import Period
 
 
 __all__ = ('generate_chart', 'BaseFeature', 'MessagesFeature')
@@ -131,6 +132,7 @@ WEEKDAYS = [
     'Thursday', 'Friday',
     'Saturday'
 ]
+PERIODS = [c.value for c in Period]
 
 
 class BaseFeature:
@@ -377,6 +379,49 @@ class MessagesFeature(BaseFeature):
                 total_messages += 1
 
             rows.append([links, emails, mentions, total_messages])
+
+        return DataFrame(rows, index=index, columns=columns)
+
+    @generate_chart(
+        bars=PERIODS,
+        lines=['Qty_messages'],
+        title='Amount by Month'
+    )
+    def by_periods(self) -> DataFrame:
+        """Shows which periods of the day the chat is most active.
+        
+        Currently, the periods are:
+
+        - Dawn
+        - Morning
+        - Evening
+        - Night
+        """
+        chat = self.chats[0]
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        columns = PERIODS.copy()
+        columns.append('Qty_messages')
+
+        rows: List[List[int]] = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(
+                day=1, hour=0, minute=0, second=0
+            )
+            data[index.strftime('%B %Y')].append(message)
+
+        index = list(data.keys())
+
+        for messages in data.values():
+            periods = {v: 0 for v in PERIODS}
+            total_messages = 0
+
+            for message in messages:
+                periods[message['Day_period'].value] += 1
+                total_messages += 1
+
+            rows.append([*periods.values(), total_messages])
 
         return DataFrame(rows, index=index, columns=columns)
 
