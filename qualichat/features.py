@@ -284,8 +284,8 @@ class MessagesFeature(BaseFeature):
         title='Amount by Month'
     )
     def fabrications(self) -> DataFrame:
-        """Shows what are the most common fabrications aspects in
-        messages by month.
+        """Shows what are the most common fabrication aspects in
+        messages per month.
 
         Fabrication aspects can be interpreted as:
 
