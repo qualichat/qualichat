@@ -397,6 +397,8 @@ class MessagesFeature(BaseFeature):
         - Morning
         - Evening
         - Night
+
+        For more information, see :class:`.Period`.
         """
         chat = self.chats[0]
         data: DefaultDict[str, List[Message]] = defaultdict(list)
