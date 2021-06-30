@@ -332,6 +332,54 @@ class MessagesFeature(BaseFeature):
 
         return DataFrame(rows, index=index, columns=columns)
 
+    @generate_chart(
+        bars=['Qty_char_links', 'Qty_char_emails', 'Qty_char_mentions'],
+        lines=['Qty_messages'],
+        title='Amount by Month'
+    )
+    def laminations(self):
+        """Shows what are the most common lamination aspects in
+        messages per month.
+
+        Lamination aspects can be interpreted as:
+
+        - Links/URLs
+        - E-mails
+        - Mentions
+
+        And it will be compared with the total messages sent per month.
+        """
+        chat = self.chats[0]
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        columns = [
+            'Qty_char_links', 'Qty_char_emails',
+            'Qty_char_mentions', 'Qty_messages'
+        ]
+        rows: List[List[int]] = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(hour=0, minute=0, second=0)
+            data[index.strftime('%B %Y')].append(message)
+
+        index = list(data.keys())
+
+        for messages in data.values():
+            links = 0
+            emails = 0
+            mentions = 0
+            total_messages = 0
+
+            for message in messages:
+                links += get_length(message['Qty_char_links'])
+                emails += get_length(message['Qty_char_emails'])
+                mentions += get_length(message['Qty_char_mentions'])
+                total_messages += 1
+
+            rows.append([links, emails, mentions, total_messages])
+
+        return DataFrame(rows, index=index, columns=columns)
+
 
 class ActorsFeature(BaseFeature):
     """A feature that adds graphics generator related to chat actors.
