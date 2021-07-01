@@ -476,6 +476,53 @@ class MessagesFeature(BaseFeature):
 
         return DataFrame(rows, index=index, columns=columns)
 
+    @generate_chart(
+        bars=['Qty_char_!', 'Qty_char_?'],
+        lines=['Qty_char_text', 'Qty_messages'],
+        title='Amount by Month'
+    )
+    def by_punctuation_marks(self) -> DataFrame:
+        """Shows which punctuation marks are used most in the chat.
+        
+        Currently, the punctuation marks sought are:
+
+        - ``!``
+        - ``?``
+        """
+        chat = self.chats[0]
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        columns = [
+            'Qty_char_!', 'Qty_char_?',
+            'Qty_char_text', 'Qty_messages'
+        ]
+        rows: List[List[int]] = []
+
+        for message in chat.messages:
+            index = message.created_at.replace(hour=0, minute=0, second=0)
+            data[index.strftime('%B %Y')].append(message)
+
+        index = list(data.keys())
+
+        for messages in data.values():
+            exclamation_marks = 0
+            question_marks = 0
+            text_content = 0
+            total_messages = 0
+
+            for message in messages:
+                exclamation_marks += get_length(message['Qty_char_!'])
+                question_marks += get_length(message['Qty_char_?'])
+                text_content += len(message['Qty_char_text'])
+                total_messages += 1
+
+            rows.append([
+                exclamation_marks, question_marks,
+                text_content, total_messages
+            ])
+
+        return DataFrame(rows, index=index, columns=columns)
+
 
 class ActorsFeature(BaseFeature):
     """A feature that adds graphics generator related to chat actors.
