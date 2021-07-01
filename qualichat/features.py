@@ -173,6 +173,8 @@ class MessagesFeature(BaseFeature):
         All the chats loaded via :meth:`qualichat.load_chats`.
     """
 
+    __slots__ = ()
+
     @generate_chart(
         bars=['Qty_char_net', 'Qty_char_text'],
         lines=['Qty_messages'],
@@ -537,6 +539,8 @@ class ActorsFeature(BaseFeature):
     chats: List[:class:`.Chat`]
         All the chats loaded via :meth:`qualichat.load_chats`.
     """
+
+    __slots__ = ()
 
     @generate_chart(
         bars=[
