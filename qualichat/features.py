@@ -482,7 +482,8 @@ class MessagesFeature(BaseFeature):
         title='Amount by Month'
     )
     def by_punctuation_marks(self) -> DataFrame:
-        """Shows which punctuation marks are used most in the chat.
+        """Shows which punctuation marks are used most in the chat
+        ordered by month.
         
         Currently, the punctuation marks sought are:
 
@@ -653,6 +654,43 @@ class ActorsFeature(BaseFeature):
                 text_content += len(message['Qty_char_text'])
 
             rows.append([net_content, text_content, len(actor.messages)])
+
+        dataframe = DataFrame(rows, index=index, columns=columns)
+        return dataframe.sort_values(by=columns, ascending=False)[start:end]
+
+    @generate_chart(
+        bars=['Qty_char_!', 'Qty_char_?'],
+        lines=['Qty_messages'],
+        title='Amount by Actor'
+    )
+    def by_punctuation_marks(
+        self, *, start: int = 0, end: int = 10
+    ) -> NDFrame:
+        """Shows which punctuation marks are used most in the chat
+        ordered by actor.
+        
+        Currently, the punctuation marks sought are:
+
+        - ``!``
+        - ``?``"""
+        chat = self.chats[0]
+
+        columns = ['Qty_char_!', 'Qty_char_?', 'Qty_messages']
+        index = [actor.display_name for actor in chat.actors]
+
+        rows: List[List[int]] = []
+
+        for actor in chat.actors:
+            exclamation_marks = 0
+            question_marks = 0
+            total_messages = 0
+
+            for message in actor.messages:
+                exclamation_marks += get_length(message['Qty_char_!'])
+                question_marks += get_length(message['Qty_char_?'])
+                total_messages += 1
+
+            rows.append([exclamation_marks, question_marks, total_messages])
 
         dataframe = DataFrame(rows, index=index, columns=columns)
         return dataframe.sort_values(by=columns, ascending=False)[start:end]
