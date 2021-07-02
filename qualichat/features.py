@@ -44,7 +44,7 @@ from .colors import BARS, LINES
 from .enums import Period, SubPeriod
 
 
-__all__ = ('generate_chart', 'BaseFeature', 'MessagesFeature')
+__all__ = ('generate_chart', 'BaseFeature', 'MessagesFeature', 'TimeFeature')
 
 
 class FeatureMethodProtocol(Protocol):
@@ -698,3 +698,84 @@ class ActorsFeature(BaseFeature):
 
         dataframe = DataFrame(rows, index=index, columns=columns)
         return dataframe.sort_values(by=columns, ascending=False)[start:end]
+
+
+class TimeFeature(BaseFeature):
+    """A feature that adds charts generator related to chat timing.
+    
+    .. note::
+
+        This feature is already automatically added to Qualichat.
+
+    Attributes
+    ----------
+    chats: List[:class:`.Chat`]
+        All the chats loaded via :meth:`qualichat.load_chats`.
+    """
+
+    __slots__ = ()
+
+    # TODO: This should be replaced with a vertical bar chart.
+    @generate_chart(
+        bars=[
+            'Super Fast Interactions', 'Fast Interactions',
+            'Regular Interactions', 'Late Interactions'
+        ],
+        lines=['Qty_messages'],
+        title='Amount by Month'
+    )
+    def interaction_interval(self) -> DataFrame:
+        """Shows the interaction interval between messages by month.
+
+        There are four levels of interaction range:
+
+        - Super Fast Interactions (<30 seconds)
+        - Fast Interactions (30-60 seconds)
+        - Regular Interactions (60-120 seconds)
+        - Late Interactions (>120 seconds)
+        """
+        chat = self.chats[0]
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        columns = [
+            'Super Fast Interactions', 'Fast Interactions',
+            'Regular Interactions', 'Late Interactions',
+            'Qty_messages'
+        ]
+        rows: List[List[int]] = []
+
+        for message in chat.messages:
+            data[message.created_at.strftime('%B %Y')].append(message)
+
+        index = list(data.keys())
+
+        for messages in data.values():
+            super_fast_interactions = 0
+            fast_interactions = 0
+            regular_interactions = 0
+            late_interactions = 0
+
+            for i, message in enumerate(messages[1:]):
+                previous = messages[i]
+
+                delta = message.created_at - previous.created_at
+                seconds = delta.total_seconds()
+
+                if seconds <= 30:
+                    super_fast_interactions += 1
+                elif 30 < seconds <= 60:
+                    fast_interactions += 1
+                elif 60 < seconds <= 120:
+                    regular_interactions += 1
+                else:
+                    late_interactions += 1
+
+            rows.append([
+                super_fast_interactions,
+                fast_interactions,
+                regular_interactions,
+                late_interactions,
+                len(messages)
+            ])
+
+        return DataFrame(rows, index=index, columns=columns)

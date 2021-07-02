@@ -60,6 +60,9 @@ Features
 .. autoclass:: qualichat.features.ActorsFeature
     :members:
 
+.. autoclass:: qualichat.features.TimeFeature
+    :members:
+
 
 Abstract Base Classes
 ---------------------

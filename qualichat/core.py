@@ -26,7 +26,11 @@ import pathlib
 from typing import Union, List, Any
 
 from .chat import Chat
-from .features import MessagesFeature, ActorsFeature
+from .features import (
+    MessagesFeature,
+    ActorsFeature,
+    TimeFeature,
+)
 
 
 __all__ = ('Qualichat', 'load_chats')
@@ -44,7 +48,7 @@ class Qualichat:
         messages.
     """
 
-    __slots__ = ('chats', 'messages', 'actors')
+    __slots__ = ('chats', 'messages', 'actors', 'time')
 
     def __init__(self, chats: List[Chat]) -> None:
         self.chats = chats
@@ -52,6 +56,7 @@ class Qualichat:
         # Qualichat features
         self.messages = MessagesFeature(chats)
         self.actors = ActorsFeature(chats)
+        self.time = TimeFeature(chats)
 
 
 def load_chats( # type: ignore
