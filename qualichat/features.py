@@ -726,7 +726,7 @@ class TimeFeature(BaseFeature):
         title='Amount by Month'
     )
     def interaction_interval(self) -> DataFrame:
-        """Shows the interaction interval between messages by month.
+        """Shows the interaction interval between messages per month.
 
         There are four levels of interaction range:
 
