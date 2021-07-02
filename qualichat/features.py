@@ -161,7 +161,7 @@ class BaseFeature:
 
 
 class MessagesFeature(BaseFeature):
-    """A feature that adds graphics generator related to chat messages.
+    """A feature that adds charts generator related to chat messages.
     
     .. note::
 
@@ -528,7 +528,7 @@ class MessagesFeature(BaseFeature):
 
 
 class ActorsFeature(BaseFeature):
-    """A feature that adds graphics generator related to chat actors.
+    """A feature that adds charts generator related to chat actors.
     
     .. note::
 
