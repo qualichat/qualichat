@@ -676,7 +676,8 @@ class ActorsFeature(BaseFeature):
         Currently, the punctuation marks sought are:
 
         - ``!``
-        - ``?``"""
+        - ``?``
+        """
         chat = self.chats[0]
 
         columns = ['Qty_char_!', 'Qty_char_?', 'Qty_messages']
