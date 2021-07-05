@@ -716,7 +716,34 @@ class TimeFeature(BaseFeature):
 
     __slots__ = ()
 
-    # TODO: This should be replaced with a vertical bar chart.
+    def _get_interation_timings(self, messages: List[Message]) -> List[int]:
+        super_fast_interactions = 0
+        fast_interactions = 0
+        regular_interactions = 0
+        late_interactions = 0
+
+        for i, message in enumerate(messages[1:]):
+            previous = messages[i]
+
+            delta = message.created_at - previous.created_at
+            seconds = delta.total_seconds()
+
+            if seconds <= 30:
+                super_fast_interactions += 1
+            elif 30 < seconds <= 60:
+                fast_interactions += 1
+            elif 60 < seconds <= 120:
+                regular_interactions += 1
+            else:
+                late_interactions += 1
+
+        return [
+            super_fast_interactions,
+            fast_interactions,
+            regular_interactions,
+            late_interactions
+        ]
+
     @generate_chart(
         bars=[
             'Super Fast Interactions', 'Fast Interactions',
@@ -751,37 +778,11 @@ class TimeFeature(BaseFeature):
         index = list(data.keys())
 
         for messages in data.values():
-            super_fast_interactions = 0
-            fast_interactions = 0
-            regular_interactions = 0
-            late_interactions = 0
-
-            for i, message in enumerate(messages[1:]):
-                previous = messages[i]
-
-                delta = message.created_at - previous.created_at
-                seconds = delta.total_seconds()
-
-                if seconds <= 30:
-                    super_fast_interactions += 1
-                elif 30 < seconds <= 60:
-                    fast_interactions += 1
-                elif 60 < seconds <= 120:
-                    regular_interactions += 1
-                else:
-                    late_interactions += 1
-
-            rows.append([
-                super_fast_interactions,
-                fast_interactions,
-                regular_interactions,
-                late_interactions,
-                len(messages)
-            ])
+            interactions = self._get_interation_timings(messages)
+            rows.append([*interactions, len(messages)])
 
         return DataFrame(rows, index=index, columns=columns)
 
-    # TODO: Abstract how to get the Interaction Interval Level.
     @generate_chart(
         bars=[
             'Super Fast Interactions', 'Fast Interactions',
@@ -816,32 +817,7 @@ class TimeFeature(BaseFeature):
         index = list(data.keys())
 
         for messages in data.values():
-            super_fast_interactions = 0
-            fast_interactions = 0
-            regular_interactions = 0
-            late_interactions = 0
-
-            for i, message in enumerate(messages[1:]):
-                previous = messages[i]
-
-                delta = message.created_at - previous.created_at
-                seconds = delta.total_seconds()
-
-                if seconds <= 30:
-                    super_fast_interactions += 1
-                elif 30 < seconds <= 60:
-                    fast_interactions += 1
-                elif 60 < seconds <= 120:
-                    regular_interactions += 1
-                else:
-                    late_interactions += 1
-
-            rows.append([
-                super_fast_interactions,
-                fast_interactions,
-                regular_interactions,
-                late_interactions,
-                len(messages)
-            ])
+            interactions = self._get_interation_timings(messages)
+            rows.append([*interactions, len(messages)])
 
         return DataFrame(rows, index=index, columns=columns)
