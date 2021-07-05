@@ -23,10 +23,10 @@ SOFTWARE.
 '''
 
 import datetime
-from enum import Enum
+from enum import Enum, IntEnum
 
 
-__all__ = ('Period', 'SubPeriod')
+__all__ = ('Period', 'SubPeriod', 'MessageType')
 
 
 class Period(Enum):
@@ -46,9 +46,19 @@ class SubPeriod(Enum):
     second_office_hour = 'Second Office Hour'
 
 
-def get_period(
-    created_at: datetime.datetime
-) -> Period:
+class MessageType(IntEnum):
+    default              = 0
+    gif_omitted          = 1
+    image_omitted        = 2
+    video_omitted        = 3
+    audio_omitted        = 4
+    sticker_omitted      = 5
+    document_omitted     = 6
+    contact_card_omitted = 7
+    deleted_message      = 8
+
+
+def get_period(created_at: datetime.datetime) -> Period:
     if 0 <= created_at.hour < 6:
         period = Period.dawn
     elif 6 <= created_at.hour < 12:
@@ -61,9 +71,7 @@ def get_period(
     return period
 
 
-def get_sub_period(
-    created_at: datetime.datetime
-) -> SubPeriod:
+def get_sub_period(created_at: datetime.datetime) -> SubPeriod:
     if 0 <= created_at.hour < 6:
         sub_period = SubPeriod.resting
     elif 6 <= created_at.hour < 9:
@@ -80,3 +88,26 @@ def get_sub_period(
         sub_period = SubPeriod.second_office_hour
 
     return sub_period
+
+
+def get_message_type(content: str) -> MessageType:
+    if content == 'image omitted':
+        message_type = MessageType.image_omitted
+    elif content == 'GIF omitted':
+        message_type = MessageType.gif_omitted
+    elif content == 'video omitted':
+        message_type = MessageType.video_omitted
+    elif content == 'audio omitted':
+        message_type = MessageType.audio_omitted
+    elif content == 'sticker omitted':
+        message_type = MessageType.sticker_omitted
+    elif content.endswith('document omitted'):
+        message_type = MessageType.document_omitted
+    elif content == 'Contact card omitted':
+        message_type = MessageType.contact_card_omitted
+    elif content == 'This message was deleted.':
+        message_type = MessageType.deleted_message
+    else:
+        message_type = MessageType.default
+
+    return message_type

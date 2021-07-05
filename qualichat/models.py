@@ -40,7 +40,7 @@ from .regex import (
     NUMBERS_RE,
     LAUGHS_RE
 )
-from .enums import get_period, get_sub_period
+from .enums import get_period, get_sub_period, get_message_type
 
 
 __all__ = ('Actor', 'Message', 'SystemMessage')
@@ -174,7 +174,13 @@ class Message(BaseMessage):
         content (via ``Qty_char_net``) and removes laughs, marks and
         numbers from this content.
 
-    - ``Day_period``: :class:`str`
+    - ``Type``: :class:`.MessageType`
+        Represents the type of message sent.
+
+        For more information see :class:`.MessageType`.
+
+
+    - ``Day_period``: :class:`.Period`
         The period of day the message was sent. These are the available
         periods (in 24h format):
 
@@ -183,7 +189,9 @@ class Message(BaseMessage):
         - ``Evening`` (12:00-17:59)
         - ``Night`` (18:00-23:59)
 
-    - ``Day_sub_period``: :class:`str`
+        For more information see :class:`.Period`.
+
+    - ``Day_sub_period``: :class:`.SubPeriod`
         The sub-period of the day the message was sent. These are the
         available periods (in 24-hour format):
 
@@ -194,6 +202,8 @@ class Message(BaseMessage):
         - ``Work (evening)`` (15:00-17:59)
         - ``Transport (evening)`` (18:00-20:59)
         - ``Second Office Hour`` (21:00-23:59)
+
+        For more information see :class:`.SubPeriod`.
 
     Attributes
     ----------
@@ -258,6 +268,7 @@ class Message(BaseMessage):
         data['Qty_char_net'] = net_text
         data['Qty_char_text'] = pure_text
 
+        data['Type'] = get_message_type(self.content)
         data['Day_period'] = get_period(self.created_at)
         data['Day_sub_period'] = get_sub_period(self.created_at)
 

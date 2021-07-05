@@ -80,6 +80,47 @@ Enumerations
 This library provides some enumerations for certain types. All time formats below are 24-hour
 format.
 
+.. class:: qualichat.enums.MessageType
+
+    Specifies the type of :class:`.Message`. This is used to denote if a
+    message is to be interpreted as a system message or a regular message.
+
+    .. attribute:: default
+
+        The default message type. This is the same as regular messages.
+
+    .. attribute:: gif_omitted
+
+        System message when a GIF image was sent but omitted.
+
+    .. attribute:: image_omitted
+
+        System message when an image was sent but omitted.
+
+    .. attribute:: video_omitted
+
+        System message when a video was sent but omitted.
+
+    .. attribute:: audio_omitted
+
+        System message when an audio was sent but omitted.
+
+    .. attribute:: sticker_omitted
+
+        System message when a sticker was sent but omitted.
+
+    .. attribute:: document_omitted
+
+        System message when a document (PDF, XML, etc.) was sent but omitted.
+
+    .. attribute:: contact_card_omitted
+
+        System message when a contact card was sent but omitted.
+
+    .. attribute:: deleted_message
+
+        System message when the message was deleted.
+
 .. class:: qualichat.enums.Period
 
     Represents the period in which a message was sent.
