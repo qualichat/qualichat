@@ -716,7 +716,8 @@ class TimeFeature(BaseFeature):
 
     __slots__ = ()
 
-    def _get_interation_timings(self, messages: List[Message]) -> List[int]:
+    @staticmethod
+    def get_interation_timings(messages: List[Message]) -> List[int]:
         super_fast_interactions = 0
         fast_interactions = 0
         regular_interactions = 0
@@ -778,7 +779,7 @@ class TimeFeature(BaseFeature):
         index = list(data.keys())
 
         for messages in data.values():
-            interactions = self._get_interation_timings(messages)
+            interactions = self.get_interation_timings(messages)
             rows.append([*interactions, len(messages)])
 
         return DataFrame(rows, index=index, columns=columns)
@@ -818,6 +819,7 @@ class TimeFeature(BaseFeature):
 
         for messages in data.values():
             interactions = self._get_interation_timings(messages)
+            interactions = self.get_interation_timings(messages)
             rows.append([*interactions, len(messages)])
 
         return DataFrame(rows, index=index, columns=columns)
