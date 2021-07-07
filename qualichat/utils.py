@@ -92,7 +92,7 @@ domains: Dict[str, str] = {
 
 
 def parse_domain(url: str) -> str:
-    """Pars a URL to return your sanitized domain.
+    """Parses a URL to return its sanitized domain.
 
     Parameters
     ----------
