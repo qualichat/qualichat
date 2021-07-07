@@ -88,6 +88,9 @@ domains: Dict[str, str] = {
     'diarioonline.com.br': 'Diário Online',
     'brasildefato.com.br': 'Brasil de Fato',
     'ig.com.br': 'IG',
+    'terrabrasilnoticias.com': 'Terra Brasil Notícias',
+    'folhadapolitica.com': 'Folha da Política',
+    'gazetadopovo.com.br': 'Gazeta do Povo'
 }
 
 
