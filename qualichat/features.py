@@ -818,7 +818,6 @@ class TimeFeature(BaseFeature):
         index = list(data.keys())
 
         for messages in data.values():
-            interactions = self._get_interation_timings(messages)
             interactions = self.get_interation_timings(messages)
             rows.append([*interactions, len(messages)])
 
