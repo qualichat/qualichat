@@ -700,6 +700,75 @@ class ActorsFeature(BaseFeature):
         dataframe = DataFrame(rows, index=index, columns=columns)
         return dataframe.sort_values(by=columns, ascending=False)[start:end]
 
+    @generate_chart(
+        bars=[
+            'Super Fast Interactions', 'Fast Interactions',
+            'Regular Interactions', 'Late Interactions'
+        ],
+        lines=['Qty_messages'],
+        title='Amount by Actor'
+    )
+    def interaction_interval(
+        self,
+        *,
+        start: int = 0,
+        end: int = 10
+    ) -> NDFrame:
+        """Shows the interaction interval between messages per actor.
+
+        There are four levels of interaction range:
+
+        - Super Fast Interactions (<30 seconds)
+        - Fast Interactions (30-60 seconds)
+        - Regular Interactions (60-120 seconds)
+        - Late Interactions (>120 seconds)
+        """
+        chat = self.chats[0]
+
+        columns = [
+            'Super Fast Interactions', 'Fast Interactions',
+            'Regular Interactions', 'Late Interactions',
+            'Qty_messages'
+        ]
+
+        rows: List[List[int]] = []
+        index = [actor.display_name for actor in chat.actors]
+
+        for actor in chat.actors:
+            super_fast_interactions = 0
+            fast_interactions = 0
+            regular_interactions = 0
+            late_interactions = 0
+
+            for i, message in enumerate(chat.messages[1:]):
+                if message.actor != actor:
+                    continue
+
+                previous = chat.messages[i]
+
+                delta = message.created_at - previous.created_at
+                seconds = delta.total_seconds()
+
+                if seconds <= 30:
+                    super_fast_interactions += 1
+                elif 30 < seconds <= 60:
+                    fast_interactions += 1
+                elif 60 < seconds <= 120:
+                    regular_interactions += 1
+                else:
+                    late_interactions += 1
+
+            rows.append([
+                super_fast_interactions,
+                fast_interactions,
+                regular_interactions,
+                late_interactions,
+                len(actor.messages)
+            ])
+
+        dataframe = DataFrame(rows, index=index, columns=columns)
+        return dataframe.sort_values(by=columns, ascending=False)[start:end]
+
 
 class TimeFeature(BaseFeature):
     """A feature that adds charts generator related to chat timing.
