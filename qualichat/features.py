@@ -26,7 +26,6 @@ from typing import (
     List,
     DefaultDict,
     Callable,
-    Protocol,
     Any,
     Optional,
     Dict,
@@ -45,11 +44,6 @@ from .enums import Period, SubPeriod
 
 
 __all__ = ('generate_chart', 'BaseFeature', 'MessagesFeature', 'TimeFeature')
-
-
-class FeatureMethodProtocol(Protocol):
-    def __call__(self, *args: Any, **kwargs: Any) -> None:
-        ...
 
 
 def generate_chart(
@@ -78,10 +72,10 @@ def generate_chart(
         lines = []
 
     def decorator(
-        method: Callable[[FeatureMethodProtocol], Union[DataFrame, NDFrame]]
-    ) -> Callable[[FeatureMethodProtocol], None]:
+        method: Callable[..., Union[DataFrame, NDFrame]]
+    ) -> Callable[..., None]:
         def generator(
-            self: FeatureMethodProtocol,
+            self: BaseFeature,
             *args: Any,
             **kwargs: Any
         ) -> None:
