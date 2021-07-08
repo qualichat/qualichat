@@ -63,6 +63,9 @@ Features
 .. autoclass:: qualichat.features.TimeFeature
     :members:
 
+.. autoclass:: qualichat.features.NounsFeature
+    :members:
+
 
 Abstract Base Classes
 ---------------------

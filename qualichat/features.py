@@ -33,17 +33,29 @@ from typing import (
 )
 from collections import defaultdict
 
+import spacy
+import matplotlib.pyplot as plt
 from pandas import DataFrame
 from pandas.core.generic import NDFrame
-import matplotlib.pyplot as plt
+from wordcloud import ( # type: ignore
+    STOPWORDS,
+    WordCloud
+)
 
 from .chat import Chat
 from .models import Message
 from .colors import BARS, LINES
 from .enums import Period, SubPeriod
+from .utils import progress_bar
 
 
-__all__ = ('generate_chart', 'BaseFeature', 'MessagesFeature', 'TimeFeature')
+__all__ = (
+    'generate_chart',
+    'BaseFeature',
+    'MessagesFeature',
+    'TimeFeature',
+    'NounsFeature',
+)
 
 
 def generate_chart(
@@ -885,3 +897,48 @@ class TimeFeature(BaseFeature):
             rows.append([*interactions, len(messages)])
 
         return DataFrame(rows, index=index, columns=columns)
+
+
+nlp = spacy.load('pt_core_news_sm') # type: ignore
+
+
+class NounsFeature(BaseFeature):
+    """..."""
+
+    __slots__ = ()
+
+    def word_cloud(self):
+        """..."""
+        chat = self.chats[0]
+        data: List[str] = []
+
+        for i, message in enumerate(chat.messages):
+            doc = nlp(message['Qty_char_text']) # type: ignore
+
+            for token in doc: # type: ignore
+                if token.pos_ == 'NOUN': # type: ignore
+                    data.append(token.text) # type: ignore
+
+            progress_bar(
+                i,
+                len(chat.messages),
+                prefix='Progress',
+                suffix='Complete',
+                length=50
+            )
+
+        stopwords = set(STOPWORDS)
+        stopwords.update([
+            'da', 'meu', 'em', 'você', 'de', 'ao', 'os', 'eu',
+            'https'
+        ])
+
+        all_words = ' '.join(data)
+        wordcloud = WordCloud().generate(all_words) # type: ignore
+
+        _, ax = plt.subplots()
+        ax.imshow(wordcloud, interpolation='bilinear')
+        ax.set_axis_off()
+
+        plt.imshow(wordcloud) # type: ignore
+        plt.show()

@@ -41,12 +41,12 @@ class ColorStreamHandler(logging.StreamHandler):
 
     def __init__(self) -> None:
         self.prefix: str = f'{Fore.GREEN}[qualichat]{Fore.RESET}'
-        super().__init__(AnsiToWin32(sys.stderr))
+        super().__init__(AnsiToWin32(sys.stderr)) # type: ignore
 
     def emit(self, record: logging.LogRecord) -> None:
         try:
             message = f'{self.prefix} {self.format(record)}'
-            self.stream.write(message + self.terminator)
+            self.stream.write(message + self.terminator) # type: ignore
             self.flush()
         except RecursionError:
             raise
@@ -118,3 +118,24 @@ def parse_domain(url: str) -> str:
         return domains[website]
 
     return domain.capitalize()
+
+
+def progress_bar(
+    iteration: int,
+    total: int,
+    prefix: str = '',
+    suffix: str = '',
+    decimals: int = 1,
+    length: int = 100,
+    fill: str = '█',
+    end: str = '\r'
+) -> None:
+    """..."""
+    float_number = 100 * (iteration / float(total))
+    percent = ('{0:.' + str(decimals) + 'f}').format(float_number)
+    filled = int(length * iteration // total)
+    bar = fill * filled + '-' * (length - filled)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=end)
+
+    if iteration == total:
+        print()
