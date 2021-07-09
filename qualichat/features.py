@@ -55,6 +55,7 @@ __all__ = (
     'MessagesFeature',
     'TimeFeature',
     'NounsFeature',
+    'VerbsFeature'
 )
 
 
@@ -963,5 +964,45 @@ class NounsFeature(BaseFeature):
 
             progress_bar(i, len(chat.messages))
 
-        all_word = ' '.join(data)
-        return WordCloud().generate(all_word) # type: ignore
+        all_words = ' '.join(data)
+        return WordCloud().generate(all_words) # type: ignore
+
+
+class VerbsFeature(BaseFeature):
+    """Textual structure analysis feature, specific for verbs.
+    
+    .. note::
+
+        This feature is already automatically added to Qualichat.
+
+    Attributes
+    ----------
+    chats: List[:class:`.Chat`]
+        All the chats loaded via :meth:`qualichat.load_chats`
+    """
+
+    __slots__ = ()
+
+    @generate_word_cloud()
+    def word_cloud(self) -> WordCloud:
+        """Shows a word cloud with the most spoken nouns in the
+        chat.
+        """
+        chat = self.chats[0]
+        data: List[str] = []
+
+        for i, message in enumerate(chat.messages, start=1):
+            if message['Type'] is not MessageType.default:
+                continue
+
+            text = message['Qty_char_text']
+            doc = nlp(text) # type: ignore
+
+            for token in doc: # type: ignore
+                if token.pos_ == 'VERB': # type: ignore
+                    data.append(token.text) # type: ignore
+
+            progress_bar(i, len(chat.messages))
+
+        all_words = ' '.join(data)
+        return WordCloud().generate(all_words) # type: ignore

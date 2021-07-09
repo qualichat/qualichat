@@ -66,6 +66,9 @@ Features
 .. autoclass:: qualichat.features.NounsFeature
     :members:
 
+.. autoclass:: qualichat.features.VerbsFeature
+    :members:
+
 
 Abstract Base Classes
 ---------------------
