@@ -913,7 +913,8 @@ class NounsFeature(BaseFeature):
         data: List[str] = []
 
         for i, message in enumerate(chat.messages):
-            doc = nlp(message['Qty_char_text']) # type: ignore
+            text = message['Qty_char_text']
+            doc = nlp(text) # type: ignore
 
             for token in doc: # type: ignore
                 if token.pos_ == 'NOUN': # type: ignore
@@ -930,15 +931,12 @@ class NounsFeature(BaseFeature):
         stopwords = set(STOPWORDS)
         stopwords.update([
             'da', 'meu', 'em', 'você', 'de', 'ao', 'os', 'eu',
-            'https'
         ])
 
         all_words = ' '.join(data)
         wordcloud = WordCloud().generate(all_words) # type: ignore
 
-        _, ax = plt.subplots()
-        ax.imshow(wordcloud, interpolation='bilinear')
-        ax.set_axis_off()
-
-        plt.imshow(wordcloud) # type: ignore
+        plt.figure()
+        plt.imshow(wordcloud, interpolation='bilinear') # type: ignore
+        plt.axis('off')
         plt.show()
