@@ -128,6 +128,31 @@ def generate_chart(
     return decorator
 
 
+stopwords = STOPWORDS
+stopwords.update(['da', 'meu', 'em', 'você', 'de', 'ao', 'os', 'eu'])
+
+
+def generate_word_cloud():
+    """A decorator that generates a word cloud automatically."""
+    def decorator(method: Callable[..., WordCloud]) -> Callable[..., None]:
+        def generator(self: BaseFeature, *args: Any, **kwargs: Any) -> None:
+                wordcloud = method(self, *args, **kwargs)
+                wordcloud.stopwords = stopwords
+
+                plt.figure()
+                plt.imshow(wordcloud, interpolation='bilinear') # type: ignore
+                plt.axis('off')
+                plt.show()
+
+        # Dummy implementation for the decorated function to inherit
+        # the documentation.
+        generator.__doc__ = method.__doc__
+        generator.__annotations__ = method.__annotations__
+
+        return generator
+    return decorator
+
+
 def get_length(obj: List[str]) -> int:
     return len(''.join(obj))
 
@@ -917,7 +942,8 @@ class NounsFeature(BaseFeature):
 
     __slots__ = ()
 
-    def word_cloud(self):
+    @generate_word_cloud()
+    def word_cloud(self) -> WordCloud:
         """Shows a word cloud with the most spoken nouns in the
         chat.
         """
@@ -940,15 +966,5 @@ class NounsFeature(BaseFeature):
                 length=50
             )
 
-        stopwords = set(STOPWORDS)
-        stopwords.update([
-            'da', 'meu', 'em', 'você', 'de', 'ao', 'os', 'eu',
-        ])
-
-        all_words = ' '.join(data)
-        wordcloud = WordCloud().generate(all_words) # type: ignore
-
-        plt.figure()
-        plt.imshow(wordcloud, interpolation='bilinear') # type: ignore
-        plt.axis('off')
-        plt.show()
+        all_word = ' '.join(data)
+        return WordCloud().generate(all_word) # type: ignore
