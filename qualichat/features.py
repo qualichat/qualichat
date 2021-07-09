@@ -950,7 +950,7 @@ class NounsFeature(BaseFeature):
         chat = self.chats[0]
         data: List[str] = []
 
-        for i, message in enumerate(chat.messages):
+        for i, message in enumerate(chat.messages, start=1):
             if message['Type'] is not MessageType.default:
                 continue
 
