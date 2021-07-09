@@ -45,7 +45,7 @@ from wordcloud import ( # type: ignore
 from .chat import Chat
 from .models import Message
 from .colors import BARS, LINES
-from .enums import Period, SubPeriod
+from .enums import Period, SubPeriod, MessageType
 from .utils import progress_bar
 
 
@@ -951,6 +951,9 @@ class NounsFeature(BaseFeature):
         data: List[str] = []
 
         for i, message in enumerate(chat.messages):
+            if message['Type'] is not MessageType.default:
+                continue
+
             text = message['Qty_char_text']
             doc = nlp(text) # type: ignore
 
