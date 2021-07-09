@@ -903,12 +903,24 @@ nlp = spacy.load('pt_core_news_sm') # type: ignore
 
 
 class NounsFeature(BaseFeature):
-    """..."""
+    """Textual structure analysis feature, specific for nouns.
+    
+    .. note::
+
+        This feature is already automatically added to Qualichat.
+
+    Attributes
+    ----------
+    chats: List[:class:`.Chat`]
+        All the chats loaded via :meth:`qualichat.load_chats`.
+    """
 
     __slots__ = ()
 
     def word_cloud(self):
-        """..."""
+        """Shows a word cloud with the most spoken nouns in the
+        chat.
+        """
         chat = self.chats[0]
         data: List[str] = []
 
