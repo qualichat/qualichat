@@ -958,13 +958,7 @@ class NounsFeature(BaseFeature):
                 if token.pos_ == 'NOUN': # type: ignore
                     data.append(token.text) # type: ignore
 
-            progress_bar(
-                i,
-                len(chat.messages),
-                prefix='Progress',
-                suffix='Complete',
-                length=50
-            )
+            progress_bar(i, len(chat.messages))
 
         all_word = ' '.join(data)
         return WordCloud().generate(all_word) # type: ignore
