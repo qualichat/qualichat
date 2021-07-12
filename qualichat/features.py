@@ -665,7 +665,7 @@ class ActorsFeature(BaseFeature):
             rows.append([links, emails, mentions, total_messages])
 
         dataframe = DataFrame(rows, index=index, columns=columns)
-        return dataframe.sort_values(by=columns, ascending=False)
+        return dataframe.sort_values(by=columns, ascending=False)[start:end]
 
     @generate_chart(
         bars=['Qty_char_net', 'Qty_char_text'],
