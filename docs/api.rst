@@ -69,6 +69,8 @@ Features
 .. autoclass:: qualichat.features.VerbsFeature
     :members:
 
+.. autoclass:: qualichat.features.EmojisFeature
+
 
 Abstract Base Classes
 ---------------------

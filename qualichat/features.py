@@ -55,7 +55,8 @@ __all__ = (
     'MessagesFeature',
     'TimeFeature',
     'NounsFeature',
-    'VerbsFeature'
+    'VerbsFeature',
+    'EmojisFeature',
 )
 
 
@@ -1006,3 +1007,40 @@ class VerbsFeature(BaseFeature):
 
         all_words = ' '.join(data)
         return WordCloud().generate(all_words) # type: ignore
+
+
+class EmojisFeature(BaseFeature):
+    """A feature that adds charts generator related to emojis.
+    
+    .. note::
+
+        This feature is already automatically added to Qualichat.
+
+    Attributes
+    ----------
+    chats: List[:class:`.Chat`]
+        All the chats loaded via :meth:`qualichat.load_chats`.
+    """
+
+    __slots__ = ()
+
+    @generate_chart(bars=['Qty_char_emoji'], title='Amount by Actor')
+    def per_user(self, *, start: int = 0, end: int = 10) -> NDFrame:
+        """Shows the amount of emoji uploaded per user."""
+        chat = self.chats[0]
+
+        columns = ['Qty_char_emoji']
+        index = [actor.display_name for actor in chat.actors]
+
+        rows: List[List[int]] = []
+
+        for actor in chat.actors:
+            emojis = 0
+
+            for message in actor.messages:
+                emojis += len(message['Qty_char_emoji'])
+
+            rows.append([emojis])
+
+        dataframe = DataFrame(rows, index=index, columns=columns)
+        return dataframe.sort_values(by=columns, ascending=False)[start:end]

@@ -32,6 +32,7 @@ from .features import (
     TimeFeature,
     NounsFeature,
     VerbsFeature,
+    EmojisFeature
 )
 
 
@@ -50,7 +51,11 @@ class Qualichat:
         messages.
     """
 
-    __slots__ = ('chats', 'messages', 'actors', 'time', 'nouns', 'verbs')
+    __slots__ = (
+        'chats', 'messages', 'actors',
+        'time', 'nouns', 'verbs',
+        'emojis'
+    )
 
     def __init__(self, chats: List[Chat]) -> None:
         self.chats = chats
@@ -61,6 +66,7 @@ class Qualichat:
         self.time = TimeFeature(chats)
         self.nouns = NounsFeature(chats)
         self.verbs = VerbsFeature(chats)
+        self.emojis = EmojisFeature(chats)
 
 
 def load_chats( # type: ignore
