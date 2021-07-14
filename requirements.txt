@@ -3,3 +3,4 @@ emojis
 pandas
 colorama
 tldextract
+spacy
