@@ -29,7 +29,8 @@ from typing import (
     Any,
     Optional,
     Dict,
-    Union
+    Union,
+    Set
 )
 from collections import defaultdict
 
@@ -130,21 +131,23 @@ def generate_chart(
     return decorator
 
 
-stopwords = STOPWORDS
+stopwords: Set[str] = set(STOPWORDS) # type: ignore
 stopwords.update(['da', 'meu', 'em', 'você', 'de', 'ao', 'os', 'eu'])
 
 
-def generate_word_cloud():
+def generate_word_cloud(): # type: ignore
     """A decorator that generates a word cloud automatically."""
-    def decorator(method: Callable[..., WordCloud]) -> Callable[..., None]:
+    def decorator(
+        method: Callable[..., WordCloud] # type: ignore
+    ) -> Callable[..., None]:
         def generator(self: BaseFeature, *args: Any, **kwargs: Any) -> None:
-                wordcloud = method(self, *args, **kwargs)
-                wordcloud.stopwords = stopwords
+            wordcloud = method(self, *args, **kwargs) # type: ignore
+            wordcloud.stopwords = stopwords
 
-                plt.figure()
-                plt.imshow(wordcloud, interpolation='bilinear') # type: ignore
-                plt.axis('off')
-                plt.show()
+            plt.figure()
+            plt.imshow(wordcloud, interpolation='bilinear') # type: ignore
+            plt.axis('off')
+            plt.show()
 
         # Dummy implementation for the decorated function to inherit
         # the documentation.
@@ -152,7 +155,7 @@ def generate_word_cloud():
         generator.__annotations__ = method.__annotations__
 
         return generator
-    return decorator
+    return decorator # type: ignore
 
 
 def get_length(obj: List[str]) -> int:
