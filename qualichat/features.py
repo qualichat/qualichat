@@ -948,7 +948,7 @@ class NounsFeature(BaseFeature):
     __slots__ = ()
 
     @generate_word_cloud()
-    def word_cloud(self) -> WordCloud:
+    def word_cloud(self) -> WordCloud: # type: ignore
         """Shows a word cloud with the most spoken nouns in the
         chat.
         """
@@ -988,7 +988,7 @@ class VerbsFeature(BaseFeature):
     __slots__ = ()
 
     @generate_word_cloud()
-    def word_cloud(self) -> WordCloud:
+    def word_cloud(self) -> WordCloud: # type: ignore
         """Shows a word cloud with the most spoken nouns in the
         chat.
         """
