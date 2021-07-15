@@ -4,3 +4,4 @@ pandas
 colorama
 tldextract
 spacy
+wordcloud
