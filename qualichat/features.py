@@ -1035,16 +1035,18 @@ class EmojisFeature(BaseFeature):
         """Shows the amount of emoji uploaded per user."""
         chat = self.chats[0]
 
-        columns = ['Qty_char_emoji']
+        columns = ['Qty_char_emoji', 'Qty_messages']
         index = [actor.display_name for actor in chat.actors]
 
         rows: List[List[int]] = []
 
         for actor in chat.actors:
             emojis = 0
+            messages = 0
 
             for message in actor.messages:
                 emojis += len(message['Qty_char_emoji'])
+                messages += 1
 
             rows.append([emojis])
 
