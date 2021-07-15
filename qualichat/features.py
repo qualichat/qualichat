@@ -36,12 +36,14 @@ from collections import defaultdict
 
 import spacy
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go # type: ignore
 from pandas import DataFrame
 from pandas.core.generic import NDFrame
 from wordcloud import ( # type: ignore
     STOPWORDS,
     WordCloud
 )
+from plotly.subplots import make_subplots # type: ignore
 
 from .chat import Chat
 from .models import Message
@@ -79,7 +81,7 @@ def generate_chart(
         to ``None``.
     title: Optional[:class:`str`]
         The title of the chart. Defaults to ``None``.
-    """    
+    """
     if bars is None:
         bars = []
 
@@ -94,33 +96,34 @@ def generate_chart(
             *args: Any,
             **kwargs: Any
         ) -> None:
-            # TODO: Add debug logging message here.
-
-            _, ax = plt.subplots()
+            fig = make_subplots( # type: ignore
+                specs=[[{'secondary_y': True}]]
+            )
             dataframe = method(self, *args, **kwargs)
 
-            ax.set_title(title)
+            index = dataframe.index # type: ignore
 
-            if bars:
-                color = BARS[len(bars)]
+            if bars is not None:
+                for bar in bars:
+                    filtered = getattr(dataframe, bar)
+                    fig.add_bar( # type: ignore
+                        x=index,
+                        y=list(filtered),
+                        name=bar
+                    )
 
-                bars_dataframe = dataframe.filter(bars) # type: ignore
-                bars_dataframe.plot.bar( # type: ignore
-                    ax=ax, rot=15, color=color
-                )
+            if lines is not None:
+                for line in lines:
+                    filtered = getattr(dataframe, line)
+                    fig.add_trace( # type: ignore
+                        go.Scatter( # type: ignore
+                            x=index, y=list(filtered), name=line
+                        ),
+                        secondary_y=bool(bars),
+                    )
 
-            if lines:
-                color = LINES[len(bars)] if bars is not None else ['#ff645c']
-
-                lines_dataframe = dataframe.filter( # type: ignore
-                    lines
-                )
-                lines_dataframe.plot( # type: ignore
-                    ax=ax, rot=15, secondary_y=True, color=color
-                )
-
-            ax.grid(axis='y', linestyle='solid') # type: ignore
-            plt.show()
+            fig.update_layout(title_text=title) # type: ignore
+            fig.show() # type: ignore
 
         # Dummy implementation for the decorated function to inherit
         # the documentation.
