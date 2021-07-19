@@ -1047,7 +1047,7 @@ class EmojisFeature(BaseFeature):
                 emojis += len(message['Qty_char_emoji'])
                 messages += 1
 
-            rows.append([emojis])
+            rows.append([emojis, messages])
 
         dataframe = DataFrame(rows, index=index, columns=columns)
         return dataframe.sort_values(by=columns, ascending=False)[start:end]
