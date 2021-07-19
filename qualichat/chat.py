@@ -41,6 +41,7 @@ def _clean_impurities(text: str) -> str:
     text = text.replace('\u200e', '')
     text = text.replace('\u2002', '')
     text = text.replace('\u202c', '')
+    text = text.replace('\u202a', '')
 
     text = text.replace('\xa0', ' ')
     text = text.replace('\u2011', '-')
