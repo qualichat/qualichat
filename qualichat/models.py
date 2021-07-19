@@ -23,8 +23,6 @@ SOFTWARE.
 '''
 
 import datetime
-import os
-import random
 from typing import List, Dict, Any, Iterable
 from types import MappingProxyType
 
@@ -66,20 +64,6 @@ def parse_time(string: str) -> datetime.datetime:
     return datetime.datetime.strptime(string, TIME_FORMAT)
 
 
-_path = os.path.dirname(__file__)
-_books_path = os.path.join(_path, 'books.txt')
-
-with open(_books_path, encoding='utf-8') as f:
-    __books__ = f.read().split('\n')
-
-def _get_random_name() -> str:
-    name = random.choice(__books__)
-    # Remove the book from the list so there is no risk that two 
-    # actors have the same display name.
-    __books__.remove(name)
-    return name.strip()
-
-
 def _remove_all_incidences(text: str, *iterables: Iterable[str]) -> str:
     for iterable in iterables:
         for incidence in iterable:
@@ -103,10 +87,10 @@ class Actor:
 
     __slots__ = ('_contact_name', 'display_name', 'messages')
 
-    def __init__(self, contact_name: str) -> None:
+    def __init__(self, contact_name: str, display_name: str) -> None:
         self._contact_name: str = contact_name
 
-        self.display_name: str = _get_random_name()
+        self.display_name: str = display_name
         self.messages: List[Message] = []
 
     def __repr__(self) -> str:

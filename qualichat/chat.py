@@ -23,7 +23,10 @@ SOFTWARE.
 '''
 
 import pathlib
-from typing import List, Union, Dict
+import json
+import os
+import random
+from typing import List, Union, Dict, Any
 
 from colorama import Fore
 
@@ -47,6 +50,52 @@ def _clean_impurities(text: str) -> str:
     text = text.replace('\u2011', '-')
 
     return text
+
+
+def _get_config_file() -> Dict[Any, Any]:
+    home = pathlib.Path.home()
+    qualichat_folder = home / '.qualichat'
+
+    if not qualichat_folder.is_dir():
+        log('debug', 'Folder {')
+
+        qualichat_folder.mkdir()
+        config_file = qualichat_folder / 'config.json'
+
+        with config_file.open('w', encoding='utf-8') as f:
+            f.write(r'{}\n')
+
+    config_file = qualichat_folder / 'config.json'
+
+    with config_file.open('r', encoding='utf-8') as f:
+        return json.load(f)
+
+_config = _get_config_file()
+
+def _save_config_file():
+    home = pathlib.Path.home()
+    config_file = home / '.qualichat' / 'config.json'
+
+    with config_file.open('w', encoding='utf-8') as f:
+        json.dump(_config, f, indent=2, sort_keys=True)
+
+
+def _get_books_names() -> List[str]:
+    path = os.path.dirname(__file__)
+    books_path = os.path.join(path, 'books.txt')
+
+    with open(books_path, encoding='utf-8') as f:
+        return f.read().split('\n')
+
+_books = _get_books_names()
+
+
+def _get_name() -> str:
+    name = random.choice(_books)
+    # Remove the book from the list so there is no risk that two 
+    # actors have the same display name.
+    _books.remove(name)
+    return name.strip()
 
 
 class Chat:
@@ -80,7 +129,7 @@ class Chat:
         log('info', f'File {name} read. Cleaning it.')
         raw_data = _clean_impurities(text)
 
-        self.filename: str = path.name
+        self.filename: str = str(path.resolve())
         self.messages: List[Message] = []
         self.system_messages: List[SystemMessage] = []
 
@@ -103,7 +152,18 @@ class Chat:
                 content = is_user_message.group(2)
 
                 if contact_name not in self._actors:
-                    self._actors[contact_name] = Actor(contact_name)
+                    if self.filename not in _config:
+                        _config[self.filename] = {}
+
+                    group_names = _config[self.filename]
+
+                    if contact_name not in group_names:
+                        group_names[contact_name] = _get_name()
+
+                    display_name = group_names[contact_name]
+                    actor = Actor(contact_name, display_name)
+
+                    self._actors[contact_name] = actor
 
                 actor = self._actors[contact_name]
                 message = Message(actor, content, created_at)
@@ -116,6 +176,8 @@ class Chat:
                 # etc.)
                 message = SystemMessage(rest, created_at)
                 self.system_messages.append(message)
+
+        _save_config_file()
 
         messages = len(self.messages) + len(self.system_messages)
         actors = len(self.actors)
