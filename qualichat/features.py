@@ -47,7 +47,6 @@ from plotly.subplots import make_subplots # type: ignore
 
 from .chat import Chat
 from .models import Message
-from .colors import BARS, LINES
 from .enums import Period, SubPeriod, MessageType
 from .utils import progress_bar
 
