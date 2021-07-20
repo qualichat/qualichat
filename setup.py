@@ -33,6 +33,14 @@ setup(
     long_description=readme,
     long_description_content_type='text/markdown',
     python_requires='>=3.7.1',
+    install_requires=[
+        'colorama',
+        'tldextract',
+        'emojis',
+        'tldextract',
+        'pandas',
+        'matplotlib',
+    ],
     package_dir={'qualichat': 'qualichat'},
     package_data={
         'qualichat': ['books.txt'],
