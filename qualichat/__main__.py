@@ -27,10 +27,10 @@ import sys
 from typing import Tuple, List, Dict
 
 from colorama import Fore
-from enquiries.choices import choose # type: ignore
+from enquiries import choose # type: ignore
 
 import qualichat
-from .features import BaseFeature, generate_chart
+from .features import BaseFeature
 
 
 GREEN = Fore.GREEN
@@ -92,9 +92,21 @@ def loadchat(parser: argparse.ArgumentParser, args: argparse.Namespace):
     choice: str = choose(f'Choose your feature.', options) # type: ignore
 
     feature = features[choice]
-    # methods = _get_methods_with_decorator(type(feature), 'generate_chart')
+    all_charts: List[str] = []
+    name_to_key: Dict[str, str] = {}
 
-    # print(methods)
+    for chart_name in feature.charts.keys():
+        name = chart_name.replace('_', ' ')
+        name = name.capitalize()
+
+        all_charts.append(name)
+        name_to_key[name] = chart_name
+
+    choices: List[str] = choose(f'Great! Now choose a chart.', all_charts, multi=True) # type: ignore
+    _print('Loading...')
+
+    for choice in choices:
+        getattr(feature, name_to_key[choice])()
 
 
 def add_loadchat_args(subparser): # type: ignore
