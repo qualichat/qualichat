@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
+from os import WCONTINUED
 from typing import (
     List,
     DefaultDict,
@@ -192,10 +193,22 @@ class BaseFeature:
         All the chats loaded via :meth:`qualichat.load_chats`.
     """
 
-    __slots__ = ('chats',)
+    __slots__ = ('chats', 'charts')
 
     def __init__(self, chats: List[Chat]) -> None:
         self.chats = chats
+        self.charts: Dict[str, Callable[..., Any]] = {}
+
+        for attr in dir(self):
+            if attr.startswith('_'):
+                continue
+
+            obj: Callable[..., Any] = getattr(self, attr)
+
+            if not callable(obj):
+                continue
+
+            self.charts[attr] = obj # type: ignore
 
 
 class MessagesFeature(BaseFeature):
