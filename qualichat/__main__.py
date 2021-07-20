@@ -30,7 +30,7 @@ from colorama import Fore
 from enquiries.choices import choose # type: ignore
 
 import qualichat
-from .features import BaseFeature
+from .features import BaseFeature, generate_chart
 
 
 GREEN = Fore.GREEN
@@ -92,6 +92,9 @@ def loadchat(parser: argparse.ArgumentParser, args: argparse.Namespace):
     choice: str = choose(f'Choose your feature.', options) # type: ignore
 
     feature = features[choice]
+    # methods = _get_methods_with_decorator(type(feature), 'generate_chart')
+
+    # print(methods)
 
 
 def add_loadchat_args(subparser): # type: ignore
