@@ -28,8 +28,6 @@ import os
 import random
 from typing import List, Union, Dict, Any
 
-from colorama import Fore
-
 from .utils import log
 from .regex import CHAT_RE, USER_MESSAGE_RE
 from .models import Actor, Message, SystemMessage
@@ -120,13 +118,14 @@ class Chat:
         if not path.is_file():
             raise FileNotFoundError(f'no such file: {str(path)!r}')
 
-        name = f'{Fore.LIGHTGREEN_EX}{str(path)}{Fore.RESET}'
+        name = f'<color>{str(path)}<reset>'
+        log('info', f'Loading chat {name}.')
 
-        log('info', f'Reading {name} file content.')
+        log('debug', f'Reading {name} file content.')
         encoding = kwargs.pop('encoding', 'utf-8')
         text = path.read_text(encoding=encoding)
 
-        log('info', f'File {name} read. Cleaning it.')
+        log('debug', f'File {name} read. Cleaning it.')
         raw_data = _clean_impurities(text)
 
         self.filename: str = str(path.resolve())
@@ -135,7 +134,7 @@ class Chat:
 
         self._actors: Dict[str, Actor] = {}
 
-        log('info', f'Contents of file {name} cleaned. Parsing it.')
+        log('debug', f'Contents of file {name} cleaned. Parsing it.')
         for match in CHAT_RE.finditer(raw_data):
             if not match:
                 # An unknown message?

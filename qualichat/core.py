@@ -23,6 +23,7 @@ SOFTWARE.
 '''
 
 import pathlib
+import logging
 from typing import Union, List, Any
 
 from .chat import Chat
@@ -93,4 +94,10 @@ def load_chats( # type: ignore
     :class:`FileNotFoundError`
         If one of the chat files could not been found.
     """
+    debug = kwargs.pop('debug', False)
+    mode = logging.DEBUG if debug is True else logging.INFO
+
+    logger = logging.getLogger('qualichat')
+    logger.setLevel(mode)
+
     return Qualichat([Chat(path, **kwargs) for path in paths])

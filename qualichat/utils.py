@@ -24,10 +24,9 @@ SOFTWARE.
 
 import logging
 import sys
-from typing import Dict
+from typing import Dict, List
 
 from tldextract import extract # type: ignore
-
 from colorama import AnsiToWin32, Fore
 
 
@@ -40,12 +39,23 @@ class ColorStreamHandler(logging.StreamHandler):
     __slots__ = ('prefix',)
 
     def __init__(self) -> None:
-        self.prefix: str = f'{Fore.GREEN}[qualichat]{Fore.RESET}'
+        self.prefix: str = f'<color>[qualichat]<reset>'
         super().__init__(AnsiToWin32(sys.stderr)) # type: ignore
 
     def emit(self, record: logging.LogRecord) -> None:
         try:
+            colors = {
+                'INFO': Fore.GREEN,
+                'DEBUG': Fore.CYAN,
+                'WARNING': Fore.RED,
+                'ERROR': Fore.LIGHTRED_EX
+            }
+
             message = f'{self.prefix} {self.format(record)}'
+            message = message.replace('<color>', colors[record.levelname])
+            message = message.replace('<reset>', Fore.RESET)
+
+            
             self.stream.write(message + self.terminator) # type: ignore
             self.flush()
         except RecursionError:
@@ -55,8 +65,6 @@ class ColorStreamHandler(logging.StreamHandler):
 
 
 logger = logging.getLogger('qualichat')
-
-logger.setLevel(logging.INFO)
 logger.addHandler(ColorStreamHandler())
 
 
