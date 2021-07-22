@@ -46,30 +46,30 @@ Chat Analyzers
     :members:
 
 
-Features
+Frames
 --------
 
-.. autofunction:: qualichat.features.generate_chart
+.. autofunction:: qualichat.frames.generate_chart
 
-.. autoclass:: qualichat.features.BaseFeature
+.. autoclass:: qualichat.frames.BaseFrame
     :members:
 
-.. autoclass:: qualichat.features.MessagesFeature
+.. autoclass:: qualichat.frames.MessagesFrame
     :members:
 
-.. autoclass:: qualichat.features.ActorsFeature
+.. autoclass:: qualichat.frames.ActorsFrame
     :members:
 
-.. autoclass:: qualichat.features.TimeFeature
+.. autoclass:: qualichat.frames.TimeFrame
     :members:
 
-.. autoclass:: qualichat.features.NounsFeature
+.. autoclass:: qualichat.frames.NounsFrame
     :members:
 
-.. autoclass:: qualichat.features.VerbsFeature
+.. autoclass:: qualichat.frames.VerbsFrame
     :members:
 
-.. autoclass:: qualichat.features.EmojisFeature
+.. autoclass:: qualichat.frames.EmojisFrame
 
 
 Abstract Base Classes

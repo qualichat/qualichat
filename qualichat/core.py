@@ -46,8 +46,8 @@ class Qualichat:
     ----------
     chats: List[:class:`.Chat`]
         All chats uploaded and parsed by Qualichat.
-    messages: :class:`.MessagesFeature`
-        A feature that adds graphics generator related to chat
+    messages: :class:`.MessagesFrame`
+        A frame that adds graphics generator related to chat
         messages.
     """
 
@@ -60,7 +60,7 @@ class Qualichat:
     def __init__(self, chats: List[Chat]) -> None:
         self.chats = chats
 
-        # Qualichat features
+        # Qualichat frames
         self.messages = MessagesFrame(chats)
         self.actors = ActorsFrame(chats)
         self.time = TimeFrame(chats)
