@@ -39,10 +39,7 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go # type: ignore
 from pandas import DataFrame
 from pandas.core.generic import NDFrame
-from wordcloud import ( # type: ignore
-    STOPWORDS,
-    WordCloud
-)
+from wordcloud import STOPWORDS, WordCloud # type: ignore
 from plotly.subplots import make_subplots # type: ignore
 
 from .chat import Chat
