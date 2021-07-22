@@ -26,13 +26,13 @@ import pathlib
 from typing import Union, List, Any
 
 from .chat import Chat
-from .features import (
-    MessagesFeature,
-    ActorsFeature,
-    TimeFeature,
-    NounsFeature,
-    VerbsFeature,
-    EmojisFeature
+from .frames import (
+    MessagesFrame,
+    ActorsFrame,
+    TimeFrame,
+    NounsFrame,
+    VerbsFrame,
+    EmojisFrame
 )
 
 
@@ -61,12 +61,12 @@ class Qualichat:
         self.chats = chats
 
         # Qualichat features
-        self.messages = MessagesFeature(chats)
-        self.actors = ActorsFeature(chats)
-        self.time = TimeFeature(chats)
-        self.nouns = NounsFeature(chats)
-        self.verbs = VerbsFeature(chats)
-        self.emojis = EmojisFeature(chats)
+        self.messages = MessagesFrame(chats)
+        self.actors = ActorsFrame(chats)
+        self.time = TimeFrame(chats)
+        self.nouns = NounsFrame(chats)
+        self.verbs = VerbsFrame(chats)
+        self.emojis = EmojisFrame(chats)
 
 
 def load_chats( # type: ignore

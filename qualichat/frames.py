@@ -53,12 +53,12 @@ from .utils import progress_bar
 
 __all__ = (
     'generate_chart',
-    'BaseFeature',
-    'MessagesFeature',
-    'TimeFeature',
-    'NounsFeature',
-    'VerbsFeature',
-    'EmojisFeature',
+    'BaseFrame',
+    'MessagesFrame',
+    'TimeFrame',
+    'NounsFrame',
+    'VerbsFrame',
+    'EmojisFrame',
 )
 
 
@@ -91,7 +91,7 @@ def generate_chart(
         method: Callable[..., Union[DataFrame, NDFrame]]
     ) -> Callable[..., None]:
         def generator(
-            self: BaseFeature,
+            self: BaseFrame,
             *args: Any,
             **kwargs: Any
         ) -> None:
@@ -142,7 +142,7 @@ def generate_word_cloud(): # type: ignore
     def decorator(
         method: Callable[..., WordCloud] # type: ignore
     ) -> Callable[..., None]:
-        def generator(self: BaseFeature, *args: Any, **kwargs: Any) -> None:
+        def generator(self: BaseFrame, *args: Any, **kwargs: Any) -> None:
             wordcloud = method(self, *args, **kwargs) # type: ignore
             wordcloud.stopwords = stopwords
 
@@ -174,11 +174,11 @@ PERIODS = [c.value for c in Period]
 SUB_PERIODS = [c.value for c in SubPeriod]
 
 
-class BaseFeature:
-    """Represents the base of a Qualichat feature.
-    Generally, you should use the built-in features that Qualichat
+class BaseFrame:
+    """Represents the base of a Qualichat frame.
+    Generally, you should use the built-in frames that Qualichat
     offers you. However, you can subclass this class and create your
-    own features.
+    own frames.
 
     .. note::
 
@@ -210,12 +210,12 @@ class BaseFeature:
             self.charts[attr] = obj # type: ignore
 
 
-class MessagesFeature(BaseFeature):
-    """A feature that adds charts generator related to chat messages.
+class MessagesFrame(BaseFrame):
+    """A frame that adds charts generator related to chat messages.
     
     .. note::
 
-        This feature is already automatically added to Qualichat.
+        This frame is already automatically added to Qualichat.
 
     Attributes
     ----------
@@ -577,12 +577,12 @@ class MessagesFeature(BaseFeature):
         return DataFrame(rows, index=index, columns=columns)
 
 
-class ActorsFeature(BaseFeature):
-    """A feature that adds charts generator related to chat actors.
+class ActorsFrame(BaseFrame):
+    """A frame that adds charts generator related to chat actors.
     
     .. note::
 
-        This feature is already automatically added to Qualichat.
+        This frame is already automatically added to Qualichat.
 
     Attributes
     ----------
@@ -820,12 +820,12 @@ class ActorsFeature(BaseFeature):
         return dataframe.sort_values(by=columns, ascending=False)[start:end]
 
 
-class TimeFeature(BaseFeature):
-    """A feature that adds charts generator related to chat timing.
+class TimeFrame(BaseFrame):
+    """A frame that adds charts generator related to chat timing.
     
     .. note::
 
-        This feature is already automatically added to Qualichat.
+        This frame is already automatically added to Qualichat.
 
     Attributes
     ----------
@@ -946,12 +946,12 @@ class TimeFeature(BaseFeature):
 nlp = spacy.load('pt_core_news_sm') # type: ignore
 
 
-class NounsFeature(BaseFeature):
-    """Textual structure analysis feature, specific for nouns.
+class NounsFrame(BaseFrame):
+    """Textual structure analysis frame, specific for nouns.
     
     .. note::
 
-        This feature is already automatically added to Qualichat.
+        This frame is already automatically added to Qualichat.
 
     Attributes
     ----------
@@ -986,12 +986,12 @@ class NounsFeature(BaseFeature):
         return WordCloud().generate(all_words) # type: ignore
 
 
-class VerbsFeature(BaseFeature):
-    """Textual structure analysis feature, specific for verbs.
+class VerbsFrame(BaseFrame):
+    """Textual structure analysis frame, specific for verbs.
     
     .. note::
 
-        This feature is already automatically added to Qualichat.
+        This frame is already automatically added to Qualichat.
 
     Attributes
     ----------
@@ -1026,12 +1026,12 @@ class VerbsFeature(BaseFeature):
         return WordCloud().generate(all_words) # type: ignore
 
 
-class EmojisFeature(BaseFeature):
-    """A feature that adds charts generator related to emojis.
+class EmojisFrame(BaseFrame):
+    """A frame that adds charts generator related to emojis.
     
     .. note::
 
-        This feature is already automatically added to Qualichat.
+        This frame is already automatically added to Qualichat.
 
     Attributes
     ----------
