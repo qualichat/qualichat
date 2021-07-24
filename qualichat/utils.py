@@ -24,7 +24,7 @@ SOFTWARE.
 
 import logging
 import sys
-from typing import Dict, List
+from typing import Dict
 
 from tldextract import extract # type: ignore
 from colorama import AnsiToWin32, Fore
