@@ -5,3 +5,4 @@ colorama
 tldextract
 spacy
 wordcloud
+spacy
