@@ -52,20 +52,18 @@ def _clean_impurities(text: str) -> str:
 
 def _get_config_file() -> Dict[Any, Any]:
     home = pathlib.Path.home()
-    qualichat_folder = home / '.qualichat'
 
-    if not qualichat_folder.is_dir():
-        log('debug', 'Folder {')
+    folder = home / '.qualichat'
+    config = folder / 'config.json'
 
-        qualichat_folder.mkdir()
-        config_file = qualichat_folder / 'config.json'
+    if not folder.is_dir():
+        log('debug', 'Creating <color>.qualichat<reset> folder.')
+        folder.mkdir(exist_ok=True)
 
-        with config_file.open('w', encoding='utf-8') as f:
-            f.write(r'{}\n')
+        with config.open('w', encoding='utf-8') as f:
+            f.write(r'{}')
 
-    config_file = qualichat_folder / 'config.json'
-
-    with config_file.open('r', encoding='utf-8') as f:
+    with config.open('r', encoding='utf-8') as f:
         return json.load(f)
 
 _config = _get_config_file()

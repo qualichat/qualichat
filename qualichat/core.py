@@ -28,18 +28,18 @@ from typing import Union, List, Any
 
 from .chat import Chat
 from .frames import (
-    MessagesFrame,
-    ActorsFrame,
-    TimeFrame,
-    NounsFrame,
-    VerbsFrame,
-    EmojisFrame
+    AnchoragesFrame,
+    ParticipationStatusFrame,
+    FabricationsFrame,
+    TracksFrame,
+    KeysFrame,
 )
 
 
 __all__ = ('Qualichat', 'load_chats')
 
 
+# TODO: Add the rest of frames on docs.
 class Qualichat:
     """Represents a set of chats for linguistic analysis.
     
@@ -53,21 +53,19 @@ class Qualichat:
     """
 
     __slots__ = (
-        'chats', 'messages', 'actors',
-        'time', 'nouns', 'verbs',
-        'emojis'
+        'chats', 'anchorages', 'participation_status', 'fabrications',
+        'tracks', 'keys',
     )
 
     def __init__(self, chats: List[Chat]) -> None:
         self.chats = chats
 
         # Qualichat frames
-        self.messages = MessagesFrame(chats)
-        self.actors = ActorsFrame(chats)
-        self.time = TimeFrame(chats)
-        self.nouns = NounsFrame(chats)
-        self.verbs = VerbsFrame(chats)
-        self.emojis = EmojisFrame(chats)
+        self.anchorages = AnchoragesFrame(chats)
+        self.participation_status = ParticipationStatusFrame(chats)
+        self.fabrications = FabricationsFrame(chats)
+        self.tracks = TracksFrame(chats)
+        self.keys = KeysFrame(chats)
 
 
 def load_chats( # type: ignore

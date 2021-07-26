@@ -24,13 +24,14 @@ SOFTWARE.
 
 import argparse
 import sys
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Optional
 
 from colorama import Fore
 from enquiries import choose # type: ignore
 
 import qualichat
-from .features import BaseFeature
+from .frames import BaseFrame
+from .utils import log
 
 
 GREEN = Fore.GREEN
@@ -54,7 +55,6 @@ def core(parser: argparse.ArgumentParser, args: argparse.Namespace):
         show_version()
 
 
-prefix = GREEN + '[qualichat]' + RESET
 qc_ascii = '''
                                 ████   ███           █████                 █████   
                                ░░███  ░░░           ░░███                 ░░███    
@@ -70,43 +70,40 @@ qc_ascii = '''
 '''
 
 
-def _print(*messages: str):
-    print(f'{prefix} {" ".join(messages)}')
-
-
 def loadchat(parser: argparse.ArgumentParser, args: argparse.Namespace):
-    qc = qualichat.load_chats(args.path)
+    qc = qualichat.load_chats(args.path, debug=args.debug)
+    frames: Dict[Optional[str], BaseFrame] = {}
 
-    features: Dict[str, BaseFeature] = {
-        'Messages Feature': qc.messages,
-        'Time Feature': qc.time,
-        'Nouns Feature': qc.nouns,
-        'Verbs Feature': qc.verbs,
-        'Emojis Feature': qc.verbs
-    }
+    for attr in dir(qc):
+        if attr.startswith('_'):
+            continue
+
+        if attr == 'chats':
+            continue
+
+        obj: BaseFrame = getattr(qc, attr)
+        frames[obj.fancy_name] = obj
 
     print(qc_ascii)
-    _print('Welcome to Qualichat.')
+    log('info', 'Welcome to Qualichat.')
 
-    options = list(features.keys())
-    choice: str = choose(f'Choose your feature.', options) # type: ignore
+    options = list(frames.keys())
+    choice: str = choose(f'Choose your frame:', options) # type: ignore
 
-    feature = features[choice]
-    all_charts: List[str] = []
+    frame = frames[choice]
     name_to_key: Dict[str, str] = {}
 
-    for chart_name in feature.charts.keys():
+    for chart_name in frame.charts.keys():
         name = chart_name.replace('_', ' ')
         name = name.capitalize()
 
-        all_charts.append(name)
         name_to_key[name] = chart_name
 
-    choices: List[str] = choose(f'Great! Now choose a chart.', all_charts, multi=True) # type: ignore
-    _print('Loading...')
+    choices: List[str] = choose(f'Great! Now choose a chart:', list(name_to_key.keys()), multi=True)
+    log('info', 'Loading charts...')
 
     for choice in choices:
-        getattr(feature, name_to_key[choice])()
+        getattr(frame, name_to_key[choice])()
 
 
 def add_loadchat_args(subparser): # type: ignore
@@ -114,6 +111,7 @@ def add_loadchat_args(subparser): # type: ignore
     parser.set_defaults(func=loadchat) # type: ignore
 
     parser.add_argument('path', help='the path of the chat') # type: ignore
+    parser.add_argument('--debug', '-D', help='sets the logging level to debug', action='store_true') # type: ignore
 
 
 def parse_args() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:

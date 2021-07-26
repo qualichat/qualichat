@@ -6,3 +6,4 @@ tldextract
 spacy
 wordcloud
 spacy
+plotly
