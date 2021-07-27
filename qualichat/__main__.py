@@ -71,7 +71,7 @@ qc_ascii = '''
 
 
 def loadchat(parser: argparse.ArgumentParser, args: argparse.Namespace):
-    qc = qualichat.load_chats(args.path, debug=args.debug)
+    qc = qualichat.load_chats(*args.path, debug=args.debug)
     frames: Dict[Optional[str], BaseFrame] = {}
 
     for attr in dir(qc):
@@ -110,7 +110,7 @@ def add_loadchat_args(subparser): # type: ignore
     parser = subparser.add_parser('load', help='loads the given chat') # type: ignore
     parser.set_defaults(func=loadchat) # type: ignore
 
-    parser.add_argument('path', help='the path of the chat') # type: ignore
+    parser.add_argument('path', help='the path of the chat', nargs='+') # type: ignore
     parser.add_argument('--debug', '-D', help='sets the logging level to debug', action='store_true') # type: ignore
 
 

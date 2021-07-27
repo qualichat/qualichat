@@ -94,6 +94,7 @@ def _get_name() -> str:
     return name.strip()
 
 
+# TODO: Update docs.
 class Chat:
     """Represents an isolated chat.
     
@@ -107,7 +108,7 @@ class Chat:
         All the system messages found by Qualichat.
     """
 
-    __slots__ = ('filename', 'messages', 'system_messages', '_actors')
+    __slots__ = ('filename', 'path', 'messages', 'system_messages', '_actors')
 
     def __init__(self, path: Union[str, pathlib.Path], **kwargs: str) -> None:
         if not isinstance(path, pathlib.Path):
@@ -126,7 +127,8 @@ class Chat:
         log('debug', f'File {name} read. Cleaning it.')
         raw_data = _clean_impurities(text)
 
-        self.filename: str = str(path.resolve())
+        self.filename: str = path.name
+        self.path: str = str(path.resolve())
         self.messages: List[Message] = []
         self.system_messages: List[SystemMessage] = []
 
@@ -149,10 +151,10 @@ class Chat:
                 content = is_user_message.group(2)
 
                 if contact_name not in self._actors:
-                    if self.filename not in _config:
-                        _config[self.filename] = {}
+                    if self.path not in _config:
+                        _config[self.path] = {}
 
-                    group_names = _config[self.filename]
+                    group_names = _config[self.path]
 
                     if contact_name not in group_names:
                         group_names[contact_name] = _get_name()

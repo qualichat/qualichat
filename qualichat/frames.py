@@ -22,13 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-from typing import List, Dict, Callable, Any, Optional, Union
+from collections import defaultdict
+from typing import DefaultDict, List, Dict, Callable, Any, Optional, Union
 
+import plotly.graph_objects as go # type: ignore
 from pandas import DataFrame
 from pandas.core.generic import NDFrame
 from plotly.subplots import make_subplots # type: ignore
 
 from .chat import Chat
+from .models import Message
 
 
 DataFrames = Dict[str, Union[DataFrame, NDFrame]]
@@ -59,12 +62,39 @@ def generate_chart(
     def decorator(method: Callable[..., DataFrames]) -> Callable[..., None]:
         def generator(self: BaseFrame, *args: Any, **kwargs: Any) -> None:
             fig = make_subplots(specs=[[{'secondary_y': True}]]) # type: ignore
+            dataframes = method(self, *args, **kwargs)
+
+            buttons: List[Dict[str, Any]] = []
+
+            for filename, dataframe in dataframes.items():
+                keys = list(dataframes.keys())
+                visibles = [False] * len(keys)
+                visibles[keys.index(filename)] = True
+
+                button = {
+                    'label': filename,
+                    'method': 'update',
+                    'args': [
+                        {'visible': visibles},
+                        {'title': filename}
+                    ]
+                }
+                buttons.append(button)
+
+                for bar in bars:
+                    filtered = dataframe[bar]
+                    fig.add_bar(
+                        x=dataframe.index,
+                        y=list(filtered),
+                        name=bar
+                    )
 
             fig.update_layout( # type: ignore
+                title_text=title,
                 updatemenus=[dict(
-                    buttons=[]
-                )],
-                title_text=title
+                    buttons=buttons,
+                    active=-1
+                )]
             )
 
             fig.show() # type: ignore
@@ -76,6 +106,10 @@ def generate_chart(
 
         return generator
     return decorator
+
+
+def _get_length(obj: List[str]) -> int:
+    return len(''.join(obj))
 
 
 class BaseFrame:
@@ -145,9 +179,52 @@ class KeysFrame(BaseFrame):
 
     fancy_name = 'Keys'
 
-    @generate_chart()
-    def test(self) -> DataFrames:
-        return {}
+    @generate_chart(
+        bars=[
+            'Qty_char_links', 'Qty_char_emails',
+            'Qty_char_marks', 'Qty_char_mentions',
+        ],
+        lines=['Qty_messages'],
+        title='Keys Frame (Laminations)'
+    )
+    def laminations(self) -> DataFrames:
+        dataframes: DataFrames = {}
+
+        columns = [
+            'Qty_char_links', 'Qty_char_emails',
+            'Qty_char_marks', 'Qty_char_mentions',
+            'Qty_messages'
+        ]
+
+        for chat in self.chats:
+            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            rows: List[List[int]] = []
+
+            for message in chat.messages:
+                data[message.created_at.strftime('%B %Y')].append(message)
+
+            for messages in data.values():
+                links = 0
+                marks = 0
+                emails = 0
+                mentions = 0
+                total_messages = 0
+
+                for message in messages:
+                    links += _get_length(message['Qty_char_links'])
+                    marks += _get_length(message['Qty_char_marks'])
+                    emails += _get_length(message['Qty_char_emails'])
+                    mentions += _get_length(message['Qty_char_mentions'])
+                    total_messages += 1
+
+                rows.append([links, marks, emails, mentions, total_messages])
+
+            index = list(data.keys())
+            dataframe = DataFrame(rows, index=index, columns=columns)
+                
+            dataframes[chat.filename] = dataframe
+
+        return dataframes
 
 
 # from typing import (
