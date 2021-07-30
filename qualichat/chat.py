@@ -1,4 +1,4 @@
-'''
+"""
 MIT License
 
 Copyright (c) 2021 Qualichat
@@ -20,125 +20,80 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
 
-import pathlib
-import json
-import os
-import random
-from typing import List, Union, Dict, Any
+from typing import Union, Any, List, Dict
+from pathlib import Path
 
-from .utils import log
-from .regex import CHAT_RE, USER_MESSAGE_RE
-from .models import Actor, Message, SystemMessage
+from .utils import log, config, get_random_name, save_config
+from .models import Message, SystemMessage, Actor
+from .regex import CHAT_FORMAT_RE, USER_MESSAGE_RE
 
 
 __all__ = ('Chat',)
 
 
-def _clean_impurities(text: str) -> str:
-    # Regex will not be used here since 
+def _clean_impurities(content: str) -> str:
+    # Regex will not be used here since
     # :meth:`str.replace` is faster and simpler.
-    text = text.replace('\u200e', '')
-    text = text.replace('\u2002', '')
-    text = text.replace('\u202c', '')
-    text = text.replace('\u202a', '')
+    content = content.replace('\u200e', '')
+    content = content.replace('\u2002', '')
+    content = content.replace('\u202c', '')
+    content = content.replace('\u202a', '')
 
-    text = text.replace('\xa0', ' ')
-    text = text.replace('\u2011', '-')
+    content = content.replace('\xa0', ' ')
+    content = content.replace('\u2011', '-')
 
-    return text
-
-
-def _get_config_file() -> Dict[Any, Any]:
-    home = pathlib.Path.home()
-
-    folder = home / '.qualichat'
-    config = folder / 'config.json'
-
-    if not folder.is_dir():
-        log('debug', 'Creating <color>.qualichat<reset> folder.')
-        folder.mkdir(exist_ok=True)
-
-        with config.open('w', encoding='utf-8') as f:
-            f.write(r'{}')
-
-    with config.open('r', encoding='utf-8') as f:
-        return json.load(f)
-
-_config = _get_config_file()
-
-def _save_config_file():
-    home = pathlib.Path.home()
-    config_file = home / '.qualichat' / 'config.json'
-
-    with config_file.open('w', encoding='utf-8') as f:
-        json.dump(_config, f, indent=2, sort_keys=True)
+    return content
 
 
-def _get_books_names() -> List[str]:
-    path = os.path.dirname(__file__)
-    books_path = os.path.join(path, 'books.txt')
-
-    with open(books_path, encoding='utf-8') as f:
-        return f.read().split('\n')
-
-_books = _get_books_names()
-
-
-def _get_name() -> str:
-    name = random.choice(_books)
-    # Remove the book from the list so there is no risk that two 
-    # actors have the same display name.
-    _books.remove(name)
-    return name.strip()
-
-
-# TODO: Update docs.
 class Chat:
     """Represents an isolated chat.
     
     Attributes
     ----------
+    path: :class:`pathlib.Path`
+        The path to the chat file.
     filename: :class:`str`
-        The filename of the given chat file.
+        The filename of the chat.
     messages: List[:class:`.Message`]
-        All the actor messages found by Qualichat.
+        All the actors messages found by Qualichat.
     system_messages: List[:class:`.SystemMessage`]
         All the system messages found by Qualichat.
     """
 
-    __slots__ = ('filename', 'path', 'messages', 'system_messages', '_actors')
+    __slots__ = ('path', 'filename', 'messages', 'system_messages', '_actors')
 
-    def __init__(self, path: Union[str, pathlib.Path], **kwargs: str) -> None:
-        if not isinstance(path, pathlib.Path):
-            path = pathlib.Path(path)
+    def __init__(self, path: Union[str, Path], **kwargs: Any) -> None:
+        if not isinstance(path, Path):
+            path = Path(path)
 
         if not path.is_file():
             raise FileNotFoundError(f'no such file: {str(path)!r}')
 
+        self.path: Path = path.resolve()
+        self.filename: str = self.path.name
+
         name = f'<color>{str(path)}<reset>'
-        log('info', f'Loading chat {name}.')
+        log('info', f'Loading chat {name}...')
 
-        log('debug', f'Reading {name} file content.')
+        log('debug', f'Reading {name} file content...')
         encoding = kwargs.pop('encoding', 'utf-8')
-        text = path.read_text(encoding=encoding)
+        content = path.read_text(encoding=encoding)
 
-        log('debug', f'File {name} read. Cleaning it.')
-        raw_data = _clean_impurities(text)
+        log('debug', f'File {name} read. Cleaning it...')
+        raw_data = _clean_impurities(content)
 
-        self.filename: str = path.name
-        self.path: str = str(path.resolve())
+        log('debug', f'Contents of the file {name} cleaned. Parsing it...')
         self.messages: List[Message] = []
         self.system_messages: List[SystemMessage] = []
 
         self._actors: Dict[str, Actor] = {}
 
-        log('debug', f'Contents of file {name} cleaned. Parsing it.')
-        for match in CHAT_RE.finditer(raw_data):
+        for match in CHAT_FORMAT_RE.finditer(raw_data):
             if not match:
-                # An unknown message?
-                # Anyway, let's just ignore it and move on.
+                # An unknown message? Anyway, 
+                # let's just ignore it and move on.
                 continue
 
             created_at = match.group(1)
@@ -151,18 +106,18 @@ class Chat:
                 content = is_user_message.group(2)
 
                 if contact_name not in self._actors:
-                    if self.path not in _config:
-                        _config[self.path] = {}
+                    path = str(self.path.resolve())
 
-                    group_names = _config[self.path]
+                    if path not in config:
+                        config[path] = {} # type: ignore
 
-                    if contact_name not in group_names:
-                        group_names[contact_name] = _get_name()
+                    group = config[path]
 
-                    display_name = group_names[contact_name]
-                    actor = Actor(contact_name, display_name)
+                    if contact_name not in group:
+                        group[contact_name] = get_random_name()
 
-                    self._actors[contact_name] = actor
+                    display_name = group[contact_name]
+                    self._actors[contact_name] = Actor(display_name)
 
                 actor = self._actors[contact_name]
                 message = Message(actor, content, created_at)
@@ -173,16 +128,17 @@ class Chat:
                 # It is a system message, indicating some group 
                 # event (actor left/joined, changed the group icon,
                 # etc.)
-                message = SystemMessage(rest, created_at)
-                self.system_messages.append(message)
+                self.system_messages.append(SystemMessage(rest, created_at))
 
-        _save_config_file()
+        save_config()
 
         messages = len(self.messages) + len(self.system_messages)
         actors = len(self.actors)
 
-        log('info', f'Loaded {messages:,} messages and {actors:,} actors ' \
-                    f'from {name} file.')
+        message = f'Loaded {messages:,} messages and {actors:,} actors from ' \
+                  f'{name}.'
+
+        log('info', message)
 
     @property
     def actors(self) -> List[Actor]:
@@ -190,3 +146,11 @@ class Chat:
         chat.
         """
         return list(self._actors.values())
+
+    def __repr__(self) -> str:
+        filename = f'filename={self.filename!r}'
+        actors = f'actors={len(self._actors)}'
+        messages = f'messages={len(self.messages)}'
+        system_messages = f'system_messages={len(self.system_messages)}'
+
+        return f'<Chat {filename} {actors} {messages} {system_messages}>'

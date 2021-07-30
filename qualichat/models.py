@@ -1,4 +1,4 @@
-'''
+"""
 MIT License
 
 Copyright (c) 2021 Qualichat
@@ -20,25 +20,25 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
 
 import datetime
-from typing import List, Dict, Any, Iterable
+from typing import Any, List, Dict, Iterable
 from types import MappingProxyType
 
 import emojis # type: ignore
 
 from .abc import BaseMessage
+from .enums import get_message_type, get_period, get_sub_period
 from .regex import (
+    LAUGHS_RE,
+    MENTION_RE,
+    NUMBERS_RE,
     URL_RE,
     EMAIL_RE,
     QUESTION_MARK_RE,
     EXCLAMATION_MARK_RE,
-    MENTION_RE,
-    NUMBERS_RE,
-    LAUGHS_RE
 )
-from .enums import get_period, get_sub_period, get_message_type
 
 
 __all__ = ('Actor', 'Message', 'SystemMessage')
@@ -53,7 +53,7 @@ def parse_time(string: str) -> datetime.datetime:
     Parameters
     ----------
     string: :class:`str`
-        The message creation time string.
+        The message's creation time string.
 
     Returns
     -------
@@ -64,12 +64,12 @@ def parse_time(string: str) -> datetime.datetime:
     return datetime.datetime.strptime(string, TIME_FORMAT)
 
 
-def _remove_all_incidences(text: str, *iterables: Iterable[str]) -> str:
+def remove_all_incidences(content: str, *iterables: Iterable[str]) -> str:
     for iterable in iterables:
         for incidence in iterable:
-            text = text.replace(incidence, '')
+            content = content.replace(incidence, '')
 
-    return text
+    return content
 
 
 class Actor:
@@ -81,20 +81,19 @@ class Actor:
         A representative name for this actor, this name is not
         necessarily the actor's real name.
     messages: List[:class:`.Message`]
-        A list containing all the messages that this user sent in the
+        A list containing all the messages that this actor sent in the
         chat.
     """
 
-    __slots__ = ('_contact_name', 'display_name', 'messages')
+    __slots__ = ('display_name', 'messages')
 
-    def __init__(self, contact_name: str, display_name: str) -> None:
-        self._contact_name: str = contact_name
-
+    def __init__(self, display_name: str) -> None:
         self.display_name: str = display_name
         self.messages: List[Message] = []
 
     def __repr__(self) -> str:
-        return f'<Actor {self.display_name=} messages={len(self.messages)}>'
+        return f'<Actor display_name={self.display_name!r} ' \
+               f'messages={len(self.messages)}>'
 
 
 class Message(BaseMessage):
@@ -217,9 +216,7 @@ class Message(BaseMessage):
         # We create a copy of the content (since we don't want to
         # change the original content) and then remove all URLs present
         # in the message, to avoid ambiguity.
-        content = _remove_all_incidences(
-            self.content, *data['Qty_char_links']
-        )
+        content = remove_all_incidences(self.content, *data['Qty_char_links'])
 
         data['Qty_char_?'] = QUESTION_MARK_RE.findall(content)
         data['Qty_char_!'] = EXCLAMATION_MARK_RE.findall(content)
@@ -230,24 +227,24 @@ class Message(BaseMessage):
         all_marks = data['Qty_char_?'] + data['Qty_char_!']
         data['Qty_char_marks'] = all_marks
 
-        net_fields_incidences = [
+        net_incidences_fields = [
             'Qty_char_mentions',
             'Qty_char_links',
             'Qty_char_emails',
             'Qty_char_emoji'
         ]
 
-        net_incidences = [data[i] for i in net_fields_incidences]
-        net_text = _remove_all_incidences(self.content, *net_incidences)
+        net_incidendes = [data[i] for i in net_incidences_fields]
+        net_text = remove_all_incidences(self.content, *net_incidendes)
 
-        pure_fields_incidences = [
+        pure_incidences_fields = [
             'Qty_char_laughs',
             'Qty_char_marks',
             'Qty_char_numbers'
         ]
 
-        pure_incidences = [data[i] for i in pure_fields_incidences]
-        pure_text = _remove_all_incidences(net_text, *pure_incidences)
+        pure_incidences = [data[i] for i in pure_incidences_fields]
+        pure_text = remove_all_incidences(net_text, *pure_incidences)
 
         data['Qty_char_net'] = net_text
         data['Qty_char_text'] = pure_text
@@ -259,8 +256,10 @@ class Message(BaseMessage):
         self._data: MappingProxyType[str, Any] = MappingProxyType(data)
 
     def __repr__(self) -> str:
-        return '<Message actor={0.actor} ' \
-               'created_at={0.created_at!r}>'.format(self)
+        actor = f'actor={self.actor}'
+        created_at = f'created_at={self.created_at!r}'
+
+        return f'<Message {actor} {created_at}>'
 
     def __getitem__(self, key: Any) -> Any:
         if not isinstance(key, str):
@@ -271,7 +270,7 @@ class Message(BaseMessage):
 
 class SystemMessage(BaseMessage):
     """Represents a message sent in the chat by the system.
-    
+
     Attributes
     ----------
     content: :class:`str`
@@ -287,4 +286,4 @@ class SystemMessage(BaseMessage):
         self.created_at: datetime.datetime = parse_time(created_at)
 
     def __repr__(self) -> str:
-        return '<SystemMessage created_at={0.created_at!r}>'.format(self)
+        return f'<SystemMessage created_at={self.created_at!r}>'
