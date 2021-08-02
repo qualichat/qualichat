@@ -1,9 +1,10 @@
-matplotlib
+plotly
+colorama
 emojis
 pandas
-colorama
-tldextract
-spacy
-wordcloud
-spacy
-plotly
+curtsies
+# matplotlib
+# tldextract
+# spacy
+# wordcloud
+# spacy

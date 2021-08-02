@@ -28,6 +28,7 @@ from collections import defaultdict
 from pandas import DataFrame
 from pandas.core.generic import NDFrame
 from plotly.subplots import make_subplots # type: ignore
+from plotly.graph_objects import Scatter # type: ignore
 
 from .chat import Chat
 from .models import Message
@@ -64,7 +65,39 @@ def generate_chart(
             specs = [[{'secondary_y': True}]]
 
             fig = make_subplots(specs=specs) # type: ignore
+            dataframes = method(self, *args, **kwargs)
 
+            # buttons: List[Dict[str, Any]] = []
+
+            # for filename, dataframe in dataframes.items():
+            #     button: Dict[str, Any] = dict()
+            #     button['label'] = filename
+            #     button['method'] = 'update'
+
+            #     ranges: List[Any] = [{'title': {'text': 'Sample text'}}]
+            #     button['args'] = ranges
+
+            #     buttons.append(button)
+
+            filename, dataframe = list(dataframes.items())[0]
+            index = dataframe.index # type: ignore
+
+            if bars is not None:
+                for bar in bars:
+                    filtered = getattr(dataframe, bar)
+                    options = dict(x=index, y=list(filtered), name=bar) # type: ignore
+                    fig.add_bar(**options) # type: ignore
+
+            if lines is not None:
+                for line in lines:
+                    filtered = getattr(dataframe, line)
+                    scatter = Scatter(x=index, y=list(filtered), name=line) # type: ignore
+                    fig.add_trace(scatter, secondary_y=True) # type: ignore
+
+            # menus: List[Dict[str, Any]] = [{'active': 0, 'showactive': True, 'buttons': buttons}]
+            title_text = f'{title} ({filename})'
+
+            fig.update_layout(title_text=title_text) # type: ignore
             fig.show() # type: ignore
 
         # Dummy implementation for the decorated function to inherit
@@ -128,7 +161,7 @@ class KeysFrame(BaseFrame):
     ----------
     chats: List[:class:`.Chat`]
         All the chats loaded via :meth:`qualichat.load_chats`.
-"""
+    """
 
     __slots__ = ()
 
