@@ -179,6 +179,17 @@ class KeysFrame(BaseFrame):
         title='Keys Frame (Laminations)'
     )
     def laminations(self) -> DataFrames:
+        """Shows what are the most common lamination aspects in
+        messages per month.
+
+        Lamination aspects can be interpreted as:
+
+        - Links/URLs
+        - E-mails
+        - Mentions
+
+        And it will be compared with the total messages sent per month.
+        """
         dataframes: DataFrames = {}
 
         columns = [
