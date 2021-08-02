@@ -1,4 +1,4 @@
-'''
+"""
 MIT License
 
 Copyright (c) 2021 Qualichat
@@ -20,23 +20,27 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
 
 import re
 
 
 __all__ = (
-    'CHAT_RE',
+    'CHAT_FORMAT_RE',
     'USER_MESSAGE_RE',
     'URL_RE',
     'EMAIL_RE',
-    'QUESTION_MARK_RE'
+    'QUESTION_MARK_RE',
+    'EXCLAMATION_MARK_RE',
+    'MENTION_RE',
+    'NUMBERS_RE',
+    'LAUGHS_RE',
 )
 
 
-CHAT_RE = re.compile(r'''
+CHAT_FORMAT_RE = re.compile(r'''
     ^\[
-    (?P<datetime>\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})
+        (?P<datetime>\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})
     \]\s
     (?P<rest>[\S\s]+?)
     (?=\n\[.+\]|\Z)

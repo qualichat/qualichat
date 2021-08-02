@@ -1,4 +1,4 @@
-'''
+"""
 MIT License
 
 Copyright (c) 2021 Qualichat
@@ -20,26 +20,23 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
 
-import pathlib
 import logging
-from typing import Union, List, Any
+from typing import Tuple, Union, Any, List
+from pathlib import Path
 
 from .chat import Chat
-from .frames import (
-    AnchoragesFrame,
-    ParticipationStatusFrame,
-    FabricationsFrame,
-    TracksFrame,
-    KeysFrame,
+
+from .frames import BaseFrame, KeysFrame
+
+
+__all__ = (
+    'Qualichat',
+    'load_chats',
 )
 
 
-__all__ = ('Qualichat', 'load_chats')
-
-
-# TODO: Add the rest of frames on docs.
 class Qualichat:
     """Represents a set of chats for linguistic analysis.
     
@@ -47,29 +44,28 @@ class Qualichat:
     ----------
     chats: List[:class:`.Chat`]
         All chats uploaded and parsed by Qualichat.
-    messages: :class:`.MessagesFrame`
-        A frame that adds graphics generator related to chat
-        messages.
+    keys: :class:`.KeysFrame`
+        The Qualichat's keys frame.
     """
 
-    __slots__ = (
-        'chats', 'anchorages', 'participation_status', 'fabrications',
-        'tracks', 'keys',
-    )
+    __slots__: Tuple[str, ...] = ('chats', 'keys')
 
     def __init__(self, chats: List[Chat]) -> None:
         self.chats = chats
 
-        # Qualichat frames
-        self.anchorages = AnchoragesFrame(chats)
-        self.participation_status = ParticipationStatusFrame(chats)
-        self.fabrications = FabricationsFrame(chats)
-        self.tracks = TracksFrame(chats)
         self.keys = KeysFrame(chats)
 
+    def __repr__(self) -> str:
+        return f'<Qualichat chats={self.chats}>'
 
-def load_chats( # type: ignore
-    *paths: Union[str, pathlib.Path],
+    @property
+    def frames(self) -> List[BaseFrame]:
+        return [getattr(self, name) for name in self.__slots__[1:]]
+
+
+def load_chats(
+    *paths: Union[str, Path],
+    debug: bool = False,
     **kwargs: Any
 ) -> Qualichat:
     """Loads the given chats from a plain text files.
@@ -78,7 +74,8 @@ def load_chats( # type: ignore
     ----------
     *paths: Union[:class:`str`, :class:`pathlib.Path`]
         The paths to the chat files.
-        The files must be in plain text format.
+    debug: :class:`bool`
+        Sets the logging level to debug.
     **kwargs: Any
         Keyword arguments that will be passed to :class:`.Chat`.
 
@@ -92,10 +89,9 @@ def load_chats( # type: ignore
     :class:`FileNotFoundError`
         If one of the chat files could not been found.
     """
-    debug = kwargs.pop('debug', False)
-    mode = logging.DEBUG if debug is True else logging.INFO
+    level = logging.DEBUG if debug else logging.INFO
 
     logger = logging.getLogger('qualichat')
-    logger.setLevel(mode)
+    logger.setLevel(level)
 
     return Qualichat([Chat(path, **kwargs) for path in paths])
