@@ -199,7 +199,10 @@ class Menu:
         return len(self.choices)
 
     def run(self) -> Any:
-        with CursorAwareWindow(out_stream=sys.stderr) as window:
+        callback: Callable[..., Any] = lambda x: x
+        options = dict(out_stream=sys.stderr, extra_bytes_callback=callback)
+        
+        with CursorAwareWindow(**options) as window:
             options = self.start(window)
 
         if self.before and self.choices[self._index] == self.choices[-1]:
