@@ -267,11 +267,11 @@ class KeysFrame(BaseFrame):
     @generate_chart(
         bars=['Qty_char_mentions'],
         lines=['Qty_messages'],
-        title='Keys Frame (Links)'
+        title='Keys Frame (Mentions)'
     )
     def mentions(self) -> DataFrames:
-        """Shows the amount of mentions sent in the chat per month and it
-        will be compared with the total messages sent.
+        """Shows the amount of mentions sent in the chat per month and
+        it will be compared with the total messages sent.
         """
         dataframes: DataFrames = {}
         columns = ['Qty_char_mentions', 'Qty_messages']
@@ -284,14 +284,14 @@ class KeysFrame(BaseFrame):
                 data[message.created_at.strftime('%B %Y')].append(message)
 
             for messages in data.values():
-                links = 0
+                mentions = 0
                 total_messages = 0
 
                 for message in messages:
-                    links += len(message['Qty_char_mentions'])
+                    mentions += len(message['Qty_char_mentions'])
                     total_messages += 1
 
-                rows.append([links, total_messages])
+                rows.append([mentions, total_messages])
 
             index = list(data.keys())
 
@@ -303,11 +303,11 @@ class KeysFrame(BaseFrame):
     @generate_chart(
         bars=['Qty_char_emails'],
         lines=['Qty_messages'],
-        title='Keys Frame (Links)'
+        title='Keys Frame (E-mails)'
     )
     def emails(self) -> DataFrames:
-        """Shows the amount of e-mails sent in the chat per month and it
-        will be compared with the total messages sent.
+        """Shows the amount of e-mails sent in the chat per month and
+        it will be compared with the total messages sent.
         """
         dataframes: DataFrames = {}
         columns = ['Qty_char_emails', 'Qty_messages']
@@ -320,14 +320,52 @@ class KeysFrame(BaseFrame):
                 data[message.created_at.strftime('%B %Y')].append(message)
 
             for messages in data.values():
-                links = 0
+                mentions = 0
                 total_messages = 0
 
                 for message in messages:
-                    links += len(message['Qty_char_mentions'])
+                    mentions += len(message['Qty_char_mentions'])
                     total_messages += 1
 
-                rows.append([links, total_messages])
+                rows.append([mentions, total_messages])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=columns)
+            dataframes[chat.filename] = dataframe
+
+        return dataframes
+
+    @generate_chart(
+        bars=['Qty_char_marks', 'Qty_char_emoji'],
+        lines=['Qty_messages'],
+        title='Keys Frame (Textual symbols)'
+    )
+    def textual_symbols(self) -> DataFrames:
+        """Shows the amount of textual symbols sent in the chat per 
+        month and it will be compared with the total messages sent.
+        """
+        dataframes: DataFrames = {}
+        columns = ['Qty_char_marks', 'Qty_char_emoji', 'Qty_messages']
+
+        for chat in self.chats:
+            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            rows: List[List[int]] = []
+
+            for message in chat.messages:
+                data[message.created_at.strftime('%B %Y')].append(message)
+
+            for messages in data.values():
+                marks = 0
+                emojis = 0
+                total_messages = 0
+
+                for message in messages:
+                    marks += len(message['Qty_char_marks'])
+                    emojis += len(message['Qty_char_emoji'])
+                    total_messages += 1
+
+                rows.append([marks, emojis, total_messages])
 
             index = list(data.keys())
 
