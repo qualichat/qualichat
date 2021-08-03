@@ -299,3 +299,39 @@ class KeysFrame(BaseFrame):
             dataframes[chat.filename] = dataframe
 
         return dataframes
+
+    @generate_chart(
+        bars=['Qty_char_emails'],
+        lines=['Qty_messages'],
+        title='Keys Frame (Links)'
+    )
+    def emails(self) -> DataFrames:
+        """Shows the amount of e-mails sent in the chat per month and it
+        will be compared with the total messages sent.
+        """
+        dataframes: DataFrames = {}
+        columns = ['Qty_char_emails', 'Qty_messages']
+
+        for chat in self.chats:
+            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            rows: List[List[int]] = []
+
+            for message in chat.messages:
+                data[message.created_at.strftime('%B %Y')].append(message)
+
+            for messages in data.values():
+                links = 0
+                total_messages = 0
+
+                for message in messages:
+                    links += len(message['Qty_char_mentions'])
+                    total_messages += 1
+
+                rows.append([links, total_messages])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=columns)
+            dataframes[chat.filename] = dataframe
+
+        return dataframes
