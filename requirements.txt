@@ -3,8 +3,7 @@ colorama
 emojis
 pandas
 curtsies
-# matplotlib
+wordcloud
+matplotlib
+spacy
 # tldextract
-# spacy
-# wordcloud
-# spacy

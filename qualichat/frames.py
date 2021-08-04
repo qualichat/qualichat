@@ -22,16 +22,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typing import Any, List, Dict, Callable, Optional, Union, DefaultDict
+from typing import (
+    Any,
+    List,
+    Dict,
+    Callable,
+    Optional,
+    Union,
+    DefaultDict,
+    Set
+)
 from collections import defaultdict
+from pathlib import Path
 
+# Fix matplotlib backend warning.
+import matplotlib
+matplotlib.use('TkAgg')
+
+import matplotlib.pyplot as plt
+import spacy
 from pandas import DataFrame
 from pandas.core.generic import NDFrame
 from plotly.subplots import make_subplots # type: ignore
 from plotly.graph_objects import Scatter # type: ignore
+from wordcloud.wordcloud import WordCloud, STOPWORDS # type: ignore
+from colorama import Fore
 
 from .chat import Chat
 from .models import Message
+from .enums import MessageType
+from .utils import log, progress_bar, Menu
 
 
 __all__ = (
@@ -41,6 +61,7 @@ __all__ = (
 
 
 DataFrames = Dict[str, Union[DataFrame, NDFrame]]
+WordClouds = Dict[str, WordCloud]
 
 
 # TODO: Add return type to this function.
@@ -109,6 +130,37 @@ def generate_chart(
     return decorator
 
 
+stopwords: Set[str] = set(STOPWORDS)
+stopwords.update([
+    'da', 'meu', 'em', 'você', 'de', 'ao', 'os', 'eu', 'Siga-nos'
+])
+
+
+# TODO: Add return type to this function.
+# TODO: Add docstring for this function.
+def word_cloud():
+    def decorator(method: Callable[..., WordClouds]) -> Callable[..., None]:
+        def generator(self: BaseFrame, *args: Any, **kwargs: Any) -> None:
+            word_clouds = method(self, *args, **kwargs)
+
+            for _, word_cloud in word_clouds.items():
+                word_cloud.stopwords = stopwords
+
+                plt.figure()
+                plt.axis('off')
+
+                plt.imshow(word_cloud, interpolation='bilinear') # type: ignore
+                plt.show()
+
+        # Dummy implementation for the decorated function to inherit
+        # the documentation.
+        generator.__doc__ = method.__doc__
+        generator.__annotations__ = method.__annotations__
+
+        return generator
+    return decorator
+
+
 class BaseFrame:
     """Represents the base of a Qualichat frame.
     Generally, you should use the built-in frames that Qualichat
@@ -150,6 +202,13 @@ class BaseFrame:
         return '<BaseFrame>'
 
 
+nlp = spacy.load('pt_core_news_sm') # type: ignore
+
+
+CYAN  = Fore.CYAN
+RESET = Fore.RESET
+
+
 class KeysFrame(BaseFrame):
     """A frame that adds charts generator related to chat messages.
 
@@ -169,6 +228,61 @@ class KeysFrame(BaseFrame):
 
     def __repr__(self) -> str:
         return '<KeysFrame>'
+
+    @word_cloud()
+    def keyword(self) -> WordClouds:
+        """Analyzes the keyword and returns a word cloud with the
+        desired type (word cloud of verbs, adjectives or nouns).
+        """
+        word_clouds: WordClouds = {}
+
+        log('info', 'Enter the keyword you want to analyze:')
+        keyword = input('» ')
+
+        for chat in self.chats:
+            data: List[str] = []
+            messages: List[Message] = []
+
+            for message in chat.messages:
+                if message['Type'] is not MessageType.default:
+                    continue
+
+                if keyword not in message.content.lower():
+                    continue
+
+                messages.append(message)
+
+            types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
+
+            menu = Menu('Choose your word cloud type:', types)
+            pos = menu.run()
+
+            for i, message in enumerate(messages, start=1):
+                text = message['Qty_char_text']
+                doc = nlp(text) # type: ignore
+
+                for token in doc: # type: ignore
+                    if token.pos_ == pos: # type: ignore
+                        data.append(token.text) # type: ignore
+
+                prefix = f'{CYAN}[{chat.filename}]{RESET} Progress'
+                progress_bar(i, len(messages), prefix=prefix)
+
+            parent = Path(__file__).resolve().parent
+            path = parent / 'fonts' / 'Roboto-Regular.ttf'
+
+            configs = {}
+            configs['width'] = 1920
+            configs['height'] = 1080
+            configs['font_path'] = str(path)
+            configs['background_color'] = 'white'
+            
+            all_words = ' '.join(data)
+            word_cloud = WordCloud(**configs).generate(all_words) # type: ignore
+
+            word_clouds[chat.filename] = word_cloud
+
+        return word_clouds
 
     @generate_chart(
         bars=[
