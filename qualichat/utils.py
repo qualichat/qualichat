@@ -29,7 +29,7 @@ import sys
 import json
 import os
 import random
-from typing import Callable, Dict, List, Any, Union, Optional
+from typing import Callable, Dict, List, Any, Union, Optional, Literal
 from pathlib import Path
 
 from colorama import AnsiToWin32, Fore
@@ -82,13 +82,17 @@ logger = logging.getLogger('qualichat')
 logger.addHandler(ColorStreamHandler())
 
 
-def log(level: str, message: str) -> None:
+Levels = Literal['debug', 'info', 'warn', 'error']
+
+
+def log(level: Levels, message: str) -> None:
     """Logs a message to ``qualichat`` logger.
 
     Parameters
     ----------
     level: :class:`str`
-        The logging level to send.
+        The logging level to send. It must be one of these: `debug`,
+        `info`, `warn`, `error`.
     message: :class:`str`
         The message content to send.
     """
