@@ -38,7 +38,7 @@ from curtsies.formatstring import FmtStr # type: ignore
 from curtsies.fmtfuncs import bold # type: ignore
 
 
-__all__ = ('log',)
+__all__ = ('log', 'progress_bar')
 
 
 GREEN     = Fore.GREEN
@@ -282,3 +282,25 @@ class Menu:
             rows += len(option_array)
 
         return array
+
+
+# TODO: Add return type to this function.
+# TODO: Add docstring for this function.
+def progress_bar(
+    iteration: int,
+    total: int,
+    prefix: str = 'Progress',
+    suffix: str = 'Complete',
+    decimals: int = 1,
+    length: int = 50,
+    fill: str = '█',
+    end: str = '\r'
+) -> None:
+    float_number = 100 * (iteration / float(total))
+    percent = ('{0:.' + str(decimals) + 'f}').format(float_number)
+    filled = int(length * iteration // total)
+    bar = fill * filled + '-' * (length - filled)
+    print(f'{prefix} |{bar}| {percent}% {suffix}', end=end)
+
+    if iteration == total:
+        print()
