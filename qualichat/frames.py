@@ -284,6 +284,55 @@ class KeysFrame(BaseFrame):
 
         return word_clouds
 
+    @word_cloud()
+    def messages(self) -> WordClouds:
+        """Analyzes the chats and returns a word cloud with the desired
+        type (word cloud of verbs, adjectives or nouns).
+         """
+        word_clouds: WordClouds = {}
+
+        for chat in self.chats:
+            data: List[str] = []
+            messages: List[Message] = []
+
+            for message in chat.messages:
+                if message['Type'] is not MessageType.default:
+                    continue
+
+                messages.append(message)
+
+            types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
+
+            menu = Menu('Choose your word cloud type:', types)
+            pos = menu.run()
+
+            for i, message in enumerate(messages, start=1):
+                text = message['Qty_char_text']
+                doc = nlp(text) # type: ignore
+
+                for token in doc: # type: ignore
+                    if token.pos_ == pos: # type: ignore
+                        data.append(token.text) # type: ignore
+
+                prefix = f'{CYAN}[{chat.filename}]{RESET} Progress'
+                progress_bar(i, len(messages), prefix=prefix)
+
+            parent = Path(__file__).resolve().parent
+            path = parent / 'fonts' / 'Roboto-Regular.ttf'
+
+            configs = {}
+            configs['width'] = 1920
+            configs['height'] = 1080
+            configs['font_path'] = str(path)
+            configs['background_color'] = 'white'
+            
+            all_words = ' '.join(data)
+            word_cloud = WordCloud(**configs).generate(all_words) # type: ignore
+
+            word_clouds[chat.filename] = word_cloud
+
+        return word_clouds
+
     @generate_chart(
         bars=[
             'Qty_char_links', 'Qty_char_emails',
