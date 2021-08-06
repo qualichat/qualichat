@@ -337,6 +337,7 @@ class KeysFrame(BaseFrame):
         bars=[
             'Qty_char_links', 'Qty_char_emails',
             'Qty_char_marks', 'Qty_char_mentions',
+            'Qty_char_emoji'
         ],
         lines=['Qty_messages'],
         title='Keys Frame (Laminations)'
@@ -345,11 +346,12 @@ class KeysFrame(BaseFrame):
         """Shows what are the most common lamination aspects in
         messages per month.
 
-        Lamination aspects can be interpreted as:
+        Laminations aspects can be interpreted as:
 
         - Links/URLs
         - E-mails
         - Mentions
+        - Símbolos/Emojis
 
         And it will be compared with the total messages sent per month.
         """
@@ -358,7 +360,7 @@ class KeysFrame(BaseFrame):
         columns = [
             'Qty_char_links', 'Qty_char_emails',
             'Qty_char_marks', 'Qty_char_mentions',
-            'Qty_messages'
+            'Qty_char_emoji', 'Qty_messages'
         ]
 
         for chat in self.chats:
@@ -371,6 +373,7 @@ class KeysFrame(BaseFrame):
             for messages in data.values():
                 links = 0
                 marks = 0
+                emojis = 0
                 emails = 0
                 mentions = 0
                 total_messages = 0
@@ -378,11 +381,14 @@ class KeysFrame(BaseFrame):
                 for message in messages:
                     links += len(message['Qty_char_links'])
                     marks += len(message['Qty_char_marks'])
+                    emojis += len(message['Qty_char_emoji'])
                     emails += len(message['Qty_char_emails'])
                     mentions += len(message['Qty_char_mentions'])
                     total_messages += 1
 
-                rows.append([links, marks, emails, mentions, total_messages])
+                rows.append(
+                    [links, marks, emojis, emails, mentions, total_messages]
+                )
 
             index = list(data.keys())
             dataframe = DataFrame(rows, index=index, columns=columns)
@@ -529,6 +535,214 @@ class KeysFrame(BaseFrame):
                     total_messages += 1
 
                 rows.append([marks, emojis, total_messages])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=columns)
+            dataframes[chat.filename] = dataframe
+
+        return dataframes
+
+    @generate_chart(
+        bars=[
+            'Qty_char_emails', 'Qty_char_marks',
+            'Qty_char_mentions', 'Qty_char_emoji',
+        ],
+        lines=['Qty_messages'],
+        title='Keys Frame (Without links)'
+    )
+    def without_links(self) -> DataFrames:
+        """Shows the amount of lamination elements *except links*
+        sent in the chat per month and it will be compared with the
+        total messages sent.
+        """
+        dataframes: DataFrames = {}
+        columns = [
+            'Qty_char_emails', 'Qty_char_marks',
+            'Qty_char_mentions', 'Qty_char_emoji',
+            'Qty_messages'
+        ]
+
+        for chat in self.chats:
+            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            rows: List[List[int]] = []
+
+            for message in chat.messages:
+                data[message.created_at.strftime('%B %Y')].append(message)
+
+            for messages in data.values():
+                emails = 0
+                marks = 0
+                emojis = 0
+                mentions = 0
+                total_messages = 0
+
+                for message in messages:
+                    if message['Qty_char_links']:
+                        continue
+
+                    emails += len(message['Qty_char_emails'])
+                    marks += len(message['Qty_char_marks'])
+                    emojis += len(message['Qty_char_emoji'])
+                    mentions += len(message['Qty_char_mentions'])
+                    total_messages += 1
+
+                rows.append([emails, marks, emojis, mentions, total_messages])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=columns)
+            dataframes[chat.filename] = dataframe
+
+        return dataframes
+
+    @generate_chart(
+        bars=[
+            'Qty_char_links', 'Qty_char_emails',
+            'Qty_char_marks', 'Qty_char_emoji',
+        ],
+        lines=['Qty_messages'],
+        title='Keys Frame (Without mentions)'
+    )
+    def without_mentions(self) -> DataFrames:
+        """Shows the amount of lamination elements *except mentions*
+        sent in the chat per month and it will be compared with the
+        total messages sent.
+        """
+        dataframes: DataFrames = {}
+        columns = [
+            'Qty_char_links', 'Qty_char_emails',
+            'Qty_char_marks', 'Qty_char_emoji',
+            'Qty_messages'
+        ]
+
+        for chat in self.chats:
+            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            rows: List[List[int]] = []
+
+            for message in chat.messages:
+                data[message.created_at.strftime('%B %Y')].append(message)
+
+            for messages in data.values():
+                links = 0
+                emails = 0
+                marks = 0
+                emojis = 0
+                total_messages = 0
+
+                for message in messages:
+                    if message['Qty_char_mentions']:
+                        continue
+                    
+                    links += len(message['Qty_char_links'])
+                    emails += len(message['Qty_char_emails'])
+                    marks += len(message['Qty_char_marks'])
+                    emojis += len(message['Qty_char_emoji'])
+                    total_messages += 1
+
+                rows.append([links, emails, marks, emojis, total_messages])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=columns)
+            dataframes[chat.filename] = dataframe
+
+        return dataframes
+
+    @generate_chart(
+        bars=[
+            'Qty_char_links', 'Qty_char_marks',
+            'Qty_char_emoji', 'Qty_char_mentions',
+        ],
+        lines=['Qty_messages'],
+        title='Keys Frame (Without e-mails)'
+    )
+    def without_emails(self) -> DataFrames:
+        """Shows the amount of laminations elements *except e-mails*
+        sent in the chat per month and it will be compared with the
+        total messages sent.
+        """
+        dataframes: DataFrames = {}
+        columns = [
+            'Qty_char_links', 'Qty_char_marks',
+            'Qty_char_emoji', 'Qty_char_mentions',
+            'Qty_messages'
+        ]
+
+        for chat in self.chats:
+            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            rows: List[List[int]] = []
+
+            for message in chat.messages:
+                data[message.created_at.strftime('%B %Y')].append(message)
+
+            for messages in data.values():
+                links = 0
+                marks = 0
+                emojis = 0
+                mentions = 0
+                total_messages = 0
+
+                for message in messages:
+                    if message['Qty_char_emails']:
+                        continue
+                    
+                    links += len(message['Qty_char_links'])
+                    marks += len(message['Qty_char_marks'])
+                    emojis += len(message['Qty_char_emoji'])
+                    mentions += len(message['Qty_char_mentions'])
+                    total_messages += 1
+
+                rows.append(
+                    [links, marks, emojis, mentions, total_messages]
+                )
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=columns)
+            dataframes[chat.filename] = dataframe
+
+        return dataframes
+
+    @generate_chart(
+        bars=['Qty_char_links', 'Qty_char_emails', 'Qty_char_mentions',],
+        lines=['Qty_messages'],
+        title='Keys Frame (Without textual symbols)'
+    )
+    def without_textual_symbols(self) -> DataFrames:
+        """Shows the amount of laminations elements *except textual
+        symbols* sent in the chat per month and it will be compared
+        with the total messages sent.
+        """
+        dataframes: DataFrames = {}
+        columns = [
+            'Qty_char_links', 'Qty_char_emails',
+            'Qty_char_mentions', 'Qty_messages'
+        ]
+
+        for chat in self.chats:
+            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            rows: List[List[int]] = []
+
+            for message in chat.messages:
+                data[message.created_at.strftime('%B %Y')].append(message)
+
+            for messages in data.values():
+                links = 0
+                emails = 0
+                mentions = 0
+                total_messages = 0
+
+                for message in messages:
+                    if message['Qty_char_marks'] or message['Qty_char_emoji']:
+                        continue
+                    
+                    links += len(message['Qty_char_links'])
+                    emails += len(message['Qty_char_emails'])
+                    mentions += len(message['Qty_char_mentions'])
+                    total_messages += 1
+
+                rows.append([links, emails, mentions, total_messages])
 
             index = list(data.keys())
 
