@@ -364,11 +364,12 @@ class KeysFrame(BaseFrame):
         ]
 
         for chat in self.chats:
-            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
             rows: List[List[int]] = []
 
             for message in chat.messages:
-                data[message.created_at.strftime('%B %Y')].append(message)
+                created_at = message.created_at.replace(hour=0, minute=0, second=0)
+                data[created_at].append(message)
 
             for messages in data.values():
                 links = 0
@@ -410,11 +411,12 @@ class KeysFrame(BaseFrame):
         columns = ['Qty_char_links', 'Qty_messages']
 
         for chat in self.chats:
-            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
             rows: List[List[int]] = []
 
             for message in chat.messages:
-                data[message.created_at.strftime('%B %Y')].append(message)
+                created_at = message.created_at.replace(hour=0, minute=0, second=0)
+                data[created_at].append(message)
 
             for messages in data.values():
                 links = 0
@@ -446,11 +448,12 @@ class KeysFrame(BaseFrame):
         columns = ['Qty_char_mentions', 'Qty_messages']
 
         for chat in self.chats:
-            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
             rows: List[List[int]] = []
 
             for message in chat.messages:
-                data[message.created_at.strftime('%B %Y')].append(message)
+                created_at = message.created_at.replace(hour=0, minute=0, second=0)
+                data[created_at].append(message)
 
             for messages in data.values():
                 mentions = 0
@@ -482,11 +485,12 @@ class KeysFrame(BaseFrame):
         columns = ['Qty_char_emails', 'Qty_messages']
 
         for chat in self.chats:
-            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
             rows: List[List[int]] = []
 
             for message in chat.messages:
-                data[message.created_at.strftime('%B %Y')].append(message)
+                created_at = message.created_at.replace(hour=0, minute=0, second=0)
+                data[created_at].append(message)
 
             for messages in data.values():
                 mentions = 0
@@ -518,11 +522,12 @@ class KeysFrame(BaseFrame):
         columns = ['Qty_char_marks', 'Qty_char_emoji', 'Qty_messages']
 
         for chat in self.chats:
-            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
             rows: List[List[int]] = []
 
             for message in chat.messages:
-                data[message.created_at.strftime('%B %Y')].append(message)
+                created_at = message.created_at.replace(hour=0, minute=0, second=0)
+                data[created_at].append(message)
 
             for messages in data.values():
                 marks = 0
@@ -564,11 +569,12 @@ class KeysFrame(BaseFrame):
         ]
 
         for chat in self.chats:
-            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
             rows: List[List[int]] = []
 
             for message in chat.messages:
-                data[message.created_at.strftime('%B %Y')].append(message)
+                created_at = message.created_at.replace(hour=0, minute=0, second=0)
+                data[created_at].append(message)
 
             for messages in data.values():
                 emails = 0
