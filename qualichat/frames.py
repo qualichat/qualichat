@@ -34,6 +34,7 @@ from typing import (
 )
 from collections import defaultdict
 from pathlib import Path
+from datetime import datetime
 
 # Fix matplotlib backend warning.
 import matplotlib
@@ -119,6 +120,7 @@ def generate_chart(
             title_text = f'{title} ({filename})'
 
             fig.update_layout(title_text=title_text) # type: ignore
+            fig.update_xaxes(rangeslider_visible=True) # type: ignore
             fig.show() # type: ignore
 
         # Dummy implementation for the decorated function to inherit
@@ -241,7 +243,7 @@ class KeysFrame(BaseFrame):
 
         for chat in self.chats:
             data: List[str] = []
-            messages: List[Message] = []
+            messages: DefaultDict[str, List[Message]] = defaultdict(list)
 
             for message in chat.messages:
                 if message['Type'] is not MessageType.default:
@@ -250,15 +252,19 @@ class KeysFrame(BaseFrame):
                 if keyword not in message.content.lower():
                     continue
 
-                messages.append(message)
+                messages['All'].append(message)
+                messages[message.created_at.strftime("%B %Y")].append(message)
 
             types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
 
             menu = Menu('Choose your word cloud type:', types)
             pos = menu.run()
 
+            menu = Menu('Choose the chat epoch:', messages)
+            messages = menu.run()
+
             for i, message in enumerate(messages, start=1):
-                text = message['Qty_char_text']
+                text = message['Qty_char_text'] # type: ignore
                 doc = nlp(text) # type: ignore
 
                 for token in doc: # type: ignore
