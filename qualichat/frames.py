@@ -244,6 +244,7 @@ class KeysFrame(BaseFrame):
         for chat in self.chats:
             data: List[str] = []
             messages: DefaultDict[str, List[Message]] = defaultdict(list)
+            all_messages: List[Message] = []
 
             for message in chat.messages:
                 if message['Type'] is not MessageType.default:
@@ -252,7 +253,7 @@ class KeysFrame(BaseFrame):
                 if keyword not in message.content.lower():
                     continue
 
-                messages['All'].append(message)
+                all_messages.append(message)
                 messages[message.created_at.strftime("%B %Y")].append(message)
 
             types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
@@ -260,10 +261,23 @@ class KeysFrame(BaseFrame):
             menu = Menu('Choose your word cloud type:', types)
             pos = menu.run()
 
-            menu = Menu('Choose the chat epoch:', messages)
-            messages = menu.run()
+            selected_messages = ['All', 'Choose a chat epoch']
 
-            for i, message in enumerate(messages, start=1):
+            menu = Menu('Which messages should be selected?', selected_messages)
+            selected = menu.run()
+
+            if selected == 'All':
+                chat_messages = all_messages
+            else:
+                menu = Menu('Choose a chat epoch:', messages, multi=True)
+                selected_messages = menu.run()
+
+                chat_messages: List[Message] = []
+
+                for messages in selected_messages:
+                    chat_messages.extend(messages) # type: ignore
+
+            for i, message in enumerate(chat_messages, start=1):
                 text = message['Qty_char_text'] # type: ignore
                 doc = nlp(text) # type: ignore
 
@@ -272,7 +286,7 @@ class KeysFrame(BaseFrame):
                         data.append(token.text) # type: ignore
 
                 prefix = f'{CYAN}[{chat.filename}]{RESET} Progress'
-                progress_bar(i, len(messages), prefix=prefix)
+                progress_bar(i, len(chat_messages), prefix=prefix)
 
             parent = Path(__file__).resolve().parent
             path = parent / 'fonts' / 'Roboto-Regular.ttf'
