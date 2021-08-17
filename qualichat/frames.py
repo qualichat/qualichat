@@ -32,7 +32,7 @@ from typing import (
     DefaultDict,
     Set
 )
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from pathlib import Path
 from datetime import datetime
 
@@ -187,9 +187,9 @@ class BaseFrame:
 
     def __init__(self, chats: List[Chat]) -> None:
         self.chats: List[Chat] = chats
-        self.charts: Dict[str, Callable[..., Any]] = {}
+        self.charts: Dict[str, Callable[..., Any]] = OrderedDict()
 
-        for attr in dir(self):
+        for attr in self.__dir__():
             if attr.startswith('_'):
                 continue
 
