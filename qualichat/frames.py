@@ -520,10 +520,6 @@ class KeysFrame(BaseFrame):
             data = sort_function(chat.messages)
             rows: List[List[int]] = []
 
-            for message in chat.messages:
-                created_at = message.created_at.replace(hour=0, minute=0, second=0)
-                data[created_at].append(message)
-
             for messages in data.values():
                 mentions = 0
                 total_messages = 0
