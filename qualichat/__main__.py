@@ -23,17 +23,55 @@ SOFTWARE.
 """
 
 import argparse
-from qualichat.frames import BaseFrame
 import sys
 import platform
+import logging
 from typing import Any, Callable, Dict, Tuple, List
 
 import plotly # type: ignore
 import colorama
+from colorama import Fore, AnsiToWin32
 
 import qualichat
 from .utils import log, Menu
-from .frames import sort_by_day, sort_by_month
+from .frames import BaseFrame, sort_by_day, sort_by_month
+
+
+GREEN     = Fore.GREEN
+CYAN      = Fore.CYAN
+RED       = Fore.RED
+LIGHT_RED = Fore.LIGHTRED_EX
+RESET     = Fore.RESET
+
+
+class ColorStreamHandler(logging.StreamHandler):
+    """Handler that adds color support to terminal."""
+
+    prefix: str = f'<color>[qualichat]<reset>'
+    colors: Dict[str, str] = {
+        'INFO': GREEN,
+        'DEBUG': CYAN,
+        'WARNING': RED,
+        'ERROR': LIGHT_RED
+    }
+
+    def __init__(self) -> None:
+        super().__init__(AnsiToWin32(sys.stderr)) # type: ignore
+
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            message = f'{self.prefix} {self.format(record)}'
+            level = record.levelname
+
+            message = message.replace('<color>', self.colors[level])
+            message = message.replace('<reset>', RESET)
+
+            self.stream.write(message + self.terminator) # type: ignore
+            self.flush()
+        except RecursionError:
+            raise
+        except Exception:
+            self.handleError(record)
 
 
 def show_version() -> None:
@@ -145,6 +183,9 @@ def parse_args() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:
 
 
 def main() -> None:
+    logger = logging.getLogger('qualichat')
+    logger.addHandler(ColorStreamHandler())
+
     parser, args = parse_args()
     args.func(parser, args)
 

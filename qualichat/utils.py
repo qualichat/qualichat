@@ -32,7 +32,6 @@ import random
 from typing import Callable, Dict, List, Any, Union, Optional, Literal
 from pathlib import Path
 
-from colorama import AnsiToWin32, Fore
 from curtsies import CursorAwareWindow, FSArray, fsarray, Input # type: ignore
 from curtsies.formatstring import FmtStr # type: ignore
 from curtsies.fmtfuncs import bold # type: ignore
@@ -41,47 +40,7 @@ from curtsies.fmtfuncs import bold # type: ignore
 __all__ = ('log', 'progress_bar')
 
 
-GREEN     = Fore.GREEN
-CYAN      = Fore.CYAN
-RED       = Fore.RED
-LIGHT_RED = Fore.LIGHTRED_EX
-RESET     = Fore.RESET
-
-
-class ColorStreamHandler(logging.StreamHandler):
-    """Handler that adds color support to terminal."""
-
-    prefix: str = f'<color>[qualichat]<reset>'
-    colors: Dict[str, str] = {
-        'INFO': GREEN,
-        'DEBUG': CYAN,
-        'WARNING': RED,
-        'ERROR': LIGHT_RED
-    }
-
-    def __init__(self) -> None:
-        super().__init__(AnsiToWin32(sys.stderr)) # type: ignore
-
-    def emit(self, record: logging.LogRecord) -> None:
-        try:
-            message = f'{self.prefix} {self.format(record)}'
-            level = record.levelname
-
-            message = message.replace('<color>', self.colors[level])
-            message = message.replace('<reset>', RESET)
-
-            self.stream.write(message + self.terminator) # type: ignore
-            self.flush()
-        except RecursionError:
-            raise
-        except Exception:
-            self.handleError(record)
-
-
 logger = logging.getLogger('qualichat')
-logger.addHandler(ColorStreamHandler())
-
-
 Levels = Literal['debug', 'info', 'warn', 'error']
 
 
