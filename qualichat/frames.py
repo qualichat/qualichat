@@ -208,7 +208,7 @@ class BaseFrame:
 
     __slots__ = ('chats', 'charts')
 
-    fancy_name: str = ''
+    fancy_name: str
 
     def __init__(self, chats: List[Chat]) -> None:
         self.chats: List[Chat] = chats
