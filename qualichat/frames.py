@@ -145,11 +145,12 @@ def word_cloud():
         def generator(self: BaseFrame, *args: Any, **kwargs: Any) -> None:
             word_clouds = method(self, *args, **kwargs)
 
-            for _, word_cloud in word_clouds.items():
+            for filename, word_cloud in word_clouds.items():
                 word_cloud.stopwords = stopwords
 
                 plt.figure()
                 plt.axis('off')
+                plt.title(f'Word cloud ({filename})')
 
                 plt.imshow(word_cloud, interpolation='bilinear') # type: ignore
                 plt.show()
