@@ -163,6 +163,30 @@ def word_cloud():
     return decorator
 
 
+MessagesData = DefaultDict[datetime, List[Message]]
+SortingFunction = Callable[[List[Message]], MessagesData]
+
+
+def sort_by_day(messages: List[Message]) -> MessagesData:
+    data: DefaultDict[datetime, List[Message]] = defaultdict(list)
+
+    for message in messages:
+        created_at = message.created_at.replace(hour=0, minute=0, second=0)
+        data[created_at].append(message)
+
+    return data
+
+
+def sort_by_month(messages: List[Message]) -> MessagesData:
+    data: DefaultDict[datetime, List[Message]] = defaultdict(list)
+
+    for message in messages:
+        created_at = message.created_at.replace(day=1, hour=0, minute=0, second=0)
+        data[created_at].append(message)
+
+    return data
+
+
 class BaseFrame:
     """Represents the base of a Qualichat frame.
     Generally, you should use the built-in frames that Qualichat
@@ -232,7 +256,7 @@ class KeysFrame(BaseFrame):
         return '<KeysFrame>'
 
     @word_cloud()
-    def keyword(self) -> WordClouds:
+    def keyword(self, sort_function: Callable[[], None]) -> WordClouds:
         """Analyzes the keyword and returns a word cloud with the
         desired type (word cloud of verbs, adjectives or nouns).
         """
@@ -305,7 +329,7 @@ class KeysFrame(BaseFrame):
         return word_clouds
 
     @word_cloud()
-    def messages(self) -> WordClouds:
+    def messages(self, sort_function: Callable[[], None]) -> WordClouds:
         """Analyzes the chats and returns a word cloud with the desired
         type (word cloud of verbs, adjectives or nouns).
          """
@@ -362,7 +386,7 @@ class KeysFrame(BaseFrame):
         lines=['Qty_messages'],
         title='Keys Frame (Laminations)'
     )
-    def laminations(self) -> DataFrames:
+    def laminations(self, sort_function: SortingFunction) -> DataFrames:
         """Shows what are the most common lamination aspects in
         messages per month.
 
@@ -384,12 +408,8 @@ class KeysFrame(BaseFrame):
         ]
 
         for chat in self.chats:
-            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
+            data = sort_function(chat.messages)
             rows: List[List[int]] = []
-
-            for message in chat.messages:
-                created_at = message.created_at.replace(hour=0, minute=0, second=0)
-                data[created_at].append(message)
 
             for messages in data.values():
                 links = 0
@@ -423,7 +443,7 @@ class KeysFrame(BaseFrame):
         lines=['Qty_messages'],
         title='Keys Frame (Links)'
     )
-    def links(self) -> DataFrames:
+    def links(self, sort_function: SortingFunction) -> DataFrames:
         """Shows the amount of links sent in the chat per month and it
         will be compared with the total messages sent.
         """
@@ -431,12 +451,8 @@ class KeysFrame(BaseFrame):
         columns = ['Qty_char_links', 'Qty_messages']
 
         for chat in self.chats:
-            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
+            data = sort_function(chat.messages)
             rows: List[List[int]] = []
-
-            for message in chat.messages:
-                created_at = message.created_at.replace(hour=0, minute=0, second=0)
-                data[created_at].append(message)
 
             for messages in data.values():
                 links = 0
@@ -460,7 +476,7 @@ class KeysFrame(BaseFrame):
         lines=['Qty_messages'],
         title='Keys Frame (Mentions)'
     )
-    def mentions(self) -> DataFrames:
+    def mentions(self, sort_function: SortingFunction) -> DataFrames:
         """Shows the amount of mentions sent in the chat per month and
         it will be compared with the total messages sent.
         """
@@ -468,12 +484,8 @@ class KeysFrame(BaseFrame):
         columns = ['Qty_char_mentions', 'Qty_messages']
 
         for chat in self.chats:
-            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
+            data = sort_function(chat.messages)
             rows: List[List[int]] = []
-
-            for message in chat.messages:
-                created_at = message.created_at.replace(hour=0, minute=0, second=0)
-                data[created_at].append(message)
 
             for messages in data.values():
                 mentions = 0
@@ -497,7 +509,7 @@ class KeysFrame(BaseFrame):
         lines=['Qty_messages'],
         title='Keys Frame (E-mails)'
     )
-    def emails(self) -> DataFrames:
+    def emails(self, sort_function: SortingFunction) -> DataFrames:
         """Shows the amount of e-mails sent in the chat per month and
         it will be compared with the total messages sent.
         """
@@ -505,7 +517,7 @@ class KeysFrame(BaseFrame):
         columns = ['Qty_char_emails', 'Qty_messages']
 
         for chat in self.chats:
-            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
+            data = sort_function(chat.messages)
             rows: List[List[int]] = []
 
             for message in chat.messages:
@@ -534,7 +546,7 @@ class KeysFrame(BaseFrame):
         lines=['Qty_messages'],
         title='Keys Frame (Textual symbols)'
     )
-    def textual_symbols(self) -> DataFrames:
+    def textual_symbols(self, sort_function: SortingFunction) -> DataFrames:
         """Shows the amount of textual symbols sent in the chat per 
         month and it will be compared with the total messages sent.
         """
@@ -542,12 +554,8 @@ class KeysFrame(BaseFrame):
         columns = ['Qty_char_marks', 'Qty_char_emoji', 'Qty_messages']
 
         for chat in self.chats:
-            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
+            data = sort_function(chat.messages)
             rows: List[List[int]] = []
-
-            for message in chat.messages:
-                created_at = message.created_at.replace(hour=0, minute=0, second=0)
-                data[created_at].append(message)
 
             for messages in data.values():
                 marks = 0
@@ -576,7 +584,7 @@ class KeysFrame(BaseFrame):
         lines=['Qty_messages'],
         title='Keys Frame (Without links)'
     )
-    def without_links(self) -> DataFrames:
+    def without_links(self, sort_function: SortingFunction) -> DataFrames:
         """Shows the amount of lamination elements *except links*
         sent in the chat per month and it will be compared with the
         total messages sent.
@@ -589,12 +597,8 @@ class KeysFrame(BaseFrame):
         ]
 
         for chat in self.chats:
-            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
+            data = sort_function(chat.messages)
             rows: List[List[int]] = []
-
-            for message in chat.messages:
-                created_at = message.created_at.replace(hour=0, minute=0, second=0)
-                data[created_at].append(message)
 
             for messages in data.values():
                 emails = 0
@@ -630,7 +634,7 @@ class KeysFrame(BaseFrame):
         lines=['Qty_messages'],
         title='Keys Frame (Without mentions)'
     )
-    def without_mentions(self) -> DataFrames:
+    def without_mentions(self, sort_function: SortingFunction) -> DataFrames:
         """Shows the amount of lamination elements *except mentions*
         sent in the chat per month and it will be compared with the
         total messages sent.
@@ -643,12 +647,8 @@ class KeysFrame(BaseFrame):
         ]
 
         for chat in self.chats:
-            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
+            data = sort_function(chat.messages)
             rows: List[List[int]] = []
-
-            for message in chat.messages:
-                created_at = message.created_at.replace(hour=0, minute=0, second=0)
-                data[created_at].append(message)
 
             for messages in data.values():
                 links = 0
@@ -684,7 +684,7 @@ class KeysFrame(BaseFrame):
         lines=['Qty_messages'],
         title='Keys Frame (Without e-mails)'
     )
-    def without_emails(self) -> DataFrames:
+    def without_emails(self, sort_function: SortingFunction) -> DataFrames:
         """Shows the amount of laminations elements *except e-mails*
         sent in the chat per month and it will be compared with the
         total messages sent.
@@ -697,11 +697,8 @@ class KeysFrame(BaseFrame):
         ]
 
         for chat in self.chats:
-            data: DefaultDict[str, List[Message]] = defaultdict(list)
+            data = sort_function(chat.messages)
             rows: List[List[int]] = []
-
-            for message in chat.messages:
-                data[message.created_at.strftime('%B %Y')].append(message)
 
             for messages in data.values():
                 links = 0
@@ -736,7 +733,7 @@ class KeysFrame(BaseFrame):
         lines=['Qty_messages'],
         title='Keys Frame (Without textual symbols)'
     )
-    def without_textual_symbols(self) -> DataFrames:
+    def without_textual_symbols(self, sort_function: SortingFunction) -> DataFrames:
         """Shows the amount of laminations elements *except textual
         symbols* sent in the chat per month and it will be compared
         with the total messages sent.
@@ -748,12 +745,8 @@ class KeysFrame(BaseFrame):
         ]
 
         for chat in self.chats:
-            data: DefaultDict[datetime, List[Message]] = defaultdict(list)
+            data = sort_function(chat.messages)
             rows: List[List[int]] = []
-
-            for message in chat.messages:
-                created_at = message.created_at.replace(hour=0, minute=0, second=0)
-                data[created_at].append(message)
 
             for messages in data.values():
                 links = 0

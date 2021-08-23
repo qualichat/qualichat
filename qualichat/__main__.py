@@ -33,6 +33,7 @@ import colorama
 
 import qualichat
 from .utils import log, Menu
+from .frames import sort_by_day, sort_by_month
 
 
 def show_version() -> None:
@@ -102,8 +103,13 @@ def loadchat(
         if not charts:
             return log('info', 'No charts were selected. Closing...')
 
+        modes = {'By day': sort_by_day, 'By month': sort_by_month}
+
+        menu = Menu('Please, choose your time sorting mode:', modes)
+        sorting_mode = menu.run()
+
         for chart in charts:
-            chart() # type: ignore
+            chart(sorting_mode) # type: ignore
 
     frames_menu()
 
