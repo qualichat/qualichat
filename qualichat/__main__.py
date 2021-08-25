@@ -27,6 +27,7 @@ import sys
 import platform
 import logging
 from typing import Any, Callable, Dict, Tuple, List
+from functools import partial
 
 import plotly # type: ignore
 import colorama
@@ -141,10 +142,17 @@ def loadchat(
         if not charts:
             return log('info', 'No charts were selected. Closing...')
 
-        modes = {'By day': sort_by_day, 'By month': sort_by_month}
+        sorting_mode_menu(frame, charts) # type: ignore
 
-        menu = Menu('Please, choose your time sorting mode:', modes)
+    def sorting_mode_menu(frame: BaseFrame, charts: List[Callable[[], None]]):
+        modes = {'By day': sort_by_day, 'By month': sort_by_month}
+        message = 'Please, choose your time sorting mode:'
+
+        menu = Menu(message, modes, before=partial(charts_menu, frame))
         sorting_mode = menu.run()
+
+        if sorting_mode is None:
+            return
 
         for chart in charts:
             chart(sorting_mode) # type: ignore
