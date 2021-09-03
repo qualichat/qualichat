@@ -50,10 +50,10 @@ class Qualichat:
 
     __slots__: Tuple[str, ...] = ('chats', 'keys')
 
-    def __init__(self, chats: List[Chat]) -> None:
+    def __init__(self, chats: List[Chat], api_key: str) -> None:
         self.chats = chats
 
-        self.keys = KeysFrame(chats)
+        self.keys = KeysFrame(chats, api_key)
 
     def __repr__(self) -> str:
         return f'<Qualichat chats={self.chats}>'
@@ -94,4 +94,6 @@ def load_chats(
     logger = logging.getLogger('qualichat')
     logger.setLevel(level)
 
-    return Qualichat([Chat(path, **kwargs) for path in paths])
+    api_key = kwargs.pop('api_key', None)
+
+    return Qualichat([Chat(path, **kwargs) for path in paths], api_key)

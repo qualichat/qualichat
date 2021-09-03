@@ -35,6 +35,8 @@ __all__ = (
     'MENTION_RE',
     'NUMBERS_RE',
     'LAUGHS_RE',
+    'SHORT_YOUTUBE_LINK_RE',
+    'YOUTUBE_LINK_RE',
 )
 
 
@@ -91,3 +93,11 @@ LAUGHS_RE = re.compile(r'''
         (?:k){2,}
     )
 ''', re.X | re.I)
+
+SHORT_YOUTUBE_LINK_RE = re.compile(r'''
+    https:\/\/youtu\.be\/([^\?|\s|\n]+)
+''', re.X)
+
+YOUTUBE_LINK_RE = re.compile(r'''
+    https://www\.youtube\.com/watch\?v=([^&|\s|\n]+)
+''')

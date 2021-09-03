@@ -42,17 +42,20 @@ matplotlib.use('TkAgg')
 
 import matplotlib.pyplot as plt
 import spacy
+import qualitube # type: ignore
 from pandas import DataFrame
 from pandas.core.generic import NDFrame
 from plotly.subplots import make_subplots # type: ignore
-from plotly.graph_objects import Scatter # type: ignore
+from plotly.graph_objects import Scatter, Figure, Table # type: ignore
 from wordcloud.wordcloud import WordCloud, STOPWORDS # type: ignore
 from colorama import Fore
+from tldextract import extract # type: ignore
 
 from .chat import Chat
 from .models import Message
 from .enums import MessageType
-from .utils import log, progress_bar, Menu
+from .utils import log, progress_bar, Menu, parse_domain
+from .regex import SHORT_YOUTUBE_LINK_RE, YOUTUBE_LINK_RE
 
 
 __all__ = (
@@ -164,6 +167,42 @@ def word_cloud():
     return decorator
 
 
+# TODO: Add return type to this function.
+# TODO: Add docstring for this function.
+def generate_table():
+    def decorator(method: Callable[..., DataFrames]) -> Callable[..., None]:
+        def generator(self: BaseFrame, *args: Any, **kwargs: Any) -> None:
+            # specs = [[{'type': 'pie'}, {'type': 'pie'}]]
+
+            fig = make_subplots() # type: ignore
+            dataframes = method(self, *args, **kwargs)
+
+            filename, dataframe = list(dataframes.items())[0]
+            
+            data: List[Any] = []
+
+            for column in dataframe.columns: # type: ignore
+                data.append(dataframe[column].tolist()) # type: ignore
+
+            header = dict(values=dataframe.columns) # type: ignore
+            cells = dict(values=data)
+
+            fig.add_table(header=header, cells=cells) # type: ignore
+
+            title_text = f'Ratings ({filename})'
+            fig.update_layout(title_text=title_text) # type: ignore
+
+            fig.show() # type: ignore
+
+        # Dummy implementation for the decorated function to inherit
+        # the documentation.
+        generator.__doc__ = method.__doc__
+        generator.__annotations__ = method.__annotations__
+
+        return generator
+    return decorator
+
+
 MessagesData = DefaultDict[datetime, List[Message]]
 SortingFunction = Callable[[List[Message]], MessagesData]
 
@@ -249,9 +288,13 @@ class KeysFrame(BaseFrame):
         All the chats loaded via :meth:`qualichat.load_chats`.
     """
 
-    __slots__ = ()
+    __slots__ = ('api_key')
 
     fancy_name = 'Keys'
+
+    def __init__(self, chats: List[Chat], api_key: str) -> None:
+        super().__init__(chats)
+        self.api_key = api_key
 
     def __repr__(self) -> str:
         return '<KeysFrame>'
@@ -378,6 +421,72 @@ class KeysFrame(BaseFrame):
 
         return word_clouds
 
+    @generate_table()
+    def rating(self, sort_function: SortingFunction) -> DataFrames:
+        """Analyze the links and bring up YouTube link statistics."""
+        dataframes: DataFrames = {}
+        columns = [
+            'Media', 'Actor', 'Date', 'Link', 'Channel', 'Views', 'Likes',
+            'Comments'
+        ]
+
+        client = qualitube.Client(self.api_key)
+
+        for chat in self.chats:
+            data = sort_function(chat.messages)
+            rows: List[List[Any]] = []
+
+            youtube_regex = {
+                ('youtu', 'be'): SHORT_YOUTUBE_LINK_RE,
+                ('youtube', 'com'): YOUTUBE_LINK_RE
+            }
+
+            domains_count = defaultdict(int) # type: ignore
+
+            views_count = defaultdict(int) # type: ignore
+            likes_count = defaultdict(int) # type: ignore
+            comments_count = defaultdict(int) # type: ignore
+
+            for messages in data.values():
+                for message in messages:
+                    for url in message['Qty_char_links']:
+                        domain = parse_domain(url)
+                        actor = message.actor.display_name
+                        created_at = str(message.created_at)
+
+                        if domain == 'YouTube':
+                            domains_count[url] += 1
+                            
+                            if domains_count[url] == 2:
+                                _, domain, suffix = extract(url) # type: ignore
+                                regex = youtube_regex[(domain, suffix)] # type: ignore
+
+                                if not (match := regex.match(url)):
+                                    continue
+
+                                id = match.group(1)
+                                videos = client.get_videos([id])
+
+                                if not videos.videos:
+                                    continue
+
+                                video = videos.videos[0]
+
+                                views_count[url] = video.view_count # type: ignore
+                                likes_count[url] = video.like_count # type: ignore
+                                comments_count[url] = video.comment_count # type: ignore
+
+                        views = views_count[url]
+                        likes = likes_count[url]
+                        comments = comments_count[url]
+                            
+                        rows.append([domain, actor, created_at, url, None, views, likes, comments])
+
+            dataframe = DataFrame(rows, columns=columns)
+            dataframes[chat.filename] = dataframe
+
+        return dataframes
+
     @generate_chart(
         bars=[
             'Qty_char_links', 'Qty_char_emails',
@@ -435,39 +544,6 @@ class KeysFrame(BaseFrame):
             index = list(data.keys())
             dataframe = DataFrame(rows, index=index, columns=columns)
                 
-            dataframes[chat.filename] = dataframe
-
-        return dataframes
-
-    @generate_chart(
-        bars=['Qty_char_links'],
-        lines=['Qty_messages'],
-        title='Keys Frame (Links)'
-    )
-    def links(self, sort_function: SortingFunction) -> DataFrames:
-        """Shows the amount of links sent in the chat per month and it
-        will be compared with the total messages sent.
-        """
-        dataframes: DataFrames = {}
-        columns = ['Qty_char_links', 'Qty_messages']
-
-        for chat in self.chats:
-            data = sort_function(chat.messages)
-            rows: List[List[int]] = []
-
-            for messages in data.values():
-                links = 0
-                total_messages = 0
-
-                for message in messages:
-                    links += len(message['Qty_char_links'])
-                    total_messages += 1
-
-                rows.append([links, total_messages])
-
-            index = list(data.keys())
-
-            dataframe = DataFrame(rows, index=index, columns=columns)
             dataframes[chat.filename] = dataframe
 
         return dataframes

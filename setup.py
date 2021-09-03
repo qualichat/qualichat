@@ -1,5 +1,5 @@
 import re
-from setuptools import setup
+from setuptools import setup # type: ignore
 
 
 # Get library version
@@ -7,7 +7,7 @@ VERSION_REGEX = re.compile(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', re.M)
 
 version = ''
 with open('qualichat/__init__.py') as f:
-    version = VERSION_REGEX.search(f.read()).group(1)
+    version = VERSION_REGEX.search(f.read()).group(1) # type: ignore
 
 if not version:
     raise RuntimeError('version is not set')

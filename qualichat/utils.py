@@ -35,9 +35,10 @@ from pathlib import Path
 from curtsies import CursorAwareWindow, FSArray, fsarray, Input # type: ignore
 from curtsies.formatstring import FmtStr # type: ignore
 from curtsies.fmtfuncs import bold # type: ignore
+from tldextract import extract # type: ignore
 
 
-__all__ = ('log', 'progress_bar')
+__all__ = ('log', 'progress_bar', 'parse_domain')
 
 
 logger = logging.getLogger('qualichat')
@@ -263,3 +264,49 @@ def progress_bar(
 
     if iteration == total:
         print()
+
+
+domains: Dict[str, str] = {
+    'youtu.be': 'YouTube',
+    'youtube.com': 'YouTube',
+    'whatsapp.com': 'WhatsApp',
+    't.me': 'Twitter',
+    'uol.com.br': 'UOL',
+    'glo.bo': 'Globo',
+    'bit.ly': 'Bitly',
+    'metropoles': 'Metrópoles',
+    'theintercept.com': 'The Intercept',
+    'estadao.com.br': 'Estadão',
+    'diarioonline.com.br': 'Diário Online',
+    'brasildefato.com.br': 'Brasil de Fato',
+    'ig.com.br': 'IG',
+    'terrabrasilnoticias.com': 'Terra Brasil Notícias',
+    'folhadapolitica.com': 'Folha da Política',
+    'gazetadopovo.com.br': 'Gazeta do Povo'
+}
+
+
+def parse_domain(url: str) -> str:
+    """Parses a URL to return its sanitized domain.
+
+    Parameters
+    ----------
+    url: :class:`str`
+        The URL to be parsed.
+
+    Returns
+    -------
+    :class:`str`
+        The parsed domain name.
+    """
+    result = extract(url)
+
+    domain: str = result.domain # type: ignore
+    suffix: str = result.suffix # type: ignore
+
+    website = f'{domain}.{suffix}'
+
+    if website in domains:
+        return domains[website]
+
+    return domain.capitalize()

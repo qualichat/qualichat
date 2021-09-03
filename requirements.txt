@@ -6,4 +6,5 @@ curtsies
 wordcloud
 matplotlib
 spacy
-# tldextract
+tldextract
+git+https://github.com/qualichat/qualitube
