@@ -35,7 +35,7 @@ from colorama import Fore, AnsiToWin32
 
 import qualichat
 from .utils import log, Menu
-from .frames import BaseFrame, sort_by_day, sort_by_month
+from .frames import BaseFrame, sort_by_actor, sort_by_time
 
 
 GREEN     = Fore.GREEN
@@ -116,7 +116,7 @@ def loadchat(
     parser: argparse.ArgumentParser,
     args: argparse.Namespace
 ) -> None:
-    qc = qualichat.load_chats(*args.paths, debug=args.debug)
+    qc = qualichat.load_chats(*args.paths, debug=args.debug, api_key=args.api_key)
     frames = {f.fancy_name: f for f in qc.frames}
 
     print(ascii)
@@ -145,7 +145,7 @@ def loadchat(
         sorting_mode_menu(frame, charts) # type: ignore
 
     def sorting_mode_menu(frame: BaseFrame, charts: List[Callable[[], None]]):
-        modes = {'By day': sort_by_day, 'By month': sort_by_month}
+        modes = {'By Actor': sort_by_actor, 'By Time': sort_by_time} # type: ignore
         message = 'Please, choose your time sorting mode:'
 
         menu = Menu(message, modes, before=partial(charts_menu, frame))
@@ -173,6 +173,13 @@ def add_loadchat_args(subparser) -> None: # type: ignore
         '-d', '--debug',
         help=debug_arg_help,
         action='store_true'
+    )
+
+    api_key_arg_help = 'Sets the YouTube API Key.'
+    parser.add_argument( # type: ignore
+        '--api-key',
+        help=api_key_arg_help,
+        action='store'
     )
 
 

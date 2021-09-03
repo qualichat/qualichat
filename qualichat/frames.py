@@ -35,6 +35,7 @@ from typing import (
 from collections import defaultdict, OrderedDict
 from pathlib import Path
 from datetime import datetime
+from functools import partial
 
 # Fix matplotlib backend warning.
 import matplotlib
@@ -207,6 +208,25 @@ MessagesData = DefaultDict[datetime, List[Message]]
 SortingFunction = Callable[[List[Message]], MessagesData]
 
 
+def sort_by_actor(messages: List[Message]) -> DefaultDict[str, List[Message]]:
+    data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+    for message in messages:
+        data[message.actor.display_name].append(message)
+
+    return data
+
+
+def sort_by_time(messages: List[Message]) -> MessagesData:
+        modes = {'By day': sort_by_day, 'By month': sort_by_month}
+        message = 'Please, choose your time sorting mode:'
+
+        menu = Menu(message, modes, before=partial(sort_by_time, messages))
+        mode = menu.run()
+
+        return mode(messages)
+
+
 def sort_by_day(messages: List[Message]) -> MessagesData:
     data: DefaultDict[datetime, List[Message]] = defaultdict(list)
 
@@ -287,8 +307,6 @@ class KeysFrame(BaseFrame):
     chats: List[:class:`.Chat`]
         All the chats loaded via :meth:`qualichat.load_chats`.
     """
-
-    __slots__ = ('api_key')
 
     fancy_name = 'Keys'
 
