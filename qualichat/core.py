@@ -94,6 +94,6 @@ def load_chats(
     logger = logging.getLogger('qualichat')
     logger.setLevel(level)
 
-    api_key = kwargs.pop('api_key', None)
+    api_key: str = kwargs.pop('api_key', None)
 
     return Qualichat([Chat(path, **kwargs) for path in paths], api_key)
