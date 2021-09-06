@@ -1,6 +1,6 @@
 name: "PyPI Publish"
 
-on: release
+on: push
 
 jobs:
   publish:
