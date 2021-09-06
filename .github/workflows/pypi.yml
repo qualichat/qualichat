@@ -6,7 +6,8 @@ on:
 
 jobs:
   build:
-   runs-on: ubuntu-latest
+    name: Publish package do PyPI
+    runs-on: ubuntu-latest
 
     steps:
       - name: Publish package
