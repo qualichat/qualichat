@@ -1,8 +1,9 @@
 name: "PyPI Publish"
 
-on:
+on:  
   push:
-    branches: [ feature/ci-cd ]
+    tags:
+      - '*'
 
 jobs:
   build:
