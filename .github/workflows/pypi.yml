@@ -1,9 +1,8 @@
 name: "PyPI Publish"
 
-on:  
-  push:
-    tags:
-      - '*'
+on:
+  release:
+    types: [published]
 
 jobs:
   build:
