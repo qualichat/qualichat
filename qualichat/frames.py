@@ -218,13 +218,22 @@ def sort_by_actor(messages: List[Message]) -> DefaultDict[str, List[Message]]:
 
 
 def sort_by_time(messages: List[Message]) -> MessagesData:
-        modes = {'By day': sort_by_day, 'By month': sort_by_month}
-        message = 'Please, choose your time sorting mode:'
+    modes = {'By day': sort_by_day, 'By month': sort_by_month} # type: ignore
+    message = 'Please, choose your time sorting mode:'
 
-        menu = Menu(message, modes, before=partial(sort_by_time, messages))
-        mode = menu.run()
+    menu = Menu(message, modes, before=partial(sort_by_time, messages)) # type: ignore
+    mode = menu.run()
 
-        return mode(messages)
+    return mode(messages)
+
+
+def sort_by_chat(chats: List[Chat], _: List[Message]) -> DefaultDict[str, List[Message]]:
+    data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+    for chat in chats:
+        data[chat.filename] = chat.messages
+
+    return data
 
 
 def sort_by_day(messages: List[Message]) -> MessagesData:

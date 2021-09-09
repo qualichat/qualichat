@@ -35,7 +35,7 @@ from colorama import Fore, AnsiToWin32
 
 import qualichat
 from .utils import log, Menu
-from .frames import BaseFrame, sort_by_actor, sort_by_time
+from .frames import BaseFrame, sort_by_actor, sort_by_chat, sort_by_time
 
 
 GREEN     = Fore.GREEN
@@ -145,7 +145,11 @@ def loadchat(
         sorting_mode_menu(frame, charts) # type: ignore
 
     def sorting_mode_menu(frame: BaseFrame, charts: List[Callable[[], None]]):
-        modes = {'By Actor': sort_by_actor, 'By Time': sort_by_time} # type: ignore
+        modes = {
+            'By Actor': sort_by_actor,
+            'By Time': sort_by_time,
+            'By Chat': partial(sort_by_chat, qc.chats)
+        }
         message = 'Please, choose your time sorting mode:'
 
         menu = Menu(message, modes, before=partial(charts_menu, frame))
