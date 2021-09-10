@@ -218,13 +218,34 @@ def sort_by_actor(messages: List[Message]) -> DefaultDict[str, List[Message]]:
 
 
 def sort_by_time(messages: List[Message]) -> MessagesData:
+    time_messages: DefaultDict[str, List[Message]] = defaultdict(list)
+
+    for message in messages:
+        time_messages[message.created_at.strftime('%B %Y')].append(message)
+
+    selected_messages = ['All', 'Choose a chat epoch']
+
+    menu = Menu('Which messages should be selected?', selected_messages)
+    selected = menu.run()
+
+    if selected == 'All':
+        chat_messages = messages
+    else:
+        menu = Menu('Choose a chat epoch:', time_messages, multi=True)
+        selected_messages = menu.run()
+
+        chat_messages: List[Message] = []
+
+        for messages in selected_messages:
+            chat_messages.extend(messages) # type: ignore
+
     modes = {'By day': sort_by_day, 'By month': sort_by_month} # type: ignore
     message = 'Please, choose your time sorting mode:'
 
     menu = Menu(message, modes, before=partial(sort_by_time, messages)) # type: ignore
     mode = menu.run()
 
-    return mode(messages)
+    return mode(chat_messages)
 
 
 def sort_by_chat(chats: List[Chat], _: List[Message]) -> DefaultDict[str, List[Message]]:
@@ -327,7 +348,7 @@ class KeysFrame(BaseFrame):
         return '<KeysFrame>'
 
     @word_cloud()
-    def keyword(self, sort_function: Callable[[], None]) -> WordClouds:
+    def keyword(self, sort_function: SortingFunction) -> WordClouds:
         """Analyzes the keyword and returns a word cloud with the
         desired type (word cloud of verbs, adjectives or nouns).
         """
@@ -338,41 +359,26 @@ class KeysFrame(BaseFrame):
 
         for chat in self.chats:
             data: List[str] = []
-            messages: DefaultDict[str, List[Message]] = defaultdict(list)
-            all_messages: List[Message] = []
 
-            for message in chat.messages:
-                if message['Type'] is not MessageType.default:
-                    continue
+            messages_list: MessagesData = sort_function(chat.messages)
+            parsed_messages: List[Message] = []
 
-                if keyword not in message.content.lower():
-                    continue
+            for messages in messages_list.values():
+                for message in messages:
+                    if message['Type'] is not MessageType.default:
+                        continue
 
-                all_messages.append(message)
-                messages[message.created_at.strftime("%B %Y")].append(message)
+                    if keyword.lower() not in message.content.lower():
+                        continue
+
+                    parsed_messages.append(message)
 
             types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
 
             menu = Menu('Choose your word cloud type:', types)
             pos = menu.run()
 
-            selected_messages = ['All', 'Choose a chat epoch']
-
-            menu = Menu('Which messages should be selected?', selected_messages)
-            selected = menu.run()
-
-            if selected == 'All':
-                chat_messages = all_messages
-            else:
-                menu = Menu('Choose a chat epoch:', messages, multi=True)
-                selected_messages = menu.run()
-
-                chat_messages: List[Message] = []
-
-                for messages in selected_messages:
-                    chat_messages.extend(messages) # type: ignore
-
-            for i, message in enumerate(chat_messages, start=1):
+            for i, message in enumerate(parsed_messages, start=1):
                 text = message['Qty_char_text'] # type: ignore
                 doc = nlp(text) # type: ignore
 
@@ -381,7 +387,7 @@ class KeysFrame(BaseFrame):
                         data.append(token.text) # type: ignore
 
                 prefix = f'{CYAN}[{chat.filename}]{RESET} Progress'
-                progress_bar(i, len(chat_messages), prefix=prefix)
+                progress_bar(i, len(parsed_messages), prefix=prefix)
 
             parent = Path(__file__).resolve().parent
             path = parent / 'fonts' / 'Roboto-Regular.ttf'
@@ -400,7 +406,7 @@ class KeysFrame(BaseFrame):
         return word_clouds
 
     @word_cloud()
-    def messages(self, sort_function: Callable[[], None]) -> WordClouds:
+    def messages(self, sort_function: SortingFunction) -> WordClouds:
         """Analyzes the chats and returns a word cloud with the desired
         type (word cloud of verbs, adjectives or nouns).
          """
@@ -408,20 +414,23 @@ class KeysFrame(BaseFrame):
 
         for chat in self.chats:
             data: List[str] = []
-            messages: List[Message] = []
 
-            for message in chat.messages:
-                if message['Type'] is not MessageType.default:
-                    continue
+            messages_list: MessagesData = sort_function(chat.messages)
+            parsed_messages: List[Message] = []
 
-                messages.append(message)
+            for messages in messages_list.values():
+                for message in messages:
+                    if message['Type'] is not MessageType.default:
+                        continue
+
+                    parsed_messages.append(message)
 
             types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
 
             menu = Menu('Choose your word cloud type:', types)
             pos = menu.run()
 
-            for i, message in enumerate(messages, start=1):
+            for i, message in enumerate(parsed_messages, start=1):
                 text = message['Qty_char_text']
                 doc = nlp(text) # type: ignore
 
@@ -430,7 +439,7 @@ class KeysFrame(BaseFrame):
                         data.append(token.text) # type: ignore
 
                 prefix = f'{CYAN}[{chat.filename}]{RESET} Progress'
-                progress_bar(i, len(messages), prefix=prefix)
+                progress_bar(i, len(parsed_messages), prefix=prefix)
 
             parent = Path(__file__).resolve().parent
             path = parent / 'fonts' / 'Roboto-Regular.ttf'
