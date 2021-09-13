@@ -250,9 +250,27 @@ def sort_by_time(messages: List[Message]) -> MessagesData:
 
 def sort_by_chat(chats: List[Chat], _: List[Message]) -> DefaultDict[str, List[Message]]:
     data: DefaultDict[str, List[Message]] = defaultdict(list)
+    all_messages: List[Message] = []
 
     for chat in chats:
         data[chat.filename] = chat.messages
+        all_messages.extend(chat.messages)
+
+    selected_messages = ['All', 'Choose a chat']
+
+    menu = Menu('Which chats should be selected?', selected_messages)
+    selected = menu.run()
+
+    if selected == 'All':
+        chat_messages = all_messages
+    else:
+        menu = Menu('Choose a chat:', data, multi=True)
+        selected_messages = menu.run()
+
+        chat_messages: List[Message] = []
+
+        for messages in selected_messages:
+            chat_messages.extend(messages)
 
     return data
 
