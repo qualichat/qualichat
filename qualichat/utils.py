@@ -286,7 +286,9 @@ domains: Dict[str, str] = {
     'fb.me': 'Facebook',
     'fb.watch': 'Facebook',
     't.co': 'Twitter',
-    'goo.gl': 'Google'
+    'goo.gl': 'Google',
+    'www.gov.br': 'Governo do Brasil',
+
 }
 
 
