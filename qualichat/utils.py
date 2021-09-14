@@ -282,7 +282,11 @@ domains: Dict[str, str] = {
     'ig.com.br': 'IG',
     'terrabrasilnoticias.com': 'Terra Brasil Notícias',
     'folhadapolitica.com': 'Folha da Política',
-    'gazetadopovo.com.br': 'Gazeta do Povo'
+    'gazetadopovo.com.br': 'Gazeta do Povo',
+    'fb.me': 'Facebook',
+    'fb.watch': 'Facebook',
+    't.co': 'Twitter',
+    'goo.gl': 'Google'
 }
 
 
