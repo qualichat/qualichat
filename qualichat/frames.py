@@ -477,7 +477,10 @@ class KeysFrame(BaseFrame):
 
     @generate_table()
     def rating(self, sort_function: SortingFunction) -> DataFrames:
-        """Analyze the links and bring up YouTube link statistics."""
+        """Analyze the links and bring up YouTube link statistics.
+        
+        Only repeated YouTube links are analyzed.
+        """
         dataframes: DataFrames = {}
         columns = [
             'Media', 'Actor', 'Date', 'Link', 'Views', 'Likes', 'Comments', 'Title'
