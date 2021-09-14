@@ -480,8 +480,7 @@ class KeysFrame(BaseFrame):
         """Analyze the links and bring up YouTube link statistics."""
         dataframes: DataFrames = {}
         columns = [
-            'Media', 'Actor', 'Date', 'Link', 'Channel', 'Views', 'Likes',
-            'Comments'
+            'Media', 'Actor', 'Date', 'Link', 'Views', 'Likes', 'Comments', 'Title'
         ]
 
         client = qualitube.Client(self.api_key)
@@ -500,6 +499,7 @@ class KeysFrame(BaseFrame):
             views_count = defaultdict(int) # type: ignore
             likes_count = defaultdict(int) # type: ignore
             comments_count = defaultdict(int) # type: ignore
+            titles = defaultdict(str) # type: ignore
 
             for messages in data.values():
                 for message in messages:
@@ -529,12 +529,14 @@ class KeysFrame(BaseFrame):
                                 views_count[url] = video.view_count # type: ignore
                                 likes_count[url] = video.like_count # type: ignore
                                 comments_count[url] = video.comment_count # type: ignore
+                                titles[url] = video.title # type: ignore
 
-                        views = views_count[url]
-                        likes = likes_count[url]
-                        comments = comments_count[url]
+                        views = views_count[url] or None
+                        likes = likes_count[url] or None
+                        comments = comments_count[url] or None
+                        title = titles[url] or None
                             
-                        rows.append([domain, actor, created_at, url, None, views, likes, comments])
+                        rows.append([domain, actor, created_at, url, views, likes, comments, title])
 
             dataframe = DataFrame(rows, columns=columns)
             dataframes[chat.filename] = dataframe
