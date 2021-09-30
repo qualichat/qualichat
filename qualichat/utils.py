@@ -25,16 +25,16 @@ SOFTWARE.
 from __future__ import annotations
 
 import logging
-import sys
+# import sys
 import json
 import os
 import random
 from typing import Callable, Dict, List, Any, Union, Optional, Literal
 from pathlib import Path
 
-from curtsies import CursorAwareWindow, FSArray, fsarray, Input # type: ignore
-from curtsies.formatstring import FmtStr # type: ignore
-from curtsies.fmtfuncs import bold # type: ignore
+# from curtsies import CursorAwareWindow, FSArray, fsarray, Input # type: ignore
+# from curtsies.formatstring import FmtStr # type: ignore
+# from curtsies.fmtfuncs import bold # type: ignore
 from tldextract import extract # type: ignore
 
 
@@ -111,137 +111,137 @@ def get_random_name() -> str:
 names = get_all_names()
 
 
-Choices = Union[List[str], Dict[str, Any]]
-no_format: Callable[[str], str] = lambda x: x
+# Choices = Union[List[str], Dict[str, Any]]
+# no_format: Callable[[str], str] = lambda x: x
 
 
-class Choice:
-    __slots__ = ('key', 'display', 'selected')
+# class Choice:
+#     __slots__ = ('key', 'display', 'selected')
 
-    def __init__(self, key: str, *, display: Any = None) -> None:
-        self.key: str = key
-        self.display: Any = display
-        self.selected: bool = False
+#     def __init__(self, key: str, *, display: Any = None) -> None:
+#         self.key: str = key
+#         self.display: Any = display
+#         self.selected: bool = False
 
-    @property
-    def value(self) -> Any:
-        return self.display or self.key
+#     @property
+#     def value(self) -> Any:
+#         return self.display or self.key
 
-    def render(self, format: Callable[[str], Union[str, FmtStr]]) -> FSArray:
-        return fsarray([format(line) for line in self.key.split('\n')])
+#     def render(self, format: Callable[[str], Union[str, FmtStr]]) -> FSArray:
+#         return fsarray([format(line) for line in self.key.split('\n')])
 
 
-class Menu:
-    __slots__ = ('prompt', 'choices', 'multi', 'before', 'after', '_index')
+# class Menu:
+#     __slots__ = ('prompt', 'choices', 'multi', 'before', 'after', '_index')
 
-    def __init__(
-        self,
-        prompt: str,
-        choices: Choices,
-        *,
-        multi: bool = False,
-        before: Optional[Callable[[], Any]] = None,
-        after: Optional[Callable[..., Any]] = None
-    ) -> None:
-        self.prompt: str = prompt
-        self.choices: List[Choice]
-        self.multi: bool = multi
-        self.before: Optional[Callable[[], Any]] = before
-        self.after: Optional[Callable[..., Any]] = after
+#     def __init__(
+#         self,
+#         prompt: str,
+#         choices: Choices,
+#         *,
+#         multi: bool = False,
+#         before: Optional[Callable[[], Any]] = None,
+#         after: Optional[Callable[..., Any]] = None
+#     ) -> None:
+#         self.prompt: str = prompt
+#         self.choices: List[Choice]
+#         self.multi: bool = multi
+#         self.before: Optional[Callable[[], Any]] = before
+#         self.after: Optional[Callable[..., Any]] = after
 
-        if isinstance(choices, dict):
-            self.choices = [Choice(k, display=v) for k, v in choices.items()]
-        else:
-            self.choices = [Choice(k) for k in choices]
+#         if isinstance(choices, dict):
+#             self.choices = [Choice(k, display=v) for k, v in choices.items()]
+#         else:
+#             self.choices = [Choice(k) for k in choices]
 
-        if self.before:
-            self.choices.append(Choice('Back'))
+#         if self.before:
+#             self.choices.append(Choice('Back'))
 
-        self._index = 0
+#         self._index = 0
 
-    def __len__(self) -> int:
-        return len(self.choices)
+#     def __len__(self) -> int:
+#         return len(self.choices)
 
-    def run(self) -> Any:
-        callback: Callable[..., Any] = lambda x: x
-        options = dict(out_stream=sys.stderr, extra_bytes_callback=callback)
+#     def run(self) -> Any:
+#         callback: Callable[..., Any] = lambda x: x
+#         options = dict(out_stream=sys.stderr, extra_bytes_callback=callback)
         
-        with CursorAwareWindow(**options) as window:
-            options = self.start(window)
+#         with CursorAwareWindow(**options) as window:
+#             options = self.start(window)
 
-        if self.before and self.choices[self._index] == self.choices[-1]:
-            return self.before()
+#         if self.before and self.choices[self._index] == self.choices[-1]:
+#             return self.before()
 
-        if self.after:
-            return self.after(options)
+#         if self.after:
+#             return self.after(options)
 
-        return options
+#         return options
 
-    def start(self, window: CursorAwareWindow) -> Any:
-        array = self.render(window.width)
-        window.render_to_terminal(array)
+#     def start(self, window: CursorAwareWindow) -> Any:
+#         array = self.render(window.width)
+#         window.render_to_terminal(array)
 
-        if self.prompt:
-            log('info', self.prompt)
+#         if self.prompt:
+#             log('info', self.prompt)
 
-        try:
-            with Input() as listener:
-                for key in listener:
-                    if key == '<UP>':
-                        self._index = max(0, self._index - 1)
-                    elif key == '<DOWN>':
-                        self._index = min(len(self) - 1, self._index + 1)
-                    elif key == '<SPACE>':
-                        if self.multi:
-                            self.toggle()
-                    elif key == '<Ctrl-j>':
-                        break
-                    else:
-                        continue
+#         try:
+#             with Input() as listener:
+#                 for key in listener:
+#                     if key == '<UP>':
+#                         self._index = max(0, self._index - 1)
+#                     elif key == '<DOWN>':
+#                         self._index = min(len(self) - 1, self._index + 1)
+#                     elif key == '<SPACE>':
+#                         if self.multi:
+#                             self.toggle()
+#                     elif key == '<Ctrl-j>':
+#                         break
+#                     else:
+#                         continue
 
-                    window.render_to_terminal(self.render(window.width))
-        except KeyboardInterrupt as error:
-            raise error
+#                     window.render_to_terminal(self.render(window.width))
+#         except KeyboardInterrupt as error:
+#             raise error
 
-        return self.get_selection()
+#         return self.get_selection()
 
-    def get_selection(self) -> Any:
-        options = [item.value for item in self.choices if item.selected]
+#     def get_selection(self) -> Any:
+#         options = [item.value for item in self.choices if item.selected]
 
-        if self.multi:
-            return options
-        elif options:
-            return options[0]
+#         if self.multi:
+#             return options
+#         elif options:
+#             return options[0]
         
-        return self.choices[self._index].value
+#         return self.choices[self._index].value
     
-    def toggle(self) -> None:
-        state = self.choices[self._index]
-        state.selected = not state.selected
+#     def toggle(self) -> None:
+#         state = self.choices[self._index]
+#         state.selected = not state.selected
 
-    def render(self, width: int) -> FSArray:
-        array = fsarray([''], width=width)
-        rows = len(array)
+#     def render(self, width: int) -> FSArray:
+#         array = fsarray([''], width=width)
+#         rows = len(array)
 
-        for option in self.choices:
-            current = self.choices[self._index] == option
-            format = bold if current else no_format
+#         for option in self.choices:
+#             current = self.choices[self._index] == option
+#             format = bold if current else no_format
 
-            option_array = option.render(format)
-            array[rows:rows + len(option_array), 2:width] = option_array
+#             option_array = option.render(format)
+#             array[rows:rows + len(option_array), 2:width] = option_array
 
-            if self.before and self.choices[-1] == option:
-                state = '» '
-            else:
-                if self.multi:
-                    state = '\u25c9 ' if option.selected else '\u25cc '
-                else:
-                    state = '» ' if current else '  '
+#             if self.before and self.choices[-1] == option:
+#                 state = '» '
+#             else:
+#                 if self.multi:
+#                     state = '\u25c9 ' if option.selected else '\u25cc '
+#                 else:
+#                     state = '» ' if current else '  '
 
-            array[rows:rows + 1, 0:2] = fsarray([state])
-            rows += len(option_array)
+#             array[rows:rows + 1, 0:2] = fsarray([state])
+#             rows += len(option_array)
 
-        return array
+#         return array
 
 
 # TODO: Add return type to this function.

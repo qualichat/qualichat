@@ -23,7 +23,7 @@ SOFTWARE.
 """
 
 import logging
-from typing import Tuple, Union, Any, List
+from typing import Tuple, Union, Any, List, Optional, Dict
 from pathlib import Path
 
 from .chat import Chat
@@ -50,7 +50,7 @@ class Qualichat:
 
     __slots__: Tuple[str, ...] = ('chats', 'keys')
 
-    def __init__(self, chats: List[Chat], api_key: str) -> None:
+    def __init__(self, chats: List[Chat], api_key: Optional[str]) -> None:
         self.chats = chats
 
         self.keys = KeysFrame(chats, api_key)
@@ -59,13 +59,22 @@ class Qualichat:
         return f'<Qualichat chats={self.chats}>'
 
     @property
-    def frames(self) -> List[BaseFrame]:
-        return [getattr(self, name) for name in self.__slots__[1:]]
+    def frames(self) -> Dict[str, BaseFrame]:
+        frames: Dict[str, BaseFrame] = {}
+
+        for name in self.__slots__[1:]:
+            o = getattr(self, name)
+            name = o.fancy_name
+            
+            frames[name] = o
+
+        return frames
 
 
 def load_chats(
     *paths: Union[str, Path],
     debug: bool = False,
+    api_key: Optional[str] = None,
     **kwargs: Any
 ) -> Qualichat:
     """Loads the given chats from a plain text files.
@@ -76,6 +85,8 @@ def load_chats(
         The paths to the chat files.
     debug: :class:`bool`
         Sets the logging level to debug.
+    api_key: Optional[:class:`str`]
+        The YouTube API Key to create rating videos charts.
     **kwargs: Any
         Keyword arguments that will be passed to :class:`.Chat`.
 
@@ -93,7 +104,5 @@ def load_chats(
 
     logger = logging.getLogger('qualichat')
     logger.setLevel(level)
-
-    api_key: str = kwargs.pop('api_key', None)
 
     return Qualichat([Chat(path, **kwargs) for path in paths], api_key)

@@ -22,118 +22,155 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import types
+import inspect
+from functools import partial
+from pathlib import Path
+from collections import defaultdict
 from typing import (
-    Any,
-    List,
+    ClassVar,
     Dict,
-    Callable,
+    List,
     Optional,
     Union,
-    DefaultDict,
-    Set
+    Set,
+    Any,
+    DefaultDict
 )
-from collections import defaultdict, OrderedDict
-from pathlib import Path
-from datetime import datetime
-from functools import partial
 
 # Fix matplotlib backend warning.
 import matplotlib
 matplotlib.use('TkAgg')
 
-import matplotlib.pyplot as plt
+import questionary
 import spacy
 import qualitube # type: ignore
+import matplotlib.pyplot as plt
 from pandas import DataFrame
 from pandas.core.generic import NDFrame
 from plotly.subplots import make_subplots # type: ignore
-from plotly.graph_objects import Scatter, Figure, Table # type: ignore
+from plotly.graph_objects import Scatter # type: ignore
 from wordcloud.wordcloud import WordCloud, STOPWORDS # type: ignore
-from colorama import Fore
 from tldextract import extract # type: ignore
+from rich.style import Style
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn
+)
 
 from .chat import Chat
 from .models import Message
 from .enums import MessageType
-from .utils import log, progress_bar, Menu, parse_domain
+from .utils import log, parse_domain
 from .regex import SHORT_YOUTUBE_LINK_RE, YOUTUBE_LINK_RE
 
 
-__all__ = (
-    'BaseFrame',
-    'KeysFrame',
-)
+__all__ = ('BaseFrame', 'KeysFrame')
 
 
+ChatsData = Dict[str, Dict[str, List[Message]]]
 DataFrames = Dict[str, Union[DataFrame, NDFrame]]
 WordClouds = Dict[str, WordCloud]
 
 
-# TODO: Add return type to this function.
-# TODO: Add docstring for this function.
-# TODO: Perhaps there is a way to completely automate the creation of
-# charts, all you need to say is which columns Qualichat should 
-# analyze.
+
+input = partial(questionary.text, qmark='[qualichat]')
+select = partial(questionary.select, qmark='[qualichat]')
+
+progress_bar = Progress(
+    SpinnerColumn(),
+    TextColumn('[progress.description]{task.description}'),
+    BarColumn(complete_style=Style(color='red')),
+    TextColumn('[progress.percentage]{task.percentage:>3.0f}%'),
+    TimeRemainingColumn(),
+    TimeElapsedColumn()
+)
+
+
 def generate_chart(
+    data: DataFrames,
     *,
     bars: Optional[List[str]] = None,
     lines: Optional[List[str]] = None,
     title: Optional[str] = None
-):
+) -> None:
     if bars is None:
         bars = []
 
     if lines is None:
         lines = []
 
-    def decorator(method: Callable[..., DataFrames]) -> Callable[..., None]:
-        def generator(self: BaseFrame, *args: Any, **kwargs: Any) -> None:
-            specs = [[{'secondary_y': True}]]
+    specs = [[{'secondary_y': True}]]
+    fig = make_subplots(specs=specs) # type: ignore
 
-            fig = make_subplots(specs=specs) # type: ignore
-            dataframes = method(self, *args, **kwargs)
+    filename, dataframe = list(data.items())[0]
+    index = dataframe.index # type: ignore
 
-            # buttons: List[Dict[str, Any]] = []
+    # buttons: List[Dict[str, Any]] = []
 
-            # for filename, dataframe in dataframes.items():
-            #     button: Dict[str, Any] = dict()
-            #     button['label'] = filename
-            #     button['method'] = 'update'
+    # for filename, dataframe in data.items():
+    #     index = list(dataframe.index) # type: ignore
 
-            #     ranges: List[Any] = [{'title': {'text': 'Sample text'}}]
-            #     button['args'] = ranges
+    #     button: Dict[str, Any] = {}
+    #     button['label'] = filename
+    #     button['method'] = 'update'
 
-            #     buttons.append(button)
+    #     args: List[Dict[str, Any]] = []
+    #     args.append({})
+    #     args.append({'title': {'text': f'{title} ({filename})'}})
+    #     button['args'] = args
 
-            filename, dataframe = list(dataframes.items())[0]
-            index = dataframe.index # type: ignore
+    #     buttons.append(button)
 
-            if bars is not None:
-                for bar in bars:
-                    filtered = getattr(dataframe, bar)
-                    options = dict(x=index, y=list(filtered), name=bar) # type: ignore
-                    fig.add_bar(**options) # type: ignore
+    # updatemenus = [{'buttons': buttons}]
+    # fig.update_layout(updatemenus=updatemenus) # type: ignore
 
-            if lines is not None:
-                for line in lines:
-                    filtered = getattr(dataframe, line)
-                    scatter = Scatter(x=index, y=list(filtered), name=line) # type: ignore
-                    fig.add_trace(scatter, secondary_y=True) # type: ignore
+    #     for bar in bars:
+    #         filtered = list(getattr(dataframe, bar))
+    #         options = dict(x=index, y=filtered, name=bar) # type: ignore
+    #         fig.add_bar(**options) # type: ignore
 
-            # menus: List[Dict[str, Any]] = [{'active': 0, 'showactive': True, 'buttons': buttons}]
-            title_text = f'{title} ({filename})'
+    #     # for line in lines:
+    #     #     filtered = getattr(dataframe, line)
+    #     #     scatter = Scatter(x=index, y=list(filtered), name=line) # type: ignore
+    #     #     fig.add_trace(scatter, secondary_y=True) # type: ignore
 
-            fig.update_layout(title_text=title_text) # type: ignore
-            fig.update_xaxes(rangeslider_visible=True) # type: ignore
-            fig.show() # type: ignore
+    #     button: Dict[str, Any] = {}
+    #     button['label'] = filename
+    #     button['method'] = 'update'
 
-        # Dummy implementation for the decorated function to inherit
-        # the documentation.
-        generator.__doc__ = method.__doc__
-        generator.__annotations__ = method.__annotations__
+    #     args: Dict[str, Any] = {}
 
-        return generator
-    return decorator
+    #     visibles: List[bool] = [False] * len(data)
+    #     visibles[i] = True
+
+    #     args['visible'] = visibles
+    #     button['args'] = [args]
+
+    #     buttons.append(button)
+        
+    # updatemenus = [{'buttons': buttons, 'showactive': False}]
+    # fig.update_layout(updatemenus=updatemenus) # type: ignore
+
+    for bar in bars:
+        filtered = getattr(dataframe, bar)
+        options = dict(x=index, y=list(filtered), name=bar) # type: ignore
+        fig.add_bar(**options) # type: ignore
+
+    for line in lines:
+        filtered = getattr(dataframe, line)
+        scatter = Scatter(x=index, y=list(filtered), name=line) # type: ignore
+        fig.add_trace(scatter, secondary_y=True) # type: ignore
+
+    title_text = f'{title} ({filename})'
+    fig.update_layout(title_text=title_text) # type: ignore
+
+    fig.update_xaxes(rangeslider_visible=True) # type: ignore
+    fig.show() # type: ignore
 
 
 stopwords: Set[str] = set(STOPWORDS)
@@ -142,157 +179,40 @@ stopwords.update([
 ])
 
 
-# TODO: Add return type to this function.
-# TODO: Add docstring for this function.
-def word_cloud():
-    def decorator(method: Callable[..., WordClouds]) -> Callable[..., None]:
-        def generator(self: BaseFrame, *args: Any, **kwargs: Any) -> None:
-            word_clouds = method(self, *args, **kwargs)
+def generate_wordcloud(data: WordClouds, *, title: str):
+    for filename, wordcloud in data.items():
+        wordcloud.stopwords = stopwords
 
-            for filename, word_cloud in word_clouds.items():
-                word_cloud.stopwords = stopwords
+        plt.figure()
+        plt.axis('off')
+        plt.title(f'Wordcloud - {title} ({filename})')
 
-                plt.figure()
-                plt.axis('off')
-                plt.title(f'Word cloud ({filename})')
-
-                plt.imshow(word_cloud, interpolation='bilinear') # type: ignore
-                plt.show()
-
-        # Dummy implementation for the decorated function to inherit
-        # the documentation.
-        generator.__doc__ = method.__doc__
-        generator.__annotations__ = method.__annotations__
-
-        return generator
-    return decorator
+        plt.imshow(wordcloud, interpolation='bilinear') # type: ignore
+        plt.show()
 
 
-# TODO: Add return type to this function.
-# TODO: Add docstring for this function.
-def generate_table():
-    def decorator(method: Callable[..., DataFrames]) -> Callable[..., None]:
-        def generator(self: BaseFrame, *args: Any, **kwargs: Any) -> None:
-            # specs = [[{'type': 'pie'}, {'type': 'pie'}]]
+def generate_table(data: DataFrames, *, title: str):
+    fig = make_subplots() # type: ignore
+    filename, dataframe = list(data.items())[0]
 
-            fig = make_subplots() # type: ignore
-            dataframes = method(self, *args, **kwargs)
+    table: List[Any] = []
 
-            filename, dataframe = list(dataframes.items())[0]
-            
-            data: List[Any] = []
+    for column in dataframe.columns: # type: ignore
+        table.append(dataframe[column].tolist()) # type: ignore
 
-            for column in dataframe.columns: # type: ignore
-                data.append(dataframe[column].tolist()) # type: ignore
+    header = {'values': dataframe.columns} # type: ignore
+    cells = {'values': table}
 
-            header = dict(values=dataframe.columns) # type: ignore
-            cells = dict(values=data)
+    fig.add_table(header=header, cells=cells) # type: ignore
 
-            fig.add_table(header=header, cells=cells) # type: ignore
+    title_text = f'{title} ({filename})'
+    fig.update_layout(title_text=title_text) # type: ignore
 
-            title_text = f'Ratings ({filename})'
-            fig.update_layout(title_text=title_text) # type: ignore
-
-            fig.show() # type: ignore
-
-        # Dummy implementation for the decorated function to inherit
-        # the documentation.
-        generator.__doc__ = method.__doc__
-        generator.__annotations__ = method.__annotations__
-
-        return generator
-    return decorator
+    fig.show() # type: ignore
 
 
-MessagesData = DefaultDict[datetime, List[Message]]
-SortingFunction = Callable[[List[Message]], MessagesData]
-
-
-def sort_by_actor(messages: List[Message]) -> DefaultDict[str, List[Message]]:
-    data: DefaultDict[str, List[Message]] = defaultdict(list)
-
-    for message in messages:
-        data[message.actor.display_name].append(message)
-
-    return data
-
-
-def sort_by_time(messages: List[Message]) -> MessagesData:
-    time_messages: DefaultDict[str, List[Message]] = defaultdict(list)
-
-    for message in messages:
-        time_messages[message.created_at.strftime('%B %Y')].append(message)
-
-    selected_messages = ['All', 'Choose a chat epoch']
-
-    menu = Menu('Which messages should be selected?', selected_messages)
-    selected = menu.run()
-
-    if selected == 'All':
-        chat_messages = messages
-    else:
-        menu = Menu('Choose a chat epoch:', time_messages, multi=True)
-        selected_messages = menu.run()
-
-        chat_messages: List[Message] = []
-
-        for messages in selected_messages:
-            chat_messages.extend(messages) # type: ignore
-
-    modes = {'By day': sort_by_day, 'By month': sort_by_month} # type: ignore
-    message = 'Please, choose your time sorting mode:'
-
-    menu = Menu(message, modes, before=partial(sort_by_time, messages)) # type: ignore
-    mode = menu.run()
-
-    return mode(chat_messages)
-
-
-def sort_by_chat(chats: List[Chat], _: List[Message]) -> DefaultDict[str, List[Message]]:
-    data: DefaultDict[str, List[Message]] = defaultdict(list)
-    all_messages: List[Message] = []
-
-    for chat in chats:
-        data[chat.filename] = chat.messages
-        all_messages.extend(chat.messages)
-
-    selected_messages = ['All', 'Choose a chat']
-
-    menu = Menu('Which chats should be selected?', selected_messages)
-    selected = menu.run()
-
-    if selected == 'All':
-        chat_messages = all_messages
-    else:
-        menu = Menu('Choose a chat:', data, multi=True)
-        selected_messages = menu.run()
-
-        chat_messages: List[Message] = []
-
-        for messages in selected_messages:
-            chat_messages.extend(messages)
-
-    return data
-
-
-def sort_by_day(messages: List[Message]) -> MessagesData:
-    data: DefaultDict[datetime, List[Message]] = defaultdict(list)
-
-    for message in messages:
-        created_at = message.created_at.replace(hour=0, minute=0, second=0)
-        data[created_at].append(message)
-
-    return data
-
-
-def sort_by_month(messages: List[Message]) -> MessagesData:
-    data: DefaultDict[datetime, List[Message]] = defaultdict(list)
-
-    for message in messages:
-        created_at = message.created_at.replace(day=1, hour=0, minute=0, second=0)
-        data[created_at].append(message)
-
-    return data
+def _normalize_frame_name(name: str) -> str:
+    return name.replace('_', ' ').capitalize()
 
 
 class BaseFrame:
@@ -315,73 +235,103 @@ class BaseFrame:
 
     __slots__ = ('chats', 'charts')
 
-    fancy_name: str
+    fancy_name: ClassVar[str]
 
     def __init__(self, chats: List[Chat]) -> None:
-        self.chats: List[Chat] = chats
-        self.charts: Dict[str, Callable[..., Any]] = OrderedDict()
+        def predicate(object: object) -> bool:
+            if not inspect.ismethod(object):
+                return False
 
-        for attr in self.__dir__():
-            if attr.startswith('_'):
-                continue
+            return not object.__name__.startswith('_')
 
-            obj: Callable[..., Any] = getattr(self, attr)
+        methods = inspect.getmembers(self, predicate=predicate)
+        charts = {}
 
-            if not callable(obj):
-                continue
+        for name, method in methods:
+            charts[_normalize_frame_name(name)] = method
 
-            self.charts[attr] = obj
+        self.chats = chats
+        self.charts: Dict[str, types.FunctionType] = charts
 
     def __repr__(self) -> str:
-        return '<BaseFrame>'
+        return '<%s>' % self.__class__.__name__
 
 
 nlp = spacy.load('pt_core_news_sm') # type: ignore
 
 
-CYAN  = Fore.CYAN
-RESET = Fore.RESET
-
-
 class KeysFrame(BaseFrame):
-    """A frame that adds charts generator related to chat messages.
-
-    .. note::
-
-        This frame is already automatically added to Qualichat.
-
-    Attributes
-    ----------
-    chats: List[:class:`.Chat`]
-        All the chats loaded via :meth:`qualichat.load_chats`.
     """
+    """
+
+    __slots__ = ('api_key')
 
     fancy_name = 'Keys'
 
-    def __init__(self, chats: List[Chat], api_key: str) -> None:
+    def __init__(self, chats: List[Chat], api_key: Optional[str]) -> None:
         super().__init__(chats)
         self.api_key = api_key
 
-    def __repr__(self) -> str:
-        return '<KeysFrame>'
-
-    @word_cloud()
-    def keyword(self, sort_function: SortingFunction) -> WordClouds:
-        """Analyzes the keyword and returns a word cloud with the
-        desired type (word cloud of verbs, adjectives or nouns).
+    def messages(self, chats: ChatsData):
         """
-        word_clouds: WordClouds = {}
+        """
+        wordclouds: WordClouds = {}
+        title = 'Keys Frame (Messages)'
 
-        log('info', 'Enter the keyword you want to analyze:')
-        keyword = input('» ')
-
-        for chat in self.chats:
-            data: List[str] = []
-
-            messages_list: MessagesData = sort_function(chat.messages)
+        for filename, data in chats.items():
+            wordcloud_data: List[str] = []
             parsed_messages: List[Message] = []
 
-            for messages in messages_list.values():
+            for messages in data.values():
+                for message in messages:
+                    if message['Type'] is not MessageType.default:
+                        continue
+
+                    parsed_messages.append(message)
+
+            types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
+
+            word_type = select('Choose your word cloud type:', types).ask()
+            pos = types[word_type]
+
+            with progress_bar as progress:
+                for message in progress.track(parsed_messages):
+                    text = message['Qty_char_text'] # type: ignore
+                    doc = nlp(text) # type: ignore
+
+                    for token in doc: # type: ignore
+                        if token.pos_ == pos: # type: ignore
+                            wordcloud_data.append(token.text) # type: ignore
+
+            parent = Path(__file__).resolve().parent
+            path = parent / 'fonts' / 'Roboto-Regular.ttf'
+
+            configs: Dict[str, Any] = {}
+            configs['width'] = 1920
+            configs['height'] = 1080
+            configs['font_path'] = str(path)
+            configs['background_color'] = 'white'
+
+            all_words = ' '.join(wordcloud_data)
+            wordcloud = WordCloud(**configs).generate(all_words) # type: ignore
+
+            wordclouds[filename] = wordcloud
+
+        generate_wordcloud(wordclouds, title=title)
+
+    def keyword(self, chats: ChatsData):
+        """
+        """
+        wordclouds: WordClouds = {}
+
+        title = 'Keys Frame (Keyword)'
+        keyword: str = input('Enter the keyword you want to analyze:').ask() # type: ignore
+
+        for filename, data in chats.items():
+            wordcloud_data: List[str] = []
+            parsed_messages: List[Message] = []
+
+            for messages in data.values():
                 for message in messages:
                     if message['Type'] is not MessageType.default:
                         continue
@@ -393,224 +343,128 @@ class KeysFrame(BaseFrame):
 
             types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
 
-            menu = Menu('Choose your word cloud type:', types)
-            pos = menu.run()
+            word_type = select('Choose your word cloud type:', types).ask()
+            pos = types[word_type]
 
-            for i, message in enumerate(parsed_messages, start=1):
-                text = message['Qty_char_text'] # type: ignore
-                doc = nlp(text) # type: ignore
+            with progress_bar as progress:
+                for message in progress.track(parsed_messages):
+                    text = message['Qty_char_text'] # type: ignore
+                    doc = nlp(text) # type: ignore
 
-                for token in doc: # type: ignore
-                    if token.pos_ == pos: # type: ignore
-                        data.append(token.text) # type: ignore
-
-                prefix = f'{CYAN}[{chat.filename}]{RESET} Progress'
-                progress_bar(i, len(parsed_messages), prefix=prefix)
+                    for token in doc: # type: ignore
+                        if token.pos_ == pos: # type: ignore
+                            wordcloud_data.append(token.text) # type: ignore
 
             parent = Path(__file__).resolve().parent
             path = parent / 'fonts' / 'Roboto-Regular.ttf'
 
-            configs = {}
+            configs: Dict[str, Any] = {}
             configs['width'] = 1920
             configs['height'] = 1080
             configs['font_path'] = str(path)
             configs['background_color'] = 'white'
-            
-            all_words = ' '.join(data)
-            word_cloud = WordCloud(**configs).generate(all_words) # type: ignore
 
-            word_clouds[chat.filename] = word_cloud
+            all_words = ' '.join(wordcloud_data)
+            wordcloud = WordCloud(**configs).generate(all_words) # type: ignore
 
-        return word_clouds
+            wordclouds[filename] = wordcloud
 
-    @word_cloud()
-    def messages(self, sort_function: SortingFunction) -> WordClouds:
-        """Analyzes the chats and returns a word cloud with the desired
-        type (word cloud of verbs, adjectives or nouns).
-         """
-        word_clouds: WordClouds = {}
+        generate_wordcloud(wordclouds, title=title)
 
-        for chat in self.chats:
-            data: List[str] = []
+    # def ratings(self, chats: ChatsData):
+    #     """
+    #     """
+    #     title = 'Keys Frame (Ratings)'
+    #     dataframes: DataFrames = {}
 
-            messages_list: MessagesData = sort_function(chat.messages)
-            parsed_messages: List[Message] = []
+    #     columns = [
+    #         'Media', 'Actor', 'Date', 'Link',
+    #         'Views', 'Likes', 'Comments', 'Title'
+    #     ]
 
-            for messages in messages_list.values():
-                for message in messages:
-                    if message['Type'] is not MessageType.default:
-                        continue
+    #     if not self.api_key:
+    #         log('info', 'No API Key provided. Please provide one.')
+    #         return None
 
-                    parsed_messages.append(message)
+    #     client = qualitube.Client(self.api_key)
 
-            types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
+    #     for filename, data in chats.items():
+    #         rows: List[List[Any]] = []
 
-            menu = Menu('Choose your word cloud type:', types)
-            pos = menu.run()
+    #         youtube_regex = {
+    #             ('youtu', 'be'): SHORT_YOUTUBE_LINK_RE,
+    #             ('youtube', 'com'): YOUTUBE_LINK_RE
+    #         }
 
-            for i, message in enumerate(parsed_messages, start=1):
-                text = message['Qty_char_text']
-                doc = nlp(text) # type: ignore
+    #         domains_count: DefaultDict[str, int] = defaultdict(int)
 
-                for token in doc: # type: ignore
-                    if token.pos_ == pos: # type: ignore
-                        data.append(token.text) # type: ignore
+    #         views_count: DefaultDict[str, int] = defaultdict(int)
+    #         likes_count: DefaultDict[str, int] = defaultdict(int)
+    #         comments_count: DefaultDict[str, int] = defaultdict(int)
+    #         titles: DefaultDict[str, str] = defaultdict(str)
 
-                prefix = f'{CYAN}[{chat.filename}]{RESET} Progress'
-                progress_bar(i, len(parsed_messages), prefix=prefix)
+    #         for messages in data.values():
+    #             for message in messages:
+    #                 for url in message['Qty_char_links']:
+    #                     domain = parse_domain(url)
 
-            parent = Path(__file__).resolve().parent
-            path = parent / 'fonts' / 'Roboto-Regular.ttf'
+    #                     if domain == 'YouTube':
+    #                         domains_count[url] += 1
 
-            configs = {}
-            configs['width'] = 1920
-            configs['height'] = 1080
-            configs['font_path'] = str(path)
-            configs['background_color'] = 'white'
-            
-            all_words = ' '.join(data)
-            word_cloud = WordCloud(**configs).generate(all_words) # type: ignore
+    #                         if domains_count[url] != 2:
+    #                             continue
 
-            word_clouds[chat.filename] = word_cloud
+    #                         _, domain, suffix = extract(url) # type: ignore
+    #                         regex = youtube_regex[(domain, suffix)] # type: ignore
 
-        return word_clouds
+    #                         if not (match := regex.match(url)):
+    #                             continue
 
-    @generate_table()
-    def rating(self, sort_function: SortingFunction) -> DataFrames:
-        """Analyze the links and bring up YouTube link statistics.
-        
-        Only repeated YouTube links are analyzed.
+    #                         id = match.group(1)
+    #                         videos = client.get_videos([id])
+    #                         print(videos)
+
+    #                         if not videos.videos:
+    #                             continue
+
+    #                         video = videos.videos[0]
+
+    #                         views_count[url] = video.view_count # type: ignore
+    #                         likes_count[url] = video.like_count # type: ignore
+    #                         comments_count[url] = video.comment_count # type: ignore
+    #                         titles[url] = video.title # type: ignore
+
+    #                     views = views_count[url] or None
+    #                     likes = likes_count[url] or None
+    #                     comments = comments_count[url] or None
+    #                     video_title = titles[url] or None
+
+    #                     actor = message.actor.display_name
+    #                     created_at = str(message.created_at)
+
+    #                     rows.append([
+    #                         domain, actor, created_at, url,
+    #                         views, likes, comments, video_title
+    #                     ])
+
+    #         dataframe = DataFrame(rows, columns=columns)
+    # #         dataframes[filename] = dataframe
+
+    #     generate_table(dataframes, title=title)
+
+    def laminations(self, chats: ChatsData):
         """
+        """
+        title = 'Keys Frame (Laminations)'
         dataframes: DataFrames = {}
-        columns = [
-            'Media', 'Actor', 'Date', 'Link', 'Views', 'Likes', 'Comments', 'Title'
+
+        bars = [
+            'Qty_char_links', 'Qty_char_emails', 'Qty_char_marks',
+            'Qty_char_mentions', 'Qty_char_emoji'
         ]
+        lines = ['Qty_messages']
 
-        client = qualitube.Client(self.api_key)
-
-        for chat in self.chats:
-            data = sort_function(chat.messages)
-            rows: List[List[Any]] = []
-
-            youtube_regex = {
-                ('youtu', 'be'): SHORT_YOUTUBE_LINK_RE,
-                ('youtube', 'com'): YOUTUBE_LINK_RE
-            }
-
-            domains_count = defaultdict(int) # type: ignore
-
-            views_count = defaultdict(int) # type: ignore
-            likes_count = defaultdict(int) # type: ignore
-            comments_count = defaultdict(int) # type: ignore
-            titles = defaultdict(str) # type: ignore
-
-            for messages in data.values():
-                for message in messages:
-                    for url in message['Qty_char_links']:
-                        domain = parse_domain(url)
-                        actor = message.actor.display_name
-                        created_at = str(message.created_at)
-
-                        if domain == 'YouTube':
-                            domains_count[url] += 1
-                            
-                            if domains_count[url] == 2:
-                                _, domain, suffix = extract(url) # type: ignore
-                                regex = youtube_regex[(domain, suffix)] # type: ignore
-
-                                if not (match := regex.match(url)):
-                                    continue
-
-                                id = match.group(1)
-                                videos = client.get_videos([id])
-
-                                if not videos.videos:
-                                    continue
-
-                                video = videos.videos[0]
-
-                                views_count[url] = video.view_count # type: ignore
-                                likes_count[url] = video.like_count # type: ignore
-                                comments_count[url] = video.comment_count # type: ignore
-                                titles[url] = video.title # type: ignore
-
-                        views = views_count[url] or None
-                        likes = likes_count[url] or None
-                        comments = comments_count[url] or None
-                        title = titles[url] or None
-                            
-                        rows.append([domain, actor, created_at, url, views, likes, comments, title])
-
-            dataframe = DataFrame(rows, columns=columns)
-            dataframes[chat.filename] = dataframe
-
-        return dataframes
-
-    @generate_chart(
-        bars=['Qty_char_links'],
-        lines=['Qty_messages'],
-        title='Keys Frame (Links)'
-    )
-    def links(self, sort_function: SortingFunction) -> DataFrames:
-        """Shows the amount of links sent in the chat per month and it
-        will be compared with the total messages sent.
-        """
-        dataframes: DataFrames = {}
-        columns = ['Qty_char_links', 'Qty_messages']
-
-        for chat in self.chats:
-            data = sort_function(chat.messages)
-            rows: List[List[int]] = []
-
-            for messages in data.values():
-                links = 0
-                total_messages = 0
-
-                for message in messages:
-                    links += len(message['Qty_char_links'])
-                    total_messages += 1
-
-                rows.append([links, total_messages])
-
-            index = list(data.keys())
-
-            dataframe = DataFrame(rows, index=index, columns=columns)
-            dataframes[chat.filename] = dataframe
-
-        return dataframes
-
-    @generate_chart(
-        bars=[
-            'Qty_char_links', 'Qty_char_emails',
-            'Qty_char_marks', 'Qty_char_mentions',
-            'Qty_char_emoji'
-        ],
-        lines=['Qty_messages'],
-        title='Keys Frame (Laminations)'
-    )
-    def laminations(self, sort_function: SortingFunction) -> DataFrames:
-        """Shows what are the most common lamination aspects in
-        messages per month.
-
-        Laminations aspects can be interpreted as:
-
-        - Links/URLs
-        - E-mails
-        - Mentions
-        - Símbolos/Emojis
-
-        And it will be compared with the total messages sent per month.
-        """
-        dataframes: DataFrames = {}
-
-        columns = [
-            'Qty_char_links', 'Qty_char_emails',
-            'Qty_char_marks', 'Qty_char_mentions',
-            'Qty_char_emoji', 'Qty_messages'
-        ]
-
-        for chat in self.chats:
-            data = sort_function(chat.messages)
+        for filename, data in chats.items():
             rows: List[List[int]] = []
 
             for messages in data.values():
@@ -634,26 +488,87 @@ class KeysFrame(BaseFrame):
                 )
 
             index = list(data.keys())
-            dataframe = DataFrame(rows, index=index, columns=columns)
-                
-            dataframes[chat.filename] = dataframe
 
-        return dataframes
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[filename] = dataframe
 
-    @generate_chart(
-        bars=['Qty_char_mentions'],
-        lines=['Qty_messages'],
-        title='Keys Frame (Mentions)'
-    )
-    def mentions(self, sort_function: SortingFunction) -> DataFrames:
-        """Shows the amount of mentions sent in the chat per month and
-        it will be compared with the total messages sent.
+        generate_chart(dataframes, lines=lines, bars=bars, title=title)
+
+    # def test(self, chats: ChatsData):
+    #     dataframes: DataFrames = {}
+
+    #     bars = ['Qty_stickers', 'Qty_videos', 'Qty_char_net', 'Qty_char_links']
+    #     lines = ['Qty_messages']
+
+    #     for filename, data in chats.items():
+    #         rows: List[List[int]] = []
+
+    #         for messages in data.values():
+    #             stickers = videos = net_content = links = total_messages = 0
+
+    #             for message in messages:
+    #                 if message.actor.display_name != 'As Lavadeiras':
+    #                     continue
+
+    #                 if message['Type'] is MessageType.sticker_omitted:
+    #                     stickers += 1
+    #                 elif message['Type'] is MessageType.video_omitted:
+    #                     videos += 1
+
+    #                 if message['Type'] is MessageType.default:
+    #                     net_content += len(message['Qty_char_net'].split(' '))
+    #                     links += len(message['Qty_char_links'])
+
+    #                 total_messages += 1
+
+    #             rows.append(([stickers, videos, net_content, links, total_messages]))
+
+    #         index = list(data.keys())
+
+    #         dataframe = DataFrame(rows, index=index, columns=bars + lines)
+    #         dataframes[filename] = dataframe
+
+    #     generate_chart(dataframes, lines=lines, bars=bars, title='Stickers')
+
+    def links(self, chats: ChatsData):
         """
+        """
+        title = 'Keys Frame (Links)'
         dataframes: DataFrames = {}
-        columns = ['Qty_char_mentions', 'Qty_messages']
 
-        for chat in self.chats:
-            data = sort_function(chat.messages)
+        bars = ['Qty_char_links']
+        lines = ['Qty_messages']
+
+        for filename, data in chats.items():
+            rows: List[List[int]] = []
+
+            for messages in data.values():
+                links = 0
+                total_messages = 0
+
+                for message in messages:
+                    links += len(message['Qty_char_links'])
+                    total_messages += 1
+
+                rows.append([links, total_messages])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[filename] = dataframe
+
+        generate_chart(dataframes, lines=lines, bars=bars, title=title)
+
+    def mentions(self, chats: ChatsData):
+        """
+        """
+        title = 'Keys Frame (Mentions)'
+        dataframes: DataFrames = {}
+
+        bars = ['Qty_char_mentions']
+        lines = ['Qty_messages']
+
+        for filename, data in chats.items():
             rows: List[List[int]] = []
 
             for messages in data.values():
@@ -668,58 +583,50 @@ class KeysFrame(BaseFrame):
 
             index = list(data.keys())
 
-            dataframe = DataFrame(rows, index=index, columns=columns)
-            dataframes[chat.filename] = dataframe
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[filename] = dataframe
 
-        return dataframes
+        generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
-    @generate_chart(
-        bars=['Qty_char_emails'],
-        lines=['Qty_messages'],
-        title='Keys Frame (E-mails)'
-    )
-    def emails(self, sort_function: SortingFunction) -> DataFrames:
-        """Shows the amount of e-mails sent in the chat per month and
-        it will be compared with the total messages sent.
+    def emails(self, chats: ChatsData):
         """
+        """
+        title = 'Keys Frame (E-mails)'
         dataframes: DataFrames = {}
-        columns = ['Qty_char_emails', 'Qty_messages']
 
-        for chat in self.chats:
-            data = sort_function(chat.messages)
+        bars = ['Qty_char_emails']
+        lines = ['Qty_messages']
+
+        for filename, data in chats.items():
             rows: List[List[int]] = []
 
             for messages in data.values():
-                mentions = 0
+                emails = 0
                 total_messages = 0
 
                 for message in messages:
-                    mentions += len(message['Qty_char_mentions'])
+                    emails += len(message['Qty_char_emails'])
                     total_messages += 1
 
-                rows.append([mentions, total_messages])
+                rows.append([emails, total_messages])
 
             index = list(data.keys())
 
-            dataframe = DataFrame(rows, index=index, columns=columns)
-            dataframes[chat.filename] = dataframe
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[filename] = dataframe
 
-        return dataframes
+        generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
-    @generate_chart(
-        bars=['Qty_char_marks', 'Qty_char_emoji'],
-        lines=['Qty_messages'],
-        title='Keys Frame (Textual symbols)'
-    )
-    def textual_symbols(self, sort_function: SortingFunction) -> DataFrames:
-        """Shows the amount of textual symbols sent in the chat per 
-        month and it will be compared with the total messages sent.
+    def textual_symbols(self, chats: ChatsData):
         """
+        """
+        title = 'Keys Frame (Textual symbols)'
         dataframes: DataFrames = {}
-        columns = ['Qty_char_marks', 'Qty_char_emoji', 'Qty_messages']
 
-        for chat in self.chats:
-            data = sort_function(chat.messages)
+        bars = ['Qty_char_marks', 'Qty_char_emoji']
+        lines = ['Qty_messages']
+
+        for filename, data in chats.items():
             rows: List[List[int]] = []
 
             for messages in data.values():
@@ -736,203 +643,384 @@ class KeysFrame(BaseFrame):
 
             index = list(data.keys())
 
-            dataframe = DataFrame(rows, index=index, columns=columns)
-            dataframes[chat.filename] = dataframe
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[filename] = dataframe
 
-        return dataframes
+        generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
-    # @generate_chart(
-    #     bars=[
-    #         'Qty_char_emails', 'Qty_char_marks',
-    #         'Qty_char_mentions', 'Qty_char_emoji',
-    #     ],
-    #     lines=['Qty_messages'],
-    #     title='Keys Frame (Without links)'
-    # )
-    # def without_links(self, sort_function: SortingFunction) -> DataFrames:
-    #     """Shows the amount of lamination elements *except links*
-    #     sent in the chat per month and it will be compared with the
-    #     total messages sent.
-    #     """
-    #     dataframes: DataFrames = {}
-    #     columns = [
-    #         'Qty_char_emails', 'Qty_char_marks',
-    #         'Qty_char_mentions', 'Qty_char_emoji',
-    #         'Qty_messages'
-    #     ]
+#     @word_cloud()
+#     def keyword(self, sort_function: SortingFunction) -> WordClouds:
+#         """Analyzes the keyword and returns a word cloud with the
+#         desired type (word cloud of verbs, adjectives or nouns).
+#         """
+#         word_clouds: WordClouds = {}
 
-    #     for chat in self.chats:
-    #         data = sort_function(chat.messages)
-    #         rows: List[List[int]] = []
+#         log('info', 'Enter the keyword you want to analyze:')
+#         keyword = input('» ')
 
-    #         for messages in data.values():
-    #             emails = 0
-    #             marks = 0
-    #             emojis = 0
-    #             mentions = 0
-    #             total_messages = 0
+#         for chat in self.chats:
+#             data: List[str] = []
 
-    #             for message in messages:
-    #                 if message['Qty_char_links']:
-    #                     continue
+#             messages_list: MessagesData = sort_function(chat.messages)
+#             parsed_messages: List[Message] = []
 
-    #                 emails += len(message['Qty_char_emails'])
-    #                 marks += len(message['Qty_char_marks'])
-    #                 emojis += len(message['Qty_char_emoji'])
-    #                 mentions += len(message['Qty_char_mentions'])
-    #                 total_messages += 1
+#             for messages in messages_list.values():
+#                 for message in messages:
+#                     if message['Type'] is not MessageType.default:
+#                         continue
 
-    #             rows.append([emails, marks, emojis, mentions, total_messages])
+#                     if keyword.lower() not in message.content.lower():
+#                         continue
 
-    #         index = list(data.keys())
+#                     parsed_messages.append(message)
 
-    #         dataframe = DataFrame(rows, index=index, columns=columns)
-    #         dataframes[chat.filename] = dataframe
+#             types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
 
-    #     return dataframes
+#             menu = Menu('Choose your word cloud type:', types)
+#             pos = menu.run()
 
-    # @generate_chart(
-    #     bars=[
-    #         'Qty_char_links', 'Qty_char_emails',
-    #         'Qty_char_marks', 'Qty_char_emoji',
-    #     ],
-    #     lines=['Qty_messages'],
-    #     title='Keys Frame (Without mentions)'
-    # )
-    # def without_mentions(self, sort_function: SortingFunction) -> DataFrames:
-    #     """Shows the amount of lamination elements *except mentions*
-    #     sent in the chat per month and it will be compared with the
-    #     total messages sent.
-    #     """
-    #     dataframes: DataFrames = {}
-    #     columns = [
-    #         'Qty_char_links', 'Qty_char_emails',
-    #         'Qty_char_marks', 'Qty_char_emoji',
-    #         'Qty_messages'
-    #     ]
+#             for i, message in enumerate(parsed_messages, start=1):
+#                 text = message['Qty_char_text'] # type: ignore
+#                 doc = nlp(text) # type: ignore
 
-    #     for chat in self.chats:
-    #         data = sort_function(chat.messages)
-    #         rows: List[List[int]] = []
+#                 for token in doc: # type: ignore
+#                     if token.pos_ == pos: # type: ignore
+#                         data.append(token.text) # type: ignore
 
-    #         for messages in data.values():
-    #             links = 0
-    #             emails = 0
-    #             marks = 0
-    #             emojis = 0
-    #             total_messages = 0
+#                 prefix = f'{CYAN}[{chat.filename}]{RESET} Progress'
+#                 progress_bar(i, len(parsed_messages), prefix=prefix)
 
-    #             for message in messages:
-    #                 if message['Qty_char_mentions']:
-    #                     continue
+#             parent = Path(__file__).resolve().parent
+#             path = parent / 'fonts' / 'Roboto-Regular.ttf'
+
+#             configs = {}
+#             configs['width'] = 1920
+#             configs['height'] = 1080
+#             configs['font_path'] = str(path)
+#             configs['background_color'] = 'white'
+            
+        #     all_words = ' '.join(data)
+        #     word_cloud = WordCloud(**configs).generate(all_words) # type: ignore
+
+        #     word_clouds[chat.filename] = word_cloud
+
+        # return word_clouds
+
+#     @word_cloud()
+#     def messages(self, sort_function: SortingFunction) -> WordClouds:
+#         """Analyzes the chats and returns a word cloud with the desired
+#         type (word cloud of verbs, adjectives or nouns).
+#          """
+#         word_clouds: WordClouds = {}
+
+#         for chat in self.chats:
+#             data: List[str] = []
+
+#             messages_list: MessagesData = sort_function(chat.messages)
+#             parsed_messages: List[Message] = []
+
+#             for messages in messages_list.values():
+#                 for message in messages:
+#                     if message['Type'] is not MessageType.default:
+#                         continue
+
+#                     parsed_messages.append(message)
+
+#             types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
+
+#             menu = Menu('Choose your word cloud type:', types)
+#             pos = menu.run()
+
+#             for i, message in enumerate(parsed_messages, start=1):
+#                 text = message['Qty_char_text']
+#                 doc = nlp(text) # type: ignore
+
+#                 for token in doc: # type: ignore
+#                     if token.pos_ == pos: # type: ignore
+#                         data.append(token.text) # type: ignore
+
+#                 prefix = f'{CYAN}[{chat.filename}]{RESET} Progress'
+#                 progress_bar(i, len(parsed_messages), prefix=prefix)
+
+#             parent = Path(__file__).resolve().parent
+#             path = parent / 'fonts' / 'Roboto-Regular.ttf'
+
+#             configs = {}
+#             configs['width'] = 1920
+#             configs['height'] = 1080
+#             configs['font_path'] = str(path)
+#             configs['background_color'] = 'white'
+            
+#             all_words = ' '.join(data)
+#             word_cloud = WordCloud(**configs).generate(all_words) # type: ignore
+
+#             word_clouds[chat.filename] = word_cloud
+
+#         return word_clouds
+
+#     @generate_table()
+#     def rating(self, sort_function: SortingFunction) -> DataFrames:
+#         """Analyze the links and bring up YouTube link statistics.
+        
+#         Only repeated YouTube links are analyzed.
+#         """
+#         dataframes: DataFrames = {}
+#         columns = [
+#             'Media', 'Actor', 'Date', 'Link', 'Views', 'Likes', 'Comments', 'Title'
+#         ]
+
+#         client = qualitube.Client(self.api_key)
+
+#         for chat in self.chats:
+#             data = sort_function(chat.messages)
+#             rows: List[List[Any]] = []
+
+#             youtube_regex = {
+#                 ('youtu', 'be'): SHORT_YOUTUBE_LINK_RE,
+#                 ('youtube', 'com'): YOUTUBE_LINK_RE
+#             }
+
+#             domains_count = defaultdict(int) # type: ignore
+
+#             views_count = defaultdict(int) # type: ignore
+#             likes_count = defaultdict(int) # type: ignore
+#             comments_count = defaultdict(int) # type: ignore
+#             titles = defaultdict(str) # type: ignore
+
+#             for messages in data.values():
+#                 for message in messages:
+#                     for url in message['Qty_char_links']:
+#                         domain = parse_domain(url)
+#                         actor = message.actor.display_name
+#                         created_at = str(message.created_at)
+
+#                         if domain == 'YouTube':
+#                             domains_count[url] += 1
+                            
+#                             if domains_count[url] == 2:
+#                                 _, domain, suffix = extract(url) # type: ignore
+#                                 regex = youtube_regex[(domain, suffix)] # type: ignore
+
+#                                 if not (match := regex.match(url)):
+#                                     continue
+
+#                                 id = match.group(1)
+#                                 videos = client.get_videos([id])
+
+#                                 if not videos.videos:
+#                                     continue
+
+#                                 video = videos.videos[0]
+
+#                                 views_count[url] = video.view_count # type: ignore
+#                                 likes_count[url] = video.like_count # type: ignore
+#                                 comments_count[url] = video.comment_count # type: ignore
+#                                 titles[url] = video.title # type: ignore
+
+#                         views = views_count[url] or None
+#                         likes = likes_count[url] or None
+#                         comments = comments_count[url] or None
+#                         title = titles[url] or None
+                            
+#                         rows.append([domain, actor, created_at, url, views, likes, comments, title])
+
+#             dataframe = DataFrame(rows, columns=columns)
+#             dataframes[chat.filename] = dataframe
+
+#         return dataframes
+
+#     # @generate_chart(
+#     #     bars=[
+#     #         'Qty_char_emails', 'Qty_char_marks',
+#     #         'Qty_char_mentions', 'Qty_char_emoji',
+#     #     ],
+#     #     lines=['Qty_messages'],
+#     #     title='Keys Frame (Without links)'
+#     # )
+#     # def without_links(self, sort_function: SortingFunction) -> DataFrames:
+#     #     """Shows the amount of lamination elements *except links*
+#     #     sent in the chat per month and it will be compared with the
+#     #     total messages sent.
+#     #     """
+#     #     dataframes: DataFrames = {}
+#     #     columns = [
+#     #         'Qty_char_emails', 'Qty_char_marks',
+#     #         'Qty_char_mentions', 'Qty_char_emoji',
+#     #         'Qty_messages'
+#     #     ]
+
+#     #     for chat in self.chats:
+#     #         data = sort_function(chat.messages)
+#     #         rows: List[List[int]] = []
+
+#     #         for messages in data.values():
+#     #             emails = 0
+#     #             marks = 0
+#     #             emojis = 0
+#     #             mentions = 0
+#     #             total_messages = 0
+
+#     #             for message in messages:
+#     #                 if message['Qty_char_links']:
+#     #                     continue
+
+#     #                 emails += len(message['Qty_char_emails'])
+#     #                 marks += len(message['Qty_char_marks'])
+#     #                 emojis += len(message['Qty_char_emoji'])
+#     #                 mentions += len(message['Qty_char_mentions'])
+#     #                 total_messages += 1
+
+#     #             rows.append([emails, marks, emojis, mentions, total_messages])
+
+#     #         index = list(data.keys())
+
+#     #         dataframe = DataFrame(rows, index=index, columns=columns)
+#     #         dataframes[chat.filename] = dataframe
+
+#     #     return dataframes
+
+#     # @generate_chart(
+#     #     bars=[
+#     #         'Qty_char_links', 'Qty_char_emails',
+#     #         'Qty_char_marks', 'Qty_char_emoji',
+#     #     ],
+#     #     lines=['Qty_messages'],
+#     #     title='Keys Frame (Without mentions)'
+#     # )
+#     # def without_mentions(self, sort_function: SortingFunction) -> DataFrames:
+#     #     """Shows the amount of lamination elements *except mentions*
+#     #     sent in the chat per month and it will be compared with the
+#     #     total messages sent.
+#     #     """
+#     #     dataframes: DataFrames = {}
+#     #     columns = [
+#     #         'Qty_char_links', 'Qty_char_emails',
+#     #         'Qty_char_marks', 'Qty_char_emoji',
+#     #         'Qty_messages'
+#     #     ]
+
+#     #     for chat in self.chats:
+#     #         data = sort_function(chat.messages)
+#     #         rows: List[List[int]] = []
+
+#     #         for messages in data.values():
+#     #             links = 0
+#     #             emails = 0
+#     #             marks = 0
+#     #             emojis = 0
+#     #             total_messages = 0
+
+#     #             for message in messages:
+#     #                 if message['Qty_char_mentions']:
+#     #                     continue
                     
-    #                 links += len(message['Qty_char_links'])
-    #                 emails += len(message['Qty_char_emails'])
-    #                 marks += len(message['Qty_char_marks'])
-    #                 emojis += len(message['Qty_char_emoji'])
-    #                 total_messages += 1
+#     #                 links += len(message['Qty_char_links'])
+#     #                 emails += len(message['Qty_char_emails'])
+#     #                 marks += len(message['Qty_char_marks'])
+#     #                 emojis += len(message['Qty_char_emoji'])
+#     #                 total_messages += 1
 
-    #             rows.append([links, emails, marks, emojis, total_messages])
+#     #             rows.append([links, emails, marks, emojis, total_messages])
 
-    #         index = list(data.keys())
+#     #         index = list(data.keys())
 
-    #         dataframe = DataFrame(rows, index=index, columns=columns)
-    #         dataframes[chat.filename] = dataframe
+#     #         dataframe = DataFrame(rows, index=index, columns=columns)
+#     #         dataframes[chat.filename] = dataframe
 
-    #     return dataframes
+#     #     return dataframes
 
-    # @generate_chart(
-    #     bars=[
-    #         'Qty_char_links', 'Qty_char_marks',
-    #         'Qty_char_emoji', 'Qty_char_mentions',
-    #     ],
-    #     lines=['Qty_messages'],
-    #     title='Keys Frame (Without e-mails)'
-    # )
-    # def without_emails(self, sort_function: SortingFunction) -> DataFrames:
-    #     """Shows the amount of laminations elements *except e-mails*
-    #     sent in the chat per month and it will be compared with the
-    #     total messages sent.
-    #     """
-    #     dataframes: DataFrames = {}
-    #     columns = [
-    #         'Qty_char_links', 'Qty_char_marks',
-    #         'Qty_char_emoji', 'Qty_char_mentions',
-    #         'Qty_messages'
-    #     ]
+#     # @generate_chart(
+#     #     bars=[
+#     #         'Qty_char_links', 'Qty_char_marks',
+#     #         'Qty_char_emoji', 'Qty_char_mentions',
+#     #     ],
+#     #     lines=['Qty_messages'],
+#     #     title='Keys Frame (Without e-mails)'
+#     # )
+#     # def without_emails(self, sort_function: SortingFunction) -> DataFrames:
+#     #     """Shows the amount of laminations elements *except e-mails*
+#     #     sent in the chat per month and it will be compared with the
+#     #     total messages sent.
+#     #     """
+#     #     dataframes: DataFrames = {}
+#     #     columns = [
+#     #         'Qty_char_links', 'Qty_char_marks',
+#     #         'Qty_char_emoji', 'Qty_char_mentions',
+#     #         'Qty_messages'
+#     #     ]
 
-    #     for chat in self.chats:
-    #         data = sort_function(chat.messages)
-    #         rows: List[List[int]] = []
+#     #     for chat in self.chats:
+#     #         data = sort_function(chat.messages)
+#     #         rows: List[List[int]] = []
 
-    #         for messages in data.values():
-    #             links = 0
-    #             marks = 0
-    #             emojis = 0
-    #             mentions = 0
-    #             total_messages = 0
+#     #         for messages in data.values():
+#     #             links = 0
+#     #             marks = 0
+#     #             emojis = 0
+#     #             mentions = 0
+#     #             total_messages = 0
 
-    #             for message in messages:
-    #                 if message['Qty_char_emails']:
-    #                     continue
+#     #             for message in messages:
+#     #                 if message['Qty_char_emails']:
+#     #                     continue
                     
-    #                 links += len(message['Qty_char_links'])
-    #                 marks += len(message['Qty_char_marks'])
-    #                 emojis += len(message['Qty_char_emoji'])
-    #                 mentions += len(message['Qty_char_mentions'])
-    #                 total_messages += 1
+#     #                 links += len(message['Qty_char_links'])
+#     #                 marks += len(message['Qty_char_marks'])
+#     #                 emojis += len(message['Qty_char_emoji'])
+#     #                 mentions += len(message['Qty_char_mentions'])
+#     #                 total_messages += 1
 
-    #             rows.append(
-    #                 [links, marks, emojis, mentions, total_messages]
-    #             )
+#     #             rows.append(
+#     #                 [links, marks, emojis, mentions, total_messages]
+#     #             )
 
-    #         index = list(data.keys())
+#     #         index = list(data.keys())
 
-    #         dataframe = DataFrame(rows, index=index, columns=columns)
-    #         dataframes[chat.filename] = dataframe
+#     #         dataframe = DataFrame(rows, index=index, columns=columns)
+#     #         dataframes[chat.filename] = dataframe
 
-    #     return dataframes
+#     #     return dataframes
 
-    # @generate_chart(
-    #     bars=['Qty_char_links', 'Qty_char_emails', 'Qty_char_mentions',],
-    #     lines=['Qty_messages'],
-    #     title='Keys Frame (Without textual symbols)'
-    # )
-    # def without_textual_symbols(self, sort_function: SortingFunction) -> DataFrames:
-    #     """Shows the amount of laminations elements *except textual
-    #     symbols* sent in the chat per month and it will be compared
-    #     with the total messages sent.
-    #     """
-    #     dataframes: DataFrames = {}
-    #     columns = [
-    #         'Qty_char_links', 'Qty_char_emails',
-    #         'Qty_char_mentions', 'Qty_messages'
-    #     ]
+#     # @generate_chart(
+#     #     bars=['Qty_char_links', 'Qty_char_emails', 'Qty_char_mentions',],
+#     #     lines=['Qty_messages'],
+#     #     title='Keys Frame (Without textual symbols)'
+#     # )
+#     # def without_textual_symbols(self, sort_function: SortingFunction) -> DataFrames:
+#     #     """Shows the amount of laminations elements *except textual
+#     #     symbols* sent in the chat per month and it will be compared
+#     #     with the total messages sent.
+#     #     """
+#     #     dataframes: DataFrames = {}
+#     #     columns = [
+#     #         'Qty_char_links', 'Qty_char_emails',
+#     #         'Qty_char_mentions', 'Qty_messages'
+#     #     ]
 
-    #     for chat in self.chats:
-    #         data = sort_function(chat.messages)
-    #         rows: List[List[int]] = []
+#     #     for chat in self.chats:
+#     #         data = sort_function(chat.messages)
+#     #         rows: List[List[int]] = []
 
-    #         for messages in data.values():
-    #             links = 0
-    #             emails = 0
-    #             mentions = 0
-    #             total_messages = 0
+#     #         for messages in data.values():
+#     #             links = 0
+#     #             emails = 0
+#     #             mentions = 0
+#     #             total_messages = 0
 
-    #             for message in messages:
-    #                 if message['Qty_char_marks'] or message['Qty_char_emoji']:
-    #                     continue
+#     #             for message in messages:
+#     #                 if message['Qty_char_marks'] or message['Qty_char_emoji']:
+#     #                     continue
                     
-    #                 links += len(message['Qty_char_links'])
-    #                 emails += len(message['Qty_char_emails'])
-    #                 mentions += len(message['Qty_char_mentions'])
-    #                 total_messages += 1
+#     #                 links += len(message['Qty_char_links'])
+#     #                 emails += len(message['Qty_char_emails'])
+#     #                 mentions += len(message['Qty_char_mentions'])
+#     #                 total_messages += 1
 
-    #             rows.append([links, emails, mentions, total_messages])
+#     #             rows.append([links, emails, mentions, total_messages])
 
-    #         index = list(data.keys())
+#     #         index = list(data.keys())
 
-    #         dataframe = DataFrame(rows, index=index, columns=columns)
-    #         dataframes[chat.filename] = dataframe
+#     #         dataframe = DataFrame(rows, index=index, columns=columns)
+#     #         dataframes[chat.filename] = dataframe
 
-    #     return dataframes
+#     #     return dataframes

@@ -25,12 +25,18 @@ SOFTWARE.
 from typing import Union, Any, List, Dict
 from pathlib import Path
 
+from colorama import Fore
+
 from .utils import log, config, get_random_name, save_config
 from .models import Message, SystemMessage, Actor
 from .regex import CHAT_FORMAT_RE, USER_MESSAGE_RE
 
 
 __all__ = ('Chat',)
+
+
+GREEN = Fore.GREEN
+RESET = Fore.RESET
 
 
 def _clean_impurities(content: str) -> str:
@@ -74,7 +80,7 @@ class Chat:
         self.path: Path = path.resolve()
         self.filename: str = self.path.name
 
-        name = f'<color>{str(path)}<reset>'
+        name = f'{GREEN}{str(path)}{RESET}'
         log('info', f'Loading chat {name}...')
 
         log('debug', f'Reading {name} file content...')

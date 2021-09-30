@@ -1,10 +1,11 @@
+spacy
 plotly
-colorama
 emojis
 pandas
-curtsies
+colorama
 wordcloud
 matplotlib
-spacy
 tldextract
+questionary
+rich
 git+https://github.com/qualichat/qualitube
