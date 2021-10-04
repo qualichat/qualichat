@@ -31,6 +31,7 @@ import os
 import random
 from typing import Dict, List, Literal
 from pathlib import Path
+from functools import lru_cache
 
 # from curtsies import CursorAwareWindow, FSArray, fsarray, Input # type: ignore
 # from curtsies.formatstring import FmtStr # type: ignore
@@ -292,6 +293,7 @@ domains: Dict[str, str] = {
 }
 
 
+@lru_cache(1000)
 def parse_domain(url: str) -> str:
     """Parses a URL to return its sanitized domain.
 
