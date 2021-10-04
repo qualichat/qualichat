@@ -271,7 +271,7 @@ domains: Dict[str, str] = {
     'youtu.be': 'YouTube',
     'youtube.com': 'YouTube',
     'whatsapp.com': 'WhatsApp',
-    't.me': 'Twitter',
+    't.me': 'Telegram',
     'uol.com.br': 'UOL',
     'glo.bo': 'Globo',
     'bit.ly': 'Bitly',
