@@ -35,6 +35,7 @@ import plotly # type: ignore
 import colorama
 import questionary
 from colorama import Fore, Style, AnsiToWin32
+from rich import print as rich_print
 from rich.style import Style as RichStyle
 from rich.progress import (
     BarColumn,
@@ -170,6 +171,15 @@ def sort_by_actor(messages: List[Message]) -> Optional[Messages]:
     return {actor: data[actor] for actor in selected_actors}
 
 
+def print_messages(messages: List[Message]) -> None:
+    for message in messages:
+        time = f'[black on red] {message.created_at} [/]'
+        header = f'[black on green] {message.actor.display_name} [/]'
+
+        rich_print(f'{time}{header}')
+        print(message.content, end='\n\n')
+
+
 def loadchat(
     parser: argparse.ArgumentParser,
     args: argparse.Namespace
@@ -196,10 +206,15 @@ def loadchat(
         if not names:
             return log('error', 'No charts were selected. Aborting.')
 
-        modes = {'By Time': sort_by_time, 'By Actor': sort_by_actor}
+        modes = {'By Time': sort_by_time, 'By Actor': sort_by_actor, 'Print messages': print_messages}
 
-        mode_name: str = select('Now, choose your sorting mode:', modes).ask()
+        mode_name: str = select('Now, choose your mode:', modes).ask()
         mode: Callable[[List[Message]], Optional[Messages]] = modes[mode_name]
+
+        if mode_name == 'Print messages':
+            # TODO: Print all chats messages.
+            mode(qc.chats[0].messages)
+            return 
 
         sorted_messages = {chat.filename: mode(chat.messages) for chat in qc.chats}
 
