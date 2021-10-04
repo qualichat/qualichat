@@ -29,7 +29,7 @@ import logging
 import json
 import os
 import random
-from typing import Callable, Dict, List, Any, Union, Optional, Literal
+from typing import Dict, List, Literal
 from pathlib import Path
 
 # from curtsies import CursorAwareWindow, FSArray, fsarray, Input # type: ignore
