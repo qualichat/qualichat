@@ -167,8 +167,18 @@ def sort_by_actor(messages: List[Message]) -> Optional[Messages]:
     if not selected_actors:
         log('error', 'No actors were selected. Aborting.')
         return None
-    
-    return {actor: data[actor] for actor in selected_actors}
+
+    ret: Dict[str, List[Message]] = {}
+    others: List[Message] = []
+
+    for actor in data:
+        if actor not in selected_actors:
+            others.extend(data[actor])
+        else:
+            ret[actor] = data[actor]
+
+    ret['Others'] = others
+    return ret
 
 
 def print_messages(messages: List[Message]) -> None:
