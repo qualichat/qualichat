@@ -19,6 +19,12 @@ with open('README.md') as f:
     readme = f.read()
 
 
+# Get requeirements
+requirements = []
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
+
 setup(
     name='qualichat',
     author='Erneist Manhein',
@@ -32,6 +38,7 @@ setup(
     description="Groups' frames of relevance",
     long_description=readme,
     long_description_content_type='text/markdown',
+    install_requires=requirements,
     python_requires='>=3.7.1',
     package_dir={'qualichat': 'qualichat'},
     package_data={
