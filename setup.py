@@ -39,6 +39,9 @@ setup(
     long_description=readme,
     long_description_content_type='text/markdown',
     install_requires=requirements,
+    dependency_links=[
+        'https://github.com/qualichat/qualitube/tarball/main#egg=qualitube-0.1.4'
+    ],
     python_requires='>=3.7.1',
     package_dir={'qualichat': 'qualichat'},
     package_data={

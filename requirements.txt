@@ -8,4 +8,4 @@ matplotlib
 tldextract
 questionary
 rich
-git+https://github.com/qualichat/qualitube
+qualitube @ https://github.com/qualichat/qualitube/archive/stable/v0.1.4.zip
