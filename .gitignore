@@ -2,6 +2,7 @@
 .venv
 .vscode
 .project
+.mypy_cache
 
 # Documentation files/folders
 docs/_build
