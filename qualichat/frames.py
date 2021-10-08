@@ -471,6 +471,7 @@ class KeysFrame(BaseFrame):
         dataframes: DataFrames = {}
 
         bars = [
+            'Qty_char_links', 'Qty_char_emails',
             'Qty_char_mentions', 'Qty_char_emoji'
         ]
         lines = ['Qty_messages']
