@@ -38,6 +38,7 @@ from .regex import (
     EMAIL_RE,
     QUESTION_MARK_RE,
     EXCLAMATION_MARK_RE,
+    EMOTICONS_RE
 )
 
 
@@ -223,8 +224,9 @@ class Message(BaseMessage):
         data['Qty_char_mentions'] = MENTION_RE.findall(content)
         data['Qty_char_numbers'] = NUMBERS_RE.findall(content)
         data['Qty_char_laughs'] = LAUGHS_RE.findall(content)
+        data['Qty_char_emoticons'] = EMOTICONS_RE.findall(content)
 
-        all_marks = data['Qty_char_?'] + data['Qty_char_!']
+        all_marks = data['Qty_char_emoji'] + data['Qty_char_emoticons']
         data['Qty_char_marks'] = all_marks
 
         net_incidences_fields = [

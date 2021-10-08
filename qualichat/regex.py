@@ -101,3 +101,7 @@ SHORT_YOUTUBE_LINK_RE = re.compile(r'''
 YOUTUBE_LINK_RE = re.compile(r'''
     https://www\.youtube\.com/watch\?v=([^&|\s|\n]+)
 ''')
+
+EMOTICONS_RE = re.compile(r'''
+    \s*(:\)|:-\)|:\(|:-\(|:D)\s*
+''')
