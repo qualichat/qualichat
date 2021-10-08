@@ -13,7 +13,7 @@ __title__ = 'qualichat'
 __author__ = 'Ernest Manheim'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2021-present Ernest Manheim'
-__version__ = '1.3.3'
+__version__ = '1.3.4'
 
 
 __all__ = ('load_chats',)
@@ -34,7 +34,7 @@ class VersionInfo(NamedTuple):
 version_info = VersionInfo(
     major=1,
     minor=3,
-    micro=3,
+    micro=4,
     releaselevel='stable',
     serial=0
 )
