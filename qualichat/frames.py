@@ -24,9 +24,10 @@ SOFTWARE.
 
 import types
 import inspect
-from functools import partial
+from re import Pattern
 from pathlib import Path
-from collections import defaultdict
+from functools import partial
+from collections import Counter, defaultdict
 from typing import (
     ClassVar,
     Dict,
@@ -469,7 +470,6 @@ class KeysFrame(BaseFrame):
         dataframes: DataFrames = {}
 
         bars = [
-            'Qty_char_links', 'Qty_char_emails', 'Qty_char_marks',
             'Qty_char_mentions', 'Qty_char_emoji'
         ]
         lines = ['Qty_messages']
@@ -479,7 +479,6 @@ class KeysFrame(BaseFrame):
 
             for messages in data.values():
                 links = 0
-                marks = 0
                 emojis = 0
                 emails = 0
                 mentions = 0
@@ -487,14 +486,13 @@ class KeysFrame(BaseFrame):
 
                 for message in messages:
                     links += len(message['Qty_char_links'])
-                    marks += len(message['Qty_char_marks'])
                     emojis += len(message['Qty_char_emoji'])
                     emails += len(message['Qty_char_emails'])
                     mentions += len(message['Qty_char_mentions'])
                     total_messages += 1
 
                 rows.append(
-                    [links, marks, emojis, emails, mentions, total_messages]
+                    [links, emojis, emails, mentions, total_messages]
                 )
 
             index = list(data.keys())
