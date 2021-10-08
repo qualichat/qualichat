@@ -378,86 +378,89 @@ class KeysFrame(BaseFrame):
 
         generate_wordcloud(wordclouds, title=title)
 
-    # def ratings(self, chats: ChatsData):
-    #     """
-    #     """
-    #     title = 'Keys Frame (Ratings)'
-    #     dataframes: DataFrames = {}
+    def ratings(self, chats: ChatsData):
+        """
+        """
+        if not self.api_key:
+            return log('info', 'No API Key provided. Please provide one.')
 
-    #     columns = [
-    #         'Media', 'Actor', 'Date', 'Link',
-    #         'Views', 'Likes', 'Comments', 'Title'
-    #     ]
+        client = qualitube.Client(self.api_key)
 
-    #     if not self.api_key:
-    #         log('info', 'No API Key provided. Please provide one.')
-    #         return None
+        title = 'Keys Frame (Ratings)'
+        dataframes: DataFrames = {}
 
-    #     client = qualitube.Client(self.api_key)
+        columns = [
+            'Media', 'Actor', 'Date', 'Link',
+            'Views', 'Likes', 'Comments', 'Title'
+        ]
 
-    #     for filename, data in chats.items():
-    #         rows: List[List[Any]] = []
+        regexes: Dict[Tuple[str, str], Pattern[str]] = {
+            ('youtu', 'be'): SHORT_YOUTUBE_LINK_RE,
+            ('youtube', 'com'): YOUTUBE_LINK_RE
+        }
 
-    #         youtube_regex = {
-    #             ('youtu', 'be'): SHORT_YOUTUBE_LINK_RE,
-    #             ('youtube', 'com'): YOUTUBE_LINK_RE
-    #         }
 
-    #         domains_count: DefaultDict[str, int] = defaultdict(int)
 
-    #         views_count: DefaultDict[str, int] = defaultdict(int)
-    #         likes_count: DefaultDict[str, int] = defaultdict(int)
-    #         comments_count: DefaultDict[str, int] = defaultdict(int)
-    #         titles: DefaultDict[str, str] = defaultdict(str)
+        for filename, data in chats.items():
+            rows: List[List[Any]] = []
+            url_counter: Counter[str] = Counter()
 
-    #         for messages in data.values():
-    #             for message in messages:
-    #                 for url in message['Qty_char_links']:
-    #                     domain = parse_domain(url)
+            CacheDictInt = DefaultDict[str, Optional[int]]
+            CacheDictStr = DefaultDict[str, Optional[str]]
 
-    #                     if domain == 'YouTube':
-    #                         domains_count[url] += 1
+            views_cache: CacheDictInt = defaultdict(lambda: None)
+            likes_cache: CacheDictInt = defaultdict(lambda: None)
+            comments_cache: CacheDictInt = defaultdict(lambda: None)
+            titles_cache: CacheDictStr = defaultdict(lambda: None)
 
-    #                         if domains_count[url] != 2:
-    #                             continue
+            for messages in data.values():
+                for message in messages:
+                    actor = message.actor.display_name
+                    created_at = str(message.created_at)
 
-    #                         _, domain, suffix = extract(url) # type: ignore
-    #                         regex = youtube_regex[(domain, suffix)] # type: ignore
+                    for url in message['Qty_char_links']:
+                        domain = parse_domain(url)
 
-    #                         if not (match := regex.match(url)):
-    #                             continue
+                        if domain == 'YouTube':
+                            url_counter[url] += 1
 
-    #                         id = match.group(1)
-    #                         videos = client.get_videos([id])
-    #                         print(videos)
+                            # Only repeated items are parsed.
+                            if url_counter[url] != 2:
+                                continue
 
-    #                         if not videos.videos:
-    #                             continue
+                            _, domain, suffix = extract(url) # type: ignore
+                            regex = regexes[(domain, suffix)] # type: ignore
 
-    #                         video = videos.videos[0]
+                            if not (match := regex.match(url)):
+                                continue
 
-    #                         views_count[url] = video.view_count # type: ignore
-    #                         likes_count[url] = video.like_count # type: ignore
-    #                         comments_count[url] = video.comment_count # type: ignore
-    #                         titles[url] = video.title # type: ignore
+                            id = match.group(1)
+                            videos = client.get_videos([id]).videos
 
-    #                     views = views_count[url] or None
-    #                     likes = likes_count[url] or None
-    #                     comments = comments_count[url] or None
-    #                     video_title = titles[url] or None
+                            if not videos:
+                                continue
 
-    #                     actor = message.actor.display_name
-    #                     created_at = str(message.created_at)
+                            video = videos[0]
 
-    #                     rows.append([
-    #                         domain, actor, created_at, url,
-    #                         views, likes, comments, video_title
-    #                     ])
+                            views_cache[url] = video.view_count
+                            likes_cache[url] = video.like_count
+                            comments_cache[url] = video.comment_count
+                            titles_cache[url] = video.title
 
-    #         dataframe = DataFrame(rows, columns=columns)
-    # #         dataframes[filename] = dataframe
+                        views = views_cache[url]
+                        likes = likes_cache[url]
+                        comments = comments_cache[url]
+                        video_title = titles_cache[url]
 
-    #     generate_table(dataframes, title=title)
+                        rows.append([
+                            domain, actor, created_at, url,
+                            views, likes, comments, video_title
+                        ])
+
+                dataframe = DataFrame(rows, columns=columns)
+                dataframes[filename] = dataframe
+
+            generate_table(dataframes, title=title)
 
     def laminations(self, chats: ChatsData):
         """
