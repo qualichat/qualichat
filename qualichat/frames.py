@@ -242,7 +242,7 @@ class BaseFrame:
             if not inspect.ismethod(object):
                 return False
 
-            return not object.__name__.startswith('_')
+            return not object.__name__.startswith('_') # type: ignore
 
         methods = inspect.getmembers(self, predicate=predicate)
         charts = {}
