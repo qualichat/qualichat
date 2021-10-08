@@ -278,6 +278,8 @@ class KeysFrame(BaseFrame):
         wordclouds: WordClouds = {}
         title = 'Keys Frame (Messages)'
 
+        endings = ('ar', 'er', 'ir')
+
         for filename, data in chats.items():
             wordcloud_data: List[str] = []
             parsed_messages: List[Message] = []
@@ -301,7 +303,12 @@ class KeysFrame(BaseFrame):
 
                     for token in doc: # type: ignore
                         if token.pos_ == pos: # type: ignore
-                            wordcloud_data.append(token.text) # type: ignore
+                            text = token.text # type: ignore
+
+                            if pos == 'VERB' and text[-2:] not in endings:
+                                continue
+                            
+                            wordcloud_data.append(text) # type: ignore
 
             parent = Path(__file__).resolve().parent
             path = parent / 'fonts' / 'Roboto-Regular.ttf'
