@@ -71,13 +71,12 @@ from .utils import log, parse_domain
 from .regex import SHORT_YOUTUBE_LINK_RE, YOUTUBE_LINK_RE
 
 
-__all__ = ('BaseFrame', 'KeysFrame')
+__all__ = ('BaseFrame', 'KeysFrame', 'ParticipationStatusFrame')
 
 
 ChatsData = Dict[str, Dict[str, List[Message]]]
 DataFrames = Dict[str, Union[DataFrame, NDFrame]]
 WordClouds = Dict[str, WordCloud]
-
 
 
 input = partial(questionary.text, qmark='[qualichat]')
@@ -655,5 +654,55 @@ class KeysFrame(BaseFrame):
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[filename] = dataframe
+
+        generate_chart(dataframes, lines=lines, bars=bars, title=title)
+
+
+class ParticipationStatusFrame(BaseFrame):
+    """
+    """
+
+    fancy_name = 'Participation Status'
+
+    def bots(self, chats: ChatsData):
+        """
+        """
+        title = 'Participation Status Frame (Bots)'
+        dataframes: DataFrames = {}
+
+        bars = ['Qty_score']
+        lines = ['Qty_messages']
+
+        chat = self.chats[0]
+        rows: List[List[float]] = []
+        
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        for message in chat.messages:
+            data[message.actor.display_name].append(message)
+
+        for messages in data.values():
+            chars_net: int = 0
+            videos: int = 0
+            stickers: int = 0
+            total_messages: int = 0
+            
+            for message in messages:
+                if message['Type'] is MessageType.default:
+                    chars_net += len(message['Qty_char_net'].split())
+                elif message['Type'] is MessageType.video_omitted:
+                    videos += 1
+                elif message['Type'] is MessageType.sticker_omitted:
+                    stickers += 1
+
+                total_messages += 1
+
+            result = ((chars_net * 1) + (videos * 2) + (stickers * 3)) / (1 + 2 + 3)
+            rows.append([result, total_messages])
+
+        index = list(data.keys())
+
+        dataframe = DataFrame(rows, index=index, columns=bars + lines)
+        dataframes = {chat.filename: dataframe}
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)

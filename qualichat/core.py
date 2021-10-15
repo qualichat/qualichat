@@ -28,7 +28,7 @@ from pathlib import Path
 
 from .chat import Chat
 
-from .frames import BaseFrame, KeysFrame
+from .frames import BaseFrame, KeysFrame, ParticipationStatusFrame
 
 
 __all__ = (
@@ -48,12 +48,13 @@ class Qualichat:
         The Qualichat's keys frame.
     """
 
-    __slots__: Tuple[str, ...] = ('chats', 'keys')
+    __slots__: Tuple[str, ...] = ('chats', 'keys', 'participation_status')
 
     def __init__(self, chats: List[Chat], api_key: Optional[str]) -> None:
         self.chats = chats
 
         self.keys = KeysFrame(chats, api_key)
+        self.participation_status = ParticipationStatusFrame(chats)
 
     def __repr__(self) -> str:
         return f'<Qualichat chats={self.chats}>'
