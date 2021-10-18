@@ -260,6 +260,9 @@ class BaseFrame:
 
 nlp = spacy.load('pt_core_news_sm') # type: ignore
 
+CacheDictInt = DefaultDict[str, Optional[int]]
+CacheDictStr = DefaultDict[str, Optional[str]]
+
 
 class KeysFrame(BaseFrame):
     """
@@ -400,14 +403,9 @@ class KeysFrame(BaseFrame):
             ('youtube', 'com'): YOUTUBE_LINK_RE
         }
 
-
-
         for filename, data in chats.items():
             rows: List[List[Any]] = []
             url_counter: Counter[str] = Counter()
-
-            CacheDictInt = DefaultDict[str, Optional[int]]
-            CacheDictStr = DefaultDict[str, Optional[str]]
 
             views_cache: CacheDictInt = defaultdict(lambda: None)
             likes_cache: CacheDictInt = defaultdict(lambda: None)
@@ -503,6 +501,15 @@ class KeysFrame(BaseFrame):
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
+    # def test2(self, chats: ChatsData):
+    #     for _, data in chats.items():
+    #         for messages in data.values():
+    #             for message in messages:
+    #                 if ':)' in message.content:
+    #                     print(message)
+    #                 # import re
+    #                 # print(re.findall(r'\s+:[^\s].?\s+', message.content))
+
     # def test(self, chats: ChatsData):
     #     dataframes: DataFrames = {}
 
@@ -516,7 +523,7 @@ class KeysFrame(BaseFrame):
     #             stickers = videos = net_content = links = total_messages = 0
 
     #             for message in messages:
-    #                 if message.actor.display_name != 'As Lavadeiras':
+    #                 if message.actor.display_name != 'Rua da Itália':
     #                     continue
 
     #                 if message['Type'] is MessageType.sticker_omitted:
