@@ -153,7 +153,7 @@ def sort_by_actor(messages: List[Message]) -> Optional[Messages]:
     data: DefaultDict[str, List[Message]] = defaultdict(list)
 
     with progress_bar as progress:
-        for message in progress.track(messages, description='Sorting...'):
+        for message in progress.track(messages, description='Tracking...'):
             data[message.actor.display_name].append(message)
 
     choices = ['All', 'Choose a specific actor']
@@ -168,17 +168,19 @@ def sort_by_actor(messages: List[Message]) -> Optional[Messages]:
         log('error', 'No actors were selected. Aborting.')
         return None
 
-    ret: Dict[str, List[Message]] = {}
-    others: List[Message] = []
+    if len(selected_actors) != 1:
+        return dict(data)
 
-    for actor in data:
-        if actor not in selected_actors:
-            others.extend(data[actor])
-        else:
-            ret[actor] = data[actor]
+    actor = selected_actors[0]
+    messages = data[actor]
 
-    ret['Others'] = others
-    return ret
+    new_data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+    with progress_bar as progress:
+        for message in progress.track(messages, description='Sorting...'):
+            new_data[message.created_at.strftime('%B %Y')].append(message)
+
+    return dict(new_data)
 
 
 def print_messages(messages: List[Message]) -> None:
