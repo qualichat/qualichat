@@ -185,8 +185,8 @@ def sort_by_actor(messages: List[Message]) -> Optional[Messages]:
 
 def print_messages(messages: List[Message]) -> None:
     for message in messages:
-        time = f'[black on red] {message.created_at} [/]'
-        header = f'[black on green] {message.actor.display_name} [/]'
+        time = f'[white]{message.created_at}[/]'
+        header = f'[green]{message.actor.display_name}[/]'
 
         rich_print(f'{time}{header}')
         print(message.content, end='\n\n')
