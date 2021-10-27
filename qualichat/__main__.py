@@ -188,7 +188,7 @@ def print_messages(messages: List[Message]) -> None:
         time = f'[white]{message.created_at}[/]'
         header = f'[green]{message.actor.display_name}[/]'
 
-        rich_print(f'{time}{header}')
+        rich_print(f'{time} {header}')
         print(message.content, end='\n\n')
 
 

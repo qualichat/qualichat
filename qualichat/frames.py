@@ -114,48 +114,18 @@ def generate_chart(
     # buttons: List[Dict[str, Any]] = []
 
     # for filename, dataframe in data.items():
-    #     index = list(dataframe.index) # type: ignore
-
     #     button: Dict[str, Any] = {}
     #     button['label'] = filename
     #     button['method'] = 'update'
 
     #     args: List[Dict[str, Any]] = []
-    #     args.append({})
+    #     args.append({'x': x, 'y': y}) # type: ignore
     #     args.append({'title': {'text': f'{title} ({filename})'}})
-    #     button['args'] = args
 
+    #     button['args'] = args
     #     buttons.append(button)
 
     # updatemenus = [{'buttons': buttons}]
-    # fig.update_layout(updatemenus=updatemenus) # type: ignore
-
-    #     for bar in bars:
-    #         filtered = list(getattr(dataframe, bar))
-    #         options = dict(x=index, y=filtered, name=bar) # type: ignore
-    #         fig.add_bar(**options) # type: ignore
-
-    #     # for line in lines:
-    #     #     filtered = getattr(dataframe, line)
-    #     #     scatter = Scatter(x=index, y=list(filtered), name=line) # type: ignore
-    #     #     fig.add_trace(scatter, secondary_y=True) # type: ignore
-
-    #     button: Dict[str, Any] = {}
-    #     button['label'] = filename
-    #     button['method'] = 'update'
-
-    #     args: Dict[str, Any] = {}
-
-    #     visibles: List[bool] = [False] * len(data)
-    #     visibles[i] = True
-
-    #     args['visible'] = visibles
-    #     button['args'] = [args]
-
-    #     buttons.append(button)
-        
-    # updatemenus = [{'buttons': buttons, 'showactive': False}]
-    # fig.update_layout(updatemenus=updatemenus) # type: ignore
 
     for bar in bars:
         filtered = getattr(dataframe, bar)
