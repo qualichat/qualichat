@@ -238,7 +238,7 @@ def loadchat(
             mode(qc.chats[0].messages)
             return 
 
-        sorted_messages = {chat.filename: mode(chat.messages) for chat in qc.chats}
+        sorted_messages = {chat: mode(chat.messages) for chat in qc.chats}
 
         for name in names:
             frame.charts[name](sorted_messages)

@@ -74,8 +74,8 @@ from .regex import SHORT_YOUTUBE_LINK_RE, YOUTUBE_LINK_RE
 __all__ = ('BaseFrame', 'KeysFrame', 'ParticipationStatusFrame')
 
 
-ChatsData = Dict[str, Dict[str, List[Message]]]
-DataFrames = Dict[str, Union[DataFrame, NDFrame]]
+ChatsData = Dict[Chat, Dict[str, List[Message]]]
+DataFrames = Dict[Chat, Union[DataFrame, NDFrame]]
 WordClouds = Dict[str, WordCloud]
 
 
@@ -108,7 +108,7 @@ def generate_chart(
     specs = [[{'secondary_y': True}]]
     fig = make_subplots(specs=specs) # type: ignore
 
-    filename, dataframe = list(data.items())[0]
+    chat, dataframe = list(data.items())[0]
     index = dataframe.index # type: ignore
 
     # buttons: List[Dict[str, Any]] = []
@@ -137,7 +137,7 @@ def generate_chart(
         scatter = Scatter(x=index, y=list(filtered), name=line) # type: ignore
         fig.add_trace(scatter, secondary_y=True) # type: ignore
 
-    title_text = f'{title} ({filename})'
+    title_text = f'{title} ({chat.filename})'
     fig.update_layout(title_text=title_text) # type: ignore
 
     fig.update_xaxes(rangeslider_visible=True) # type: ignore
@@ -184,6 +184,13 @@ def generate_table(data: DataFrames, *, title: str):
 
 def _normalize_frame_name(name: str) -> str:
     return name.replace('_', ' ').capitalize()
+
+
+def _normalize_row(row: List[int], actor: str, chat: Chat) -> List[int]:
+    if actor != 'Others':
+        return row
+
+    return [int(i / len(chat.actors)) for i in row]
 
 
 class BaseFrame:
@@ -443,10 +450,10 @@ class KeysFrame(BaseFrame):
         ]
         lines = ['Qty_messages']
 
-        for filename, data in chats.items():
+        for chat, data in chats.items():
             rows: List[List[int]] = []
 
-            for messages in data.values():
+            for actor, messages in data.items():
                 links = 0
                 emojis = 0
                 emails = 0
@@ -460,14 +467,17 @@ class KeysFrame(BaseFrame):
                     mentions += len(message['Qty_char_mentions'])
                     total_messages += 1
 
-                rows.append(
-                    [links, emojis, emails, mentions, total_messages]
-                )
+                row = [links, emojis, emails, mentions, total_messages]
+                rows.append(_normalize_row(row, actor, chat))
+
+                # rows.append(
+                #     [links, emojis, emails, mentions, total_messages]
+                # )
 
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[filename] = dataframe
+            dataframes[chat] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
@@ -525,10 +535,10 @@ class KeysFrame(BaseFrame):
         bars = ['Qty_char_links']
         lines = ['Qty_messages']
 
-        for filename, data in chats.items():
+        for chat, data in chats.items():
             rows: List[List[int]] = []
 
-            for messages in data.values():
+            for actor, messages in data.items():
                 links = 0
                 total_messages = 0
 
@@ -536,12 +546,13 @@ class KeysFrame(BaseFrame):
                     links += len(message['Qty_char_links'])
                     total_messages += 1
 
-                rows.append([links, total_messages])
+                row = [links, total_messages]
+                rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[filename] = dataframe
+            dataframes[chat] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
@@ -554,10 +565,10 @@ class KeysFrame(BaseFrame):
         bars = ['Qty_char_mentions']
         lines = ['Qty_messages']
 
-        for filename, data in chats.items():
+        for chat, data in chats.items():
             rows: List[List[int]] = []
 
-            for messages in data.values():
+            for actor, messages in data.items():
                 mentions = 0
                 total_messages = 0
 
@@ -565,12 +576,13 @@ class KeysFrame(BaseFrame):
                     mentions += len(message['Qty_char_mentions'])
                     total_messages += 1
 
-                rows.append([mentions, total_messages])
+                row = [mentions, total_messages]
+                rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[filename] = dataframe
+            dataframes[chat] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
@@ -583,10 +595,10 @@ class KeysFrame(BaseFrame):
         bars = ['Qty_char_emails']
         lines = ['Qty_messages']
 
-        for filename, data in chats.items():
+        for chat, data in chats.items():
             rows: List[List[int]] = []
 
-            for messages in data.values():
+            for actor, messages in data.items():
                 emails = 0
                 total_messages = 0
 
@@ -594,12 +606,13 @@ class KeysFrame(BaseFrame):
                     emails += len(message['Qty_char_emails'])
                     total_messages += 1
 
-                rows.append([emails, total_messages])
+                row = [emails, total_messages]
+                rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[filename] = dataframe
+            dataframes[chat] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
@@ -612,10 +625,10 @@ class KeysFrame(BaseFrame):
         bars = ['Qty_char_marks', 'Qty_char_emoji']
         lines = ['Qty_messages']
 
-        for filename, data in chats.items():
+        for chat, data in chats.items():
             rows: List[List[int]] = []
 
-            for messages in data.values():
+            for actor, messages in data.items():
                 marks = 0
                 emojis = 0
                 total_messages = 0
@@ -625,12 +638,13 @@ class KeysFrame(BaseFrame):
                     emojis += len(message['Qty_char_emoji'])
                     total_messages += 1
 
-                rows.append([marks, emojis, total_messages])
+                row = [marks, emojis, total_messages]
+                rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[filename] = dataframe
+            dataframes[chat] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
