@@ -76,7 +76,7 @@ __all__ = ('BaseFrame', 'KeysFrame', 'ParticipationStatusFrame')
 
 ChatsData = Dict[Chat, Dict[str, List[Message]]]
 DataFrames = Dict[Chat, Union[DataFrame, NDFrame]]
-WordClouds = Dict[str, WordCloud]
+WordClouds = Dict[Chat, WordCloud]
 
 
 input = partial(questionary.text, qmark='[qualichat]')
@@ -261,7 +261,7 @@ class KeysFrame(BaseFrame):
 
         endings = ('ar', 'er', 'ir')
 
-        for filename, data in chats.items():
+        for chat, data in chats.items():
             wordcloud_data: List[str] = []
             parsed_messages: List[Message] = []
 
@@ -303,7 +303,7 @@ class KeysFrame(BaseFrame):
             all_words = ' '.join(wordcloud_data)
             wordcloud = WordCloud(**configs).generate(all_words) # type: ignore
 
-            wordclouds[filename] = wordcloud
+            wordclouds[chat] = wordcloud
 
         generate_wordcloud(wordclouds, title=title)
 
@@ -315,7 +315,7 @@ class KeysFrame(BaseFrame):
         title = 'Keys Frame (Keyword)'
         keyword: str = input('Enter the keyword you want to analyze:').ask() # type: ignore
 
-        for filename, data in chats.items():
+        for chat, data in chats.items():
             wordcloud_data: List[str] = []
             parsed_messages: List[Message] = []
 
@@ -355,7 +355,7 @@ class KeysFrame(BaseFrame):
             all_words = ' '.join(wordcloud_data)
             wordcloud = WordCloud(**configs).generate(all_words) # type: ignore
 
-            wordclouds[filename] = wordcloud
+            wordclouds[chat] = wordcloud
 
         generate_wordcloud(wordclouds, title=title)
 
@@ -694,6 +694,6 @@ class ParticipationStatusFrame(BaseFrame):
         index = list(data.keys())
 
         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-        dataframes = {chat.filename: dataframe}
+        dataframes = {chat: dataframe}
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
