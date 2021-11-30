@@ -54,16 +54,9 @@ from plotly.subplots import make_subplots # type: ignore
 from plotly.graph_objects import Scatter # type: ignore
 from wordcloud.wordcloud import WordCloud, STOPWORDS # type: ignore
 from tldextract import extract # type: ignore
-from rich.style import Style
-from rich.progress import (
-    BarColumn,
-    Progress,
-    SpinnerColumn,
-    TextColumn,
-    TimeElapsedColumn,
-    TimeRemainingColumn
-)
+from rich.progress import Progress
 
+from . import sorters
 from .chat import Chat
 from .models import Message
 from .enums import MessageType
@@ -77,19 +70,11 @@ __all__ = ('BaseFrame', 'KeysFrame', 'ParticipationStatusFrame')
 ChatsData = Dict[Chat, Dict[str, List[Message]]]
 DataFrames = Dict[Chat, Union[DataFrame, NDFrame]]
 WordClouds = Dict[Chat, WordCloud]
+Messages = Dict[Chat, List[Message]]
 
 
 input = partial(questionary.text, qmark='[qualichat]')
 select = partial(questionary.select, qmark='[qualichat]')
-
-progress_bar = Progress(
-    SpinnerColumn(),
-    TextColumn('[progress.description]{task.description}'),
-    BarColumn(complete_style=Style(color='red')),
-    TextColumn('[progress.percentage]{task.percentage:>3.0f}%'),
-    TimeRemainingColumn(),
-    TimeElapsedColumn()
-)
 
 
 def generate_chart(
@@ -151,12 +136,12 @@ stopwords.update([
 
 
 def generate_wordcloud(data: WordClouds, *, title: str):
-    for filename, wordcloud in data.items():
+    for chat, wordcloud in data.items():
         wordcloud.stopwords = stopwords
 
         plt.figure()
         plt.axis('off')
-        plt.title(f'Wordcloud - {title} ({filename})')
+        plt.title(f'Wordcloud - {title} ({chat.filename})')
 
         plt.imshow(wordcloud, interpolation='bilinear') # type: ignore
         plt.show()
@@ -250,10 +235,11 @@ class KeysFrame(BaseFrame):
     fancy_name = 'Keys'
 
     def __init__(self, chats: List[Chat], api_key: Optional[str]) -> None:
-        super().__init__(chats)
         self.api_key = api_key
+        super().__init__(chats)
 
-    def messages(self, chats: ChatsData):
+    @sorters.wordcloud
+    def messages(self, chats: Dict[Chat, List[Message]]):
         """
         """
         wordclouds: WordClouds = {}
@@ -261,35 +247,34 @@ class KeysFrame(BaseFrame):
 
         endings = ('ar', 'er', 'ir')
 
-        for chat, data in chats.items():
-            wordcloud_data: List[str] = []
+        for chat, messages in chats.items():
+            data: List[str] = []
             parsed_messages: List[Message] = []
 
-            for messages in data.values():
-                for message in messages:
-                    if message['Type'] is not MessageType.default:
-                        continue
+            for message in messages:
+                if message['Type'] is not MessageType.default:
+                    continue
 
-                    parsed_messages.append(message)
+                parsed_messages.append(message)
 
             types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
 
             word_type = select('Choose your word cloud type:', types).ask()
             pos = types[word_type]
 
-            with progress_bar as progress:
+            with Progress() as progress:
                 for message in progress.track(parsed_messages):
-                    text = message['Qty_char_text'] # type: ignore
+                    text = message['Qty_char_text']
                     doc = nlp(text) # type: ignore
 
                     for token in doc: # type: ignore
                         if token.pos_ == pos: # type: ignore
                             text = token.text # type: ignore
 
-                            if pos == 'VERB' and text[-2:] not in endings:
+                            if pos == 'VERB' and not text.endswith(endings):
                                 continue
                             
-                            wordcloud_data.append(text) # type: ignore
+                            data.append(text) # type: ignore
 
             parent = Path(__file__).resolve().parent
             path = parent / 'fonts' / 'Roboto-Regular.ttf'
@@ -300,14 +285,15 @@ class KeysFrame(BaseFrame):
             configs['font_path'] = str(path)
             configs['background_color'] = 'white'
 
-            all_words = ' '.join(wordcloud_data)
+            all_words = ' '.join(data)
             wordcloud = WordCloud(**configs).generate(all_words) # type: ignore
 
             wordclouds[chat] = wordcloud
 
         generate_wordcloud(wordclouds, title=title)
 
-    def keyword(self, chats: ChatsData):
+    @sorters.wordcloud
+    def keyword(self, chats: Dict[Chat, List[Message]]):
         """
         """
         wordclouds: WordClouds = {}
@@ -315,26 +301,25 @@ class KeysFrame(BaseFrame):
         title = 'Keys Frame (Keyword)'
         keyword: str = input('Enter the keyword you want to analyze:').ask() # type: ignore
 
-        for chat, data in chats.items():
-            wordcloud_data: List[str] = []
+        for chat, messages in chats.items():
+            data: List[str] = []
             parsed_messages: List[Message] = []
 
-            for messages in data.values():
-                for message in messages:
-                    if message['Type'] is not MessageType.default:
-                        continue
+            for message in messages:
+                if message['Type'] is not MessageType.default:
+                    continue
 
-                    if keyword.lower() not in message.content.lower():
-                        continue
+                if keyword.lower() not in message.content.lower():
+                    continue
 
-                    parsed_messages.append(message)
+                parsed_messages.append(message)
 
             types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
 
             word_type = select('Choose your word cloud type:', types).ask()
             pos = types[word_type]
 
-            with progress_bar as progress:
+            with Progress() as progress:
                 for message in progress.track(parsed_messages):
                     text = message['Qty_char_text'] # type: ignore
                     doc = nlp(text) # type: ignore
@@ -352,7 +337,7 @@ class KeysFrame(BaseFrame):
             configs['font_path'] = str(path)
             configs['background_color'] = 'white'
 
-            all_words = ' '.join(wordcloud_data)
+            all_words = ' '.join(data)
             wordcloud = WordCloud(**configs).generate(all_words) # type: ignore
 
             wordclouds[chat] = wordcloud
@@ -438,6 +423,7 @@ class KeysFrame(BaseFrame):
 
             generate_table(dataframes, title=title)
 
+    @sorters.sort_by_modes
     def laminations(self, chats: ChatsData):
         """
         """
@@ -469,10 +455,6 @@ class KeysFrame(BaseFrame):
 
                 row = [links, emojis, emails, mentions, total_messages]
                 rows.append(_normalize_row(row, actor, chat))
-
-                # rows.append(
-                #     [links, emojis, emails, mentions, total_messages]
-                # )
 
             index = list(data.keys())
 
@@ -526,6 +508,7 @@ class KeysFrame(BaseFrame):
 
     #     generate_chart(dataframes, lines=lines, bars=bars, title='Stickers')
 
+    @sorters.sort_by_modes
     def links(self, chats: ChatsData):
         """
         """
@@ -556,6 +539,7 @@ class KeysFrame(BaseFrame):
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
+    @sorters.sort_by_modes
     def mentions(self, chats: ChatsData):
         """
         """
@@ -586,6 +570,7 @@ class KeysFrame(BaseFrame):
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
+    @sorters.sort_by_modes
     def emails(self, chats: ChatsData):
         """
         """
@@ -616,6 +601,7 @@ class KeysFrame(BaseFrame):
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
+    @sorters.sort_by_modes
     def textual_symbols(self, chats: ChatsData):
         """
         """
