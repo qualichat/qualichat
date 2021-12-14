@@ -22,60 +22,81 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import sys
 import logging
 import argparse
+import sys
 import platform
-from datetime import datetime
+from typing import List, Tuple
 from functools import partial
-from collections import defaultdict
-from typing import Callable, Tuple, List, DefaultDict, Dict, Optional
 
 import plotly # type: ignore
-import colorama
 import questionary
-from colorama import Fore, Style, AnsiToWin32
-from rich import print as rich_print
-from rich.style import Style as RichStyle
-from rich.progress import (
-    BarColumn,
-    Progress,
-    SpinnerColumn,
-    TextColumn,
-    TimeElapsedColumn,
-    TimeRemainingColumn
-)
+from rich import print
+from rich.logging import RichHandler
+from rich._log_render import LogRender
 
 import qualichat
-from .utils import log
-from .models import Message
-from .frames import BaseFrame
+from qualichat.frames import BaseFrame
+from qualichat.utils import log
 
 
-BLACK  = Fore.BLACK
-BRIGHT = Style.BRIGHT
-RESET  = Style.RESET_ALL
-
-logging_colors = {'INFO': Fore.YELLOW, 'DEBUG': Fore.CYAN, 'ERROR': Fore.RED}
+__all__ = ()
 
 
-Messages = Dict[str, List[Message]]
+# import logging
+# import sys
+# import datetime
+# import argparse
+# from typing import Tuple
+
+# from rich import print
+
+# # import sys
+# # import argparse
+# # import platform
+# # from datetime import datetime
+# # from functools import partial
+# # from typing import Tuple, List, Dict
+
+# # import plotly # type: ignore
+# # import colorama
+# # import questionary
+# # from colorama import Fore, Style, AnsiToWin32
+
+# # import qualichat
+# # from .utils import log
+# # from .models import Message
+# # # from .frames import BaseFrame
 
 
-class ColorStreamHandler(logging.StreamHandler):
-    """Handler that adds color support to terminal."""
+# # BLACK  = Fore.BLACK
+# # BRIGHT = Style.BRIGHT
+# # RESET  = Style.RESET_ALL
 
-    def __init__(self) -> None:
-        super().__init__(AnsiToWin32(sys.stderr)) # type: ignore
+# # logging_colors = {'INFO': Fore.YELLOW, 'DEBUG': Fore.CYAN, 'ERROR': Fore.RED}
 
-    def format(self, record: logging.LogRecord) -> str:
-        now = datetime.now()
-        time = f'{BLACK}{BRIGHT}{now.strftime("%H:%M:%S")}{RESET}'
 
-        COLOR = logging_colors[record.levelname]
-        level = f'{COLOR}[{record.levelname}]{RESET}'
+# # Messages = Dict[str, List[Message]]
 
-        return f'{time} {level} {record.getMessage()}'
+
+# class ColorStreamHandler(logging.StreamHandler):
+#     """Handler that adds color support to terminal."""
+
+#     def __init__(self) -> None:
+#         super().__init__(sys.stderr)  # type: ignore
+
+#     def format(self, record: logging.LogRecord) -> str:
+#         now = datetime.datetime.now()
+#         time = f"[dim]{now.strftime('%H:%M:%S')}[/]"
+
+#         return f"{time}"
+
+# #         time = f'{BLACK}{BRIGHT}{now.strftime("%H:%M:%S")}{RESET}'
+
+# #         COLOR = logging_colors[record.levelname]
+# #         level = f'{COLOR}[{record.levelname}]{RESET}'
+
+# #         return f'{time} {level} {record.getMessage()}'
 
 
 def show_version() -> None:
@@ -85,7 +106,6 @@ def show_version() -> None:
     entries.append(f'- Python {formatter.format(sys.version_info)}')
     entries.append(f'- Qualichat {formatter.format(qualichat.version_info)}')
     entries.append(f'- Plotly {plotly.__version__}')
-    entries.append(f'- Colorama {colorama.__version__}') # type: ignore
 
     uname = platform.uname()
     entries.append('- System info: {0.system} {0.release}'.format(uname))
@@ -118,8 +138,7 @@ checkbox = partial(questionary.checkbox, qmark='[qualichat]')
 
 
 def loadchat(
-    parser: argparse.ArgumentParser,
-    args: argparse.Namespace
+    parser: argparse.ArgumentParser, args: argparse.Namespace
 ) -> None:
     debug = args.debug
     api_key = args.api_key
@@ -133,7 +152,7 @@ def loadchat(
         frame_name: str = select('Please, choose a frame:', qc.frames).ask()
 
         if not frame_name:
-            return log('error', 'Operation canceled')
+            return log('error', 'Operation canceled. Aborting.')
 
         frame: BaseFrame = qc.frames[frame_name]
 
@@ -149,23 +168,21 @@ def loadchat(
         log('info', 'Restarting menu...')
 
 
-def add_loadchat_args(
-    subparser: argparse._SubParsersAction # type: ignore
-) -> None:
+def add_loadchat_args(subparser: argparse.Action) -> None:
     parser_help = 'starts an interactive session with Qualichat'
     parser = subparser.add_parser('load', help=parser_help) # type: ignore
-    parser.set_defaults(func=loadchat)
+    parser.set_defaults(func=loadchat) # type: ignore
 
     path_arg_help = 'the paths to the chats'
     parser.add_argument('paths', help=path_arg_help, nargs='+') # type: ignore
 
     debug_args = ('-d', '--debug')
     debug_arg_help = 'set the logging level to debug'
-    parser.add_argument(*debug_args, help=debug_arg_help, action='store_true')
+    parser.add_argument(*debug_args, help=debug_arg_help, action='store_true') # type: ignore
 
     api_key_args = ('-k', '--api-key')
     api_key_arg_help = 'set the YouTube API Key for video ratings'
-    parser.add_argument(*api_key_args, help=api_key_arg_help, action='store')
+    parser.add_argument(*api_key_args, help=api_key_arg_help, action='store') # type: ignore
 
 
 def parse_args() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:
@@ -184,7 +201,9 @@ def parse_args() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:
 
 def main() -> None:
     logger = logging.getLogger('qualichat')
-    logger.addHandler(ColorStreamHandler())
+
+    handler = RichHandler(omit_repeated_times=False, show_path=False, markup=True)
+    logger.addHandler(handler)
 
     parser, args = parse_args()
     args.func(parser, args)

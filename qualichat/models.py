@@ -23,23 +23,14 @@ SOFTWARE.
 """
 
 import datetime
-from typing import Any, List, Dict, Iterable
+from typing import Any, Dict, Iterable, List
 from types import MappingProxyType
 
 import emojis # type: ignore
 
+from .regex import *
 from .abc import BaseMessage
 from .enums import get_message_type, get_period, get_sub_period
-from .regex import (
-    LAUGHS_RE,
-    MENTION_RE,
-    NUMBERS_RE,
-    URL_RE,
-    EMAIL_RE,
-    QUESTION_MARK_RE,
-    EXCLAMATION_MARK_RE,
-    EMOTICONS_RE
-)
 
 
 __all__ = ('Actor', 'Message', 'SystemMessage')
@@ -226,7 +217,7 @@ class Message(BaseMessage):
         data['Qty_char_laughs'] = LAUGHS_RE.findall(content)
         data['Qty_char_emoticons'] = EMOTICONS_RE.findall(content)
 
-        all_marks = data['Qty_char_emoji'] + data['Qty_char_emoticons']
+        all_marks: List[str] = data['Qty_char_emoji'] + data['Qty_char_emoticons']
         data['Qty_char_marks'] = all_marks
 
         net_incidences_fields = [

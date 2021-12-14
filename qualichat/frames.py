@@ -22,55 +22,44 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import types
 import inspect
-from re import Pattern
+import base64
 from pathlib import Path
-from functools import partial
-from collections import Counter, defaultdict
 from typing import (
+    Any,
     ClassVar,
+    DefaultDict,
     Dict,
     List,
     Optional,
+    Pattern,
+    Tuple,
     Union,
-    Set,
-    Any,
-    DefaultDict,
-    Tuple
 )
-
-# Fix matplotlib backend warning.
-import matplotlib
-matplotlib.use('TkAgg')
+from types import FunctionType
+from functools import partial, cache
+from io import BytesIO
+from collections import defaultdict, Counter
 
 import questionary
 import spacy
 import qualitube # type: ignore
-import matplotlib.pyplot as plt
-from pandas import DataFrame
-from pandas.core.generic import NDFrame
+from pandas import DataFrame, Index
 from plotly.subplots import make_subplots # type: ignore
-from plotly.graph_objects import Scatter # type: ignore
-from wordcloud.wordcloud import WordCloud, STOPWORDS # type: ignore
-from tldextract import extract # type: ignore
+from plotly.graph_objs import Scatter, Figure # type: ignore
 from rich.progress import Progress
+from wordcloud.wordcloud import WordCloud # type: ignore
+from tldextract import extract # type: ignore
 
 from . import sorters
 from .chat import Chat
 from .models import Message
 from .enums import MessageType
 from .utils import log, parse_domain
-from .regex import SHORT_YOUTUBE_LINK_RE, YOUTUBE_LINK_RE
+from .regex import *
 
 
 __all__ = ('BaseFrame', 'KeysFrame', 'ParticipationStatusFrame')
-
-
-ChatsData = Dict[Chat, Dict[str, List[Message]]]
-DataFrames = Dict[Chat, Union[DataFrame, NDFrame]]
-WordClouds = Dict[Chat, WordCloud]
-Messages = Dict[Chat, List[Message]]
 
 
 input = partial(questionary.text, qmark='[qualichat]')
@@ -78,12 +67,14 @@ select = partial(questionary.select, qmark='[qualichat]')
 
 
 def generate_chart(
-    data: DataFrames,
+    dataframes: Dict[Chat, DataFrame],
     *,
     bars: Optional[List[str]] = None,
     lines: Optional[List[str]] = None,
-    title: Optional[str] = None
+    title: Optional[str] = None,
 ) -> None:
+    """
+    """
     if bars is None:
         bars = []
 
@@ -93,76 +84,123 @@ def generate_chart(
     specs = [[{'secondary_y': True}]]
     fig = make_subplots(specs=specs) # type: ignore
 
-    chat, dataframe = list(data.items())[0]
-    index = dataframe.index # type: ignore
+    buttons: List[Dict[str, Any]] = []
 
-    # buttons: List[Dict[str, Any]] = []
+    for i, (chat, dataframe) in enumerate(dataframes.items()):
+        index = list(dataframe.index) # type: ignore
 
-    # for filename, dataframe in data.items():
-    #     button: Dict[str, Any] = {}
-    #     button['label'] = filename
-    #     button['method'] = 'update'
+        button: Dict[str, Any] = {}
+        button['label'] = chat.filename
+        button['method'] = 'update'
 
-    #     args: List[Dict[str, Any]] = []
-    #     args.append({'x': x, 'y': y}) # type: ignore
-    #     args.append({'title': {'text': f'{title} ({filename})'}})
+        args: List[Union[Dict[str, Any], List[Dict[str, Any]]]] = []
 
-    #     button['args'] = args
-    #     buttons.append(button)
+        visibility: List[bool] = []
+        for j in range(len(dataframes)):
+            for _ in range(len(bars + lines)):
+                visibility.append(i == j)
 
-    # updatemenus = [{'buttons': buttons}]
+        args.append({'visible': visibility})
+        args.append({'title': {'text': f'{title} ({chat.filename})'}})
 
-    for bar in bars:
-        filtered = getattr(dataframe, bar)
-        options = dict(x=index, y=list(filtered), name=bar) # type: ignore
-        fig.add_bar(**options) # type: ignore
+        button['args'] = args
+        buttons.append(button)
 
-    for line in lines:
-        filtered = getattr(dataframe, line)
-        scatter = Scatter(x=index, y=list(filtered), name=line) # type: ignore
-        fig.add_trace(scatter, secondary_y=True) # type: ignore
+        for bar in bars:
+            filtered = getattr(dataframe, bar)
+            options = dict(x=index, y=list(filtered), name=bar) # type: ignore
+            fig.add_bar(**options) # type: ignore
 
-    title_text = f'{title} ({chat.filename})'
-    fig.update_layout(title_text=title_text) # type: ignore
+        for line in lines:
+            filtered = getattr(dataframe, line)
+            scatter = Scatter(x=index, y=list(filtered), name=line) # type: ignore
+            fig.add_trace(scatter, secondary_y=True) # type: ignore
+
+    updatemenus = [{'buttons': buttons, 'active': 0}]
+    fig.update_layout(updatemenus=updatemenus) # type: ignore
 
     fig.update_xaxes(rangeslider_visible=True) # type: ignore
     fig.show() # type: ignore
 
 
-stopwords: Set[str] = set(STOPWORDS)
-stopwords.update([
-    'da', 'meu', 'em', 'você', 'de', 'ao', 'os', 'eu', 'Siga-nos'
-])
+def generate_wordcloud(wordclouds: Dict[Chat, WordCloud], *, title: str):
+    """
+    """
+    fig = Figure() # type: ignore
+    buttons: List[Dict[str, Any]] = []
+
+    for i, (chat, wordcloud) in enumerate(wordclouds.items()):
+        button: Dict[str, Any] = {}
+        button['label'] = chat.filename
+        button['method'] = 'update'
+
+        args: List[Dict[str, Any]] = []
+
+        visibility: List[bool] = []
+        for j in range(len(wordclouds)):
+            visibility.append(i == j)
+
+        args.append({'visible': visibility})
+        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+
+        button['args'] = args
+
+        buffer = BytesIO()
+        image = wordcloud.to_image() # type: ignore
+
+        image.save(buffer, format='png')
+        buffer.seek(0)
+        encoded_file = base64.b64encode(buffer.read()).decode('utf-8')
+
+        source = f'data:image/png;base64, {encoded_file}'
+        fig.add_image(source=source) # type: ignore
+
+        buttons.append(button)
+
+    updatemenus = [{'buttons': buttons, 'active': 0}]
+    fig.update_layout(updatemenus=updatemenus) # type: ignore
+
+    fig.show() # type: ignore
 
 
-def generate_wordcloud(data: WordClouds, *, title: str):
-    for chat, wordcloud in data.items():
-        wordcloud.stopwords = stopwords
+def generate_table(
+    tables: Dict[Chat, DataFrame],
+    *,
+    columns: Optional[List[str]] = None,
+    title: str
+):
+    """
+    """
+    if columns is None:
+        columns = []
 
-        plt.figure()
-        plt.axis('off')
-        plt.title(f'Wordcloud - {title} ({chat.filename})')
-
-        plt.imshow(wordcloud, interpolation='bilinear') # type: ignore
-        plt.show()
-
-
-def generate_table(data: DataFrames, *, title: str):
     fig = make_subplots() # type: ignore
-    filename, dataframe = list(data.items())[0]
+    buttons: List[Dict[str, Any]] = []
 
-    table: List[Any] = []
+    for chat, dataframe in tables.items():
+        button: Dict[str, Any] = {}
+        button['label'] = chat.filename
+        button['method'] = 'update'
 
-    for column in dataframe.columns: # type: ignore
-        table.append(dataframe[column].tolist()) # type: ignore
+        args: List[Dict[str, Any]] = []
+        values: List[Any] = []
 
-    header = {'values': dataframe.columns} # type: ignore
-    cells = {'values': table}
+        for column in columns:
+            values.append(dataframe[column].to_list()) # type: ignore
+
+        args.append({'cells': {'values': values}, 'header': {'values': columns}})
+        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+
+        button['args'] = args
+        buttons.append(button)
+
+    header: Dict[str, List[str]] = {'values': []}
+    cells: Dict[str, List[Any]] = {'values': []}
 
     fig.add_table(header=header, cells=cells) # type: ignore
 
-    title_text = f'{title} ({filename})'
-    fig.update_layout(title_text=title_text) # type: ignore
+    updatemenus = [{'buttons': buttons, 'active': 0}]
+    fig.update_layout(updatemenus=updatemenus) # type: ignore
 
     fig.show() # type: ignore
 
@@ -202,10 +240,10 @@ class BaseFrame:
 
     def __init__(self, chats: List[Chat]) -> None:
         def predicate(object: object) -> bool:
-            if not inspect.ismethod(object):
-                return False
+            if inspect.ismethod(object):
+                return not object.__name__.startswith('_') # type: ignore
 
-            return not object.__name__.startswith('_') # type: ignore
+            return False
 
         methods = inspect.getmembers(self, predicate=predicate)
         charts = {}
@@ -214,146 +252,120 @@ class BaseFrame:
             charts[_normalize_frame_name(name)] = method
 
         self.chats = chats
-        self.charts: Dict[str, types.FunctionType] = charts
+        self.charts: Dict[str, FunctionType] = charts
 
     def __repr__(self) -> str:
         return '<%s>' % self.__class__.__name__
 
 
-nlp = spacy.load('pt_core_news_sm') # type: ignore
+nlp = spacy.load('pt_core_news_md')
 
-CacheDictInt = DefaultDict[str, Optional[int]]
-CacheDictStr = DefaultDict[str, Optional[str]]
+pos: Optional[str] = None
+keyword: Optional[str] = None
+
+
+@cache
+def _parse_nlp(word: str, *, pos: str):
+    doc = nlp(word)
+    endings = ('ar', 'er', 'ir')
+
+    for token in doc:
+        if token.pos_ == pos:
+            if pos == 'VERB' and not token.text.endswith(endings):
+                continue
+
+            yield token.text
+
+
+def _parse_nlp_messages(messages: List[Message]):
+    types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
+
+    global pos
+
+    if pos is None:
+        morphological_class = select('Choose a morphological class:', types).ask()
+        pos = types[morphological_class]
+
+    with Progress() as progress:
+        for message in progress.track(messages, description='Parsing...'):
+            for text in _parse_nlp(message['Qty_char_text'], pos=pos):
+                yield text
+
+
+def _generate_wordcloud(data: List[str]):
+    parent = Path(__file__).resolve().parent
+    path = parent / 'fonts' / 'Roboto-Regular.ttf'
+
+    configs: Dict[str, Any] = {}
+    configs['width'] = 1920
+    configs['height'] = 1080
+    configs['font_path'] = str(path)
+    configs['background_color'] = 'white'
+
+    all_words = ' '.join(data)
+    return WordCloud(**configs).generate(all_words) # type: ignore
 
 
 class KeysFrame(BaseFrame):
     """
     """
 
-    __slots__ = ('api_key')
-
     fancy_name = 'Keys'
 
-    def __init__(self, chats: List[Chat], api_key: Optional[str]) -> None:
+    def __init__(self, chats: List[Chat], *, api_key: Optional[str]) -> None:
         self.api_key = api_key
         super().__init__(chats)
 
     @sorters.wordcloud
-    def messages(self, chats: Dict[Chat, List[Message]]):
+    def messages(self, chats_data: Dict[Chat, List[Message]]):
         """
         """
-        wordclouds: WordClouds = {}
+        wordclouds: Dict[Chat, WordCloud] = {}
         title = 'Keys Frame (Messages)'
 
-        endings = ('ar', 'er', 'ir')
-
-        for chat, messages in chats.items():
-            data: List[str] = []
-            parsed_messages: List[Message] = []
-
-            for message in messages:
-                if message['Type'] is not MessageType.default:
-                    continue
-
-                parsed_messages.append(message)
-
-            types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
-
-            word_type = select('Choose your word cloud type:', types).ask()
-            pos = types[word_type]
-
-            with Progress() as progress:
-                for message in progress.track(parsed_messages):
-                    text = message['Qty_char_text']
-                    doc = nlp(text) # type: ignore
-
-                    for token in doc: # type: ignore
-                        if token.pos_ == pos: # type: ignore
-                            text = token.text # type: ignore
-
-                            if pos == 'VERB' and not text.endswith(endings):
-                                continue
-                            
-                            data.append(text) # type: ignore
-
-            parent = Path(__file__).resolve().parent
-            path = parent / 'fonts' / 'Roboto-Regular.ttf'
-
-            configs: Dict[str, Any] = {}
-            configs['width'] = 1920
-            configs['height'] = 1080
-            configs['font_path'] = str(path)
-            configs['background_color'] = 'white'
-
-            all_words = ' '.join(data)
-            wordcloud = WordCloud(**configs).generate(all_words) # type: ignore
-
-            wordclouds[chat] = wordcloud
+        for chat, messages in chats_data.items():
+            data: List[str] = list(_parse_nlp_messages(messages))
+            wordclouds[chat] = _generate_wordcloud(data)
 
         generate_wordcloud(wordclouds, title=title)
 
     @sorters.wordcloud
-    def keyword(self, chats: Dict[Chat, List[Message]]):
+    def keyword(self, chats_data: Dict[Chat, List[Message]]):
         """
         """
-        wordclouds: WordClouds = {}
-
+        wordclouds: Dict[Chat, WordCloud] = {}
         title = 'Keys Frame (Keyword)'
-        keyword: str = input('Enter the keyword you want to analyze:').ask() # type: ignore
 
-        for chat, messages in chats.items():
-            data: List[str] = []
-            parsed_messages: List[Message] = []
+        global keyword
+
+        if keyword is None:
+            result: str = input('Enter the keyword:').ask()
+            keyword = result
+
+        for chat, messages in chats_data.items():
+            new_messages: List[Message] = []
 
             for message in messages:
-                if message['Type'] is not MessageType.default:
-                    continue
-
                 if keyword.lower() not in message.content.lower():
                     continue
 
-                parsed_messages.append(message)
+                new_messages.append(message)
 
-            types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
-
-            word_type = select('Choose your word cloud type:', types).ask()
-            pos = types[word_type]
-
-            with Progress() as progress:
-                for message in progress.track(parsed_messages):
-                    text = message['Qty_char_text'] # type: ignore
-                    doc = nlp(text) # type: ignore
-
-                    for token in doc: # type: ignore
-                        if token.pos_ == pos: # type: ignore
-                            wordcloud_data.append(token.text) # type: ignore
-
-            parent = Path(__file__).resolve().parent
-            path = parent / 'fonts' / 'Roboto-Regular.ttf'
-
-            configs: Dict[str, Any] = {}
-            configs['width'] = 1920
-            configs['height'] = 1080
-            configs['font_path'] = str(path)
-            configs['background_color'] = 'white'
-
-            all_words = ' '.join(data)
-            wordcloud = WordCloud(**configs).generate(all_words) # type: ignore
-
-            wordclouds[chat] = wordcloud
+            data: List[str] = list(_parse_nlp_messages(new_messages))
+            wordclouds[chat] = _generate_wordcloud(data)
 
         generate_wordcloud(wordclouds, title=title)
 
-    def ratings(self, chats: ChatsData):
+    def ratings(self, chats: List[Chat]):
         """
         """
         if not self.api_key:
-            return log('info', 'No API Key provided. Please provide one.')
+            return log('error', 'No API Key provided. Please provide one.')
 
         client = qualitube.Client(self.api_key)
 
         title = 'Keys Frame (Ratings)'
-        dataframes: DataFrames = {}
+        tables: Dict[Chat, DataFrame] = {}
 
         columns = [
             'Media', 'Actor', 'Date', 'Link',
@@ -365,19 +377,19 @@ class KeysFrame(BaseFrame):
             ('youtube', 'com'): YOUTUBE_LINK_RE
         }
 
-        for filename, data in chats.items():
+        for chat in chats:
             rows: List[List[Any]] = []
             url_counter: Counter[str] = Counter()
 
-            views_cache: CacheDictInt = defaultdict(lambda: None)
-            likes_cache: CacheDictInt = defaultdict(lambda: None)
-            comments_cache: CacheDictInt = defaultdict(lambda: None)
-            titles_cache: CacheDictStr = defaultdict(lambda: None)
+            views_cache: DefaultDict[str, Optional[int]] = defaultdict(int)
+            likes_cache: DefaultDict[str, Optional[int]] = defaultdict(int)
+            comments_cache: DefaultDict[str, Optional[int]] = defaultdict(int)
+            titles_cache: DefaultDict[str, Optional[str]] = defaultdict(str)
 
-            for messages in data.values():
-                for message in messages:
-                    actor = message.actor.display_name
+            with Progress() as progress:
+                for message in progress.track(chat.messages):
                     created_at = str(message.created_at)
+                    actor = message.actor.display_name
 
                     for url in message['Qty_char_links']:
                         domain = parse_domain(url)
@@ -402,15 +414,15 @@ class KeysFrame(BaseFrame):
                                 continue
 
                             video = videos[0]
-
+                        
                             views_cache[url] = video.view_count
                             likes_cache[url] = video.like_count
                             comments_cache[url] = video.comment_count
                             titles_cache[url] = video.title
 
-                        views = views_cache[url]
-                        likes = likes_cache[url]
-                        comments = comments_cache[url]
+                        views = views_cache[url] or ''
+                        likes = likes_cache[url] or ''
+                        comments = comments_cache[url] or ''
                         video_title = titles_cache[url]
 
                         rows.append([
@@ -418,17 +430,17 @@ class KeysFrame(BaseFrame):
                             views, likes, comments, video_title
                         ])
 
-                dataframe = DataFrame(rows, columns=columns)
-                dataframes[filename] = dataframe
+            dataframe = DataFrame(rows, columns=columns)
+            tables[chat] = dataframe
 
-            generate_table(dataframes, title=title)
+        generate_table(tables, columns=columns, title=title)
 
-    @sorters.sort_by_modes
-    def laminations(self, chats: ChatsData):
+    @sorters.modes
+    def laminations(self, chats_data: Dict[Chat, Dict[str, List[Message]]]):
         """
         """
         title = 'Keys Frame (Laminations)'
-        dataframes: DataFrames = {}
+        dataframes: Dict[Chat, DataFrame] = {}
 
         bars = [
             'Qty_char_links', 'Qty_char_emails',
@@ -436,7 +448,7 @@ class KeysFrame(BaseFrame):
         ]
         lines = ['Qty_messages']
 
-        for chat, data in chats.items():
+        for chat, data in chats_data.items():
             rows: List[List[int]] = []
 
             for actor, messages in data.items():
@@ -444,16 +456,14 @@ class KeysFrame(BaseFrame):
                 emojis = 0
                 emails = 0
                 mentions = 0
-                total_messages = 0
 
                 for message in messages:
                     links += len(message['Qty_char_links'])
                     emojis += len(message['Qty_char_emoji'])
                     emails += len(message['Qty_char_emails'])
                     mentions += len(message['Qty_char_mentions'])
-                    total_messages += 1
 
-                row = [links, emojis, emails, mentions, total_messages]
+                row = [links, emojis, emails, mentions, len(messages)]
                 rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
@@ -463,73 +473,26 @@ class KeysFrame(BaseFrame):
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
-    # def test2(self, chats: ChatsData):
-    #     for _, data in chats.items():
-    #         for messages in data.values():
-    #             for message in messages:
-    #                 if ':)' in message.content:
-    #                     print(message)
-    #                 # import re
-    #                 # print(re.findall(r'\s+:[^\s].?\s+', message.content))
-
-    # def test(self, chats: ChatsData):
-    #     dataframes: DataFrames = {}
-
-    #     bars = ['Qty_stickers', 'Qty_videos', 'Qty_char_net', 'Qty_char_links']
-    #     lines = ['Qty_messages']
-
-    #     for filename, data in chats.items():
-    #         rows: List[List[int]] = []
-
-    #         for messages in data.values():
-    #             stickers = videos = net_content = links = total_messages = 0
-
-    #             for message in messages:
-    #                 if message.actor.display_name != 'Rua da Itália':
-    #                     continue
-
-    #                 if message['Type'] is MessageType.sticker_omitted:
-    #                     stickers += 1
-    #                 elif message['Type'] is MessageType.video_omitted:
-    #                     videos += 1
-
-    #                 if message['Type'] is MessageType.default:
-    #                     net_content += len(message['Qty_char_net'].split(' '))
-    #                     links += len(message['Qty_char_links'])
-
-    #                 total_messages += 1
-
-    #             rows.append(([stickers, videos, net_content, links, total_messages]))
-
-    #         index = list(data.keys())
-
-    #         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-    #         dataframes[filename] = dataframe
-
-    #     generate_chart(dataframes, lines=lines, bars=bars, title='Stickers')
-
-    @sorters.sort_by_modes
-    def links(self, chats: ChatsData):
+    @sorters.modes
+    def links(self, chats_data: Dict[Chat, Dict[str, List[Message]]]):
         """
         """
         title = 'Keys Frame (Links)'
-        dataframes: DataFrames = {}
+        dataframes: Dict[Chat, DataFrame] = {}
 
         bars = ['Qty_char_links']
         lines = ['Qty_messages']
 
-        for chat, data in chats.items():
+        for chat, data in chats_data.items():
             rows: List[List[int]] = []
 
             for actor, messages in data.items():
                 links = 0
-                total_messages = 0
 
                 for message in messages:
                     links += len(message['Qty_char_links'])
-                    total_messages += 1
 
-                row = [links, total_messages]
+                row = [links, len(messages)]
                 rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
@@ -539,28 +502,26 @@ class KeysFrame(BaseFrame):
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
-    @sorters.sort_by_modes
-    def mentions(self, chats: ChatsData):
+    @sorters.modes
+    def mentions(self, chats_data: Dict[Chat, Dict[str, List[Message]]]):
         """
         """
         title = 'Keys Frame (Mentions)'
-        dataframes: DataFrames = {}
+        dataframes: Dict[Chat, DataFrame] = {}
 
         bars = ['Qty_char_mentions']
         lines = ['Qty_messages']
 
-        for chat, data in chats.items():
+        for chat, data in chats_data.items():
             rows: List[List[int]] = []
 
             for actor, messages in data.items():
                 mentions = 0
-                total_messages = 0
 
                 for message in messages:
                     mentions += len(message['Qty_char_mentions'])
-                    total_messages += 1
 
-                row = [mentions, total_messages]
+                row = [mentions, len(messages)]
                 rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
@@ -570,28 +531,26 @@ class KeysFrame(BaseFrame):
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
-    @sorters.sort_by_modes
-    def emails(self, chats: ChatsData):
+    @sorters.modes
+    def emails(self, chats_data: Dict[Chat, Dict[str, List[Message]]]):
         """
         """
         title = 'Keys Frame (E-mails)'
-        dataframes: DataFrames = {}
+        dataframes: Dict[Chat, DataFrame] = {}
 
         bars = ['Qty_char_emails']
         lines = ['Qty_messages']
 
-        for chat, data in chats.items():
+        for chat, data in chats_data.items():
             rows: List[List[int]] = []
 
             for actor, messages in data.items():
                 emails = 0
-                total_messages = 0
 
                 for message in messages:
                     emails += len(message['Qty_char_emails'])
-                    total_messages += 1
 
-                row = [emails, total_messages]
+                row = [emails, len(messages)]
                 rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
@@ -601,30 +560,28 @@ class KeysFrame(BaseFrame):
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
-    @sorters.sort_by_modes
-    def textual_symbols(self, chats: ChatsData):
+    @sorters.modes
+    def textual_symbols(self, chats_data: Dict[Chat, Dict[str, List[Message]]]):
         """
         """
         title = 'Keys Frame (Textual symbols)'
-        dataframes: DataFrames = {}
+        dataframes: Dict[Chat, DataFrame] = {}
 
         bars = ['Qty_char_marks', 'Qty_char_emoji']
         lines = ['Qty_messages']
 
-        for chat, data in chats.items():
+        for chat, data in chats_data.items():
             rows: List[List[int]] = []
 
             for actor, messages in data.items():
                 marks = 0
                 emojis = 0
-                total_messages = 0
 
                 for message in messages:
                     marks += len(message['Qty_char_marks'])
                     emojis += len(message['Qty_char_emoji'])
-                    total_messages += 1
 
-                row = [marks, emojis, total_messages]
+                row = [marks, emojis, len(messages)]
                 rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
@@ -641,45 +598,38 @@ class ParticipationStatusFrame(BaseFrame):
 
     fancy_name = 'Participation Status'
 
-    def bots(self, chats: ChatsData):
+    @sorters.group_messages_by_users
+    def bots(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
         """
         """
+        dataframes: Dict[Chat, DataFrame] = {}
         title = 'Participation Status Frame (Bots)'
-        dataframes: DataFrames = {}
 
         bars = ['Qty_score']
         lines = ['Qty_messages']
 
-        chat = self.chats[0]
-        rows: List[List[float]] = []
-        
-        data: DefaultDict[str, List[Message]] = defaultdict(list)
+        for chat, data in chat_data.items():
+            rows: List[List[int]] = []
 
-        for message in chat.messages:
-            data[message.actor.display_name].append(message)
+            for messages in data.values():
+                chars_net: int = 0
+                videos: int = 0
+                stickers: int = 0
 
-        for messages in data.values():
-            chars_net: int = 0
-            videos: int = 0
-            stickers: int = 0
-            total_messages: int = 0
-            
-            for message in messages:
-                if message['Type'] is MessageType.default:
-                    chars_net += len(message['Qty_char_net'].split())
-                elif message['Type'] is MessageType.video_omitted:
-                    videos += 1
-                elif message['Type'] is MessageType.sticker_omitted:
-                    stickers += 1
+                for message in messages:
+                    if message['Type'] is MessageType.default:
+                        chars_net += len(message['Qty_char_net'].split())
+                    elif message['Type'] is MessageType.video_omitted:
+                        videos += 1
+                    elif message['Type'] is MessageType.sticker_omitted:
+                        stickers += 1
 
-                total_messages += 1
+                result = ((chars_net * 1) + (videos * 2) + (stickers * 3)) / 6
+                rows.append([int(result), len(messages)])
 
-            result = ((chars_net * 1) + (videos * 2) + (stickers * 3)) / (1 + 2 + 3)
-            rows.append([result, total_messages])
+            index = list(data.keys())
 
-        index = list(data.keys())
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
 
-        dataframe = DataFrame(rows, index=index, columns=bars + lines)
-        dataframes = {chat: dataframe}
-
-        generate_chart(dataframes, lines=lines, bars=bars, title=title)
+        generate_chart(dataframes, bars=bars, lines=lines, title=title)

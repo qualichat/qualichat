@@ -23,121 +23,26 @@ SOFTWARE.
 """
 
 from collections import defaultdict
-from typing import Callable, DefaultDict, Dict, List, Optional
+from typing import Callable, DefaultDict, Dict, List
 from functools import partial
 
 import questionary
-from rich import print
 from rich.progress import Progress
 
 from .chat import Chat
 from .models import Message
+from .enums import MessageType
 from .utils import log
 
 
-__all__ = ('sort_by_modes',)
-
-
-Messages = Dict[str, List[Message]]
+__all__ = ('group_messages_by_users', 'modes', 'wordcloud')
 
 
 select = partial(questionary.select, qmark='[qualichat]')
 checkbox = partial(questionary.checkbox, qmark='[qualichat]')
 
 
-def _sort_by_time(messages: List[Message]) -> Optional[Messages]:
-    data: DefaultDict[str, List[Message]] = defaultdict(list)
-
-    with Progress() as progress:
-        for message in progress.track(messages, description='Sorting...'):
-            data[message.created_at.strftime('%B %Y')].append(message)
-
-    choices = ['All', 'Choose a specific epoch']
-    selected = select('Which messages should be selected?', choices).ask()
-
-    if selected == 'All':
-        return dict(data)
-
-    selected_epochs = checkbox('Choose a chat epoch:', data).ask()
-
-    if not selected_epochs:
-        log('error', 'No epochs were selected. Aborting.')
-        return None
-
-    return {epoch: data[epoch] for epoch in selected_epochs}
-
-
-def _sort_by_actor(messages: List[Message]) -> Optional[Messages]:
-    data: DefaultDict[str, List[Message]] = defaultdict(list)
-
-    with Progress() as progress:
-        for message in progress.track(messages, description='Tracking...'):
-            data[message.actor.display_name].append(message)
-
-    choices = ['All', 'Choose a specific actor']
-    selected = select('Which actors should be selected?', choices).ask()
-
-    if selected == 'All':
-        return dict(data)
-
-    selected_actors = checkbox('Choose an actor:', data).ask()
-
-    if not selected_actors:
-        log('error', 'No actors were selected. Aborting.')
-        return None
-
-    if len(selected_actors) != 1:
-        ret: Dict[str, List[Message]] = {}
-        others: List[Message] = []
-        
-        for actor in data:
-            if actor not in selected_actors:
-                others.extend(data[actor])
-            else:
-                ret[actor] = data[actor]
-
-        ret['Others'] = others
-        return ret
-
-    actor = selected_actors[0]
-    messages = data[actor]
-
-    new_data: DefaultDict[str, List[Message]] = defaultdict(list)
-
-    with Progress() as progress:
-        for message in progress.track(messages, description='Sorting...'):
-            new_data[message.created_at.strftime('%B %Y')].append(message)
-
-    return dict(new_data)
-
-
-def sort_by_modes(func: Callable[..., None]):
-    """
-    """
-
-    # Hack to avoid circular imports.
-    from .frames import BaseFrame    
-
-    def decorator(self: BaseFrame, chats: List[Chat]) -> None:
-        modes: Dict[str, Callable[..., Optional[Messages]]] = {
-            'By Time': _sort_by_time,
-            'By Actor': _sort_by_actor,
-        }
-
-        name = select('Now, choose your mode:', modes).ask()
-        mode = modes[name]
-
-        sorted_messages = {chat: mode(chat.messages) for chat in chats}
-        
-        if None in sorted_messages.values():
-            return
-        
-        func(self, sorted_messages)
-
-    return decorator
-
-
-def wordcloud(func: Callable[..., None]):
+def group_messages_by_users(func: Callable[..., None]):
     """
     """
 
@@ -145,6 +50,189 @@ def wordcloud(func: Callable[..., None]):
     from .frames import BaseFrame 
 
     def decorator(self: BaseFrame, chats: List[Chat]) -> None:
-        func(self, {chat: chat.messages for chat in chats})
+        data: Dict[Chat, Dict[str, List[Message]]] = {}
+
+        for chat in chats:
+            messages = {act.display_name: act.messages for act in chat.actors}
+            data[chat] = messages
+
+        func(self, data)
+
+    return decorator
+
+
+
+# Data = Dict[Chat, Optional[Union[Dict[str, List[Message]], List[Message]]]]
+
+
+
+
+def _sort_by_time(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
+    ret: Dict[Chat, Dict[str, List[Message]]] = {}
+
+    def sort(messages: List[Message]):
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        with Progress() as progress:
+            for m in progress.track(messages, description='Sorting...'):
+                data[m.created_at.strftime('%B %Y')].append(m)
+
+        choices = ['All', 'Choose an epoch']
+        message = f'[{chat.filename}] Which messages should be selected?'
+        
+        selected = select(message, choices).ask()
+
+        if selected == 'All':
+            return dict(data)
+
+        if not (epochs := checkbox('Choose an epoch:', data).ask()):
+            raise KeyError()
+
+        return {epoch: data[epoch] for epoch in epochs}
+
+    for chat in chats:
+        ret[chat] = sort(chat.messages)
+
+    return ret
+
+
+def _sort_by_actor(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
+    ret: Dict[Chat, Dict[str, List[Message]]] = {}
+
+    def sort(messages: List[Message]) -> Dict[str, List[Message]]:
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        with Progress() as progress:
+            for m in progress.track(messages, description='Tracking...'):
+                data[m.actor.display_name].append(m)
+
+        choices = ['All', 'Choose a specific actor']
+        message = f'[{chat.filename}] Which actors should be selected?'
+        selected = select(message, choices).ask()
+
+        if selected == 'All':
+            return dict(data)
+
+        if not (actors := checkbox('Choose an actor:', data).ask()):
+            raise KeyError()
+
+        if len(actors) != 1:
+            ret: Dict[str, List[Message]] = {}
+            others: List[Message] = []
+            
+            for actor in data:
+                if actor not in actors:
+                    others.extend(data[actor])
+                else:
+                    ret[actor] = data[actor]
+
+            ret['Others'] = others
+            return ret
+
+        actor = actors[0]
+        messages = data[actor]
+
+        new_data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        with Progress() as progress:
+            for m in progress.track(messages, description='Sorting...'):
+                new_data[m.created_at.strftime('%B %Y')].append(m)
+
+        return dict(new_data)
+
+    for chat in chats:
+        ret[chat] = sort(chat.messages)
+
+    return ret
+
+
+# def _sort_by_groups(chats: List[Chat]) -> Data:
+#     choices = ['All', 'Choose a specific group']
+#     selected = select('Which groups should be selected?', choices).ask()
+
+#     if selected == 'All':
+#         return {chat: chat.messages for chat in chats}
+
+#     choices = [chat.filename for chat in chats]
+#     groups = checkbox('Choose a group:', choices).ask()
+
+#     if not groups:
+#         log('error', 'No groups were selected. Aborting.')
+#         return {chat: None for chat in chats}
+
+#     return {chat: chat.messages for chat in chats if chat.filename in groups}
+
+# def _sort_by_time_ignore_groups(chats: List[Chat]) -> Data:
+    
+
+
+def modes(func: Callable[..., None]):
+    """
+    """
+
+    # Hack to avoid circular imports.
+    from .frames import BaseFrame    
+
+    def decorator(self: BaseFrame, chats: List[Chat]) -> None:
+        modes = {'By Time': _sort_by_time, 'By Actor': _sort_by_actor}
+        name = select('Now, choose your mode:', modes).ask()
+
+        try:
+            sorted_messages = modes[name](chats)
+        except (KeyError, TypeError):
+            return log('error', 'Option not selected. Aborting.')
+
+        func(self, sorted_messages)
+
+    return decorator
+
+
+# def sort_by_frames(func: Callable[..., None]):
+#     """
+#     """
+
+#     # Hack to avoid circular imports.
+#     from .frames import BaseFrame 
+
+#     def decorator(self: BaseFrame, chats: List[Chat]) -> None:
+#         modes = {
+#             'By Time': _sort_by_time,
+#             'By Groups': _sort_by_groups,
+#         }
+
+#         name = select('Now, choose your frame type:', modes).ask()
+#         mode = modes[name]
+
+#         sorted_messages = mode(chats)
+        
+#         if None in sorted_messages.values():
+#             return
+        
+#         func(self, sorted_messages)
+
+#     return decorator
+
+
+def wordcloud(func: Callable[..., None]):
+    """
+    """
+
+    # Hack to avoid circular imports.
+    from .frames import BaseFrame
+
+    def decorator(self: BaseFrame, chats: List[Chat]) -> None:
+        data: Dict[Chat, List[Message]] = {}
+
+        for chat in chats:
+            messages: List[Message] = []
+
+            for message in chat.messages:
+                if message['Type'] is not MessageType.default:
+                    continue
+
+                messages.append(message)
+            data[chat] = messages
+
+        func(self, data)
 
     return decorator

@@ -22,21 +22,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typing import Union, Any, List, Dict
+from typing import Any, Dict, List, Union
 from pathlib import Path
 
-from colorama import Fore
-
-from .utils import log, config, get_random_name, save_config
 from .models import Message, SystemMessage, Actor
+
+# from colorama import Fore
+
+# from .utils import log, config, get_random_name, save_config
 from .regex import CHAT_FORMAT_RE, USER_MESSAGE_RE
+from .utils import config, get_random_name, log
 
 
 __all__ = ('Chat',)
 
 
-GREEN = Fore.GREEN
-RESET = Fore.RESET
+# GREEN = Fore.GREEN
+# RESET = Fore.RESET
 
 
 def _clean_impurities(content: str) -> str:
@@ -68,7 +70,9 @@ class Chat:
         All the system messages found by Qualichat.
     """
 
-    __slots__ = ('path', 'filename', 'messages', 'system_messages', '_actors')
+    __slots__ = (
+        'path', 'filename', 'messages', 'system_messages', '_actors',
+    )
 
     def __init__(self, path: Union[str, Path], **kwargs: Any) -> None:
         if not isinstance(path, Path):
@@ -80,7 +84,7 @@ class Chat:
         self.path: Path = path.resolve()
         self.filename: str = self.path.name
 
-        name = f'{GREEN}{str(path)}{RESET}'
+        name = f'[green]{str(path)}[/]'
         log('info', f'Loading chat {name}...')
 
         log('debug', f'Reading {name} file content...')
@@ -112,12 +116,12 @@ class Chat:
                 content = is_user_message.group(2)
 
                 if contact_name not in self._actors:
-                    path = str(self.path.resolve())
+                    path = str(self.path)
 
                     if path not in config:
-                        config[path] = {} # type: ignore
+                        config[path] = {}
 
-                    group = config[path]
+                    group: Dict[str, str] = config[path]
 
                     if contact_name not in group:
                         group[contact_name] = get_random_name()
@@ -125,7 +129,7 @@ class Chat:
                     display_name = group[contact_name]
                     self._actors[contact_name] = Actor(display_name)
 
-                actor = self._actors[contact_name]
+                actor = self._actors[contact_name]                
                 message = Message(actor, content, created_at)
 
                 self.messages.append(message)
@@ -136,15 +140,13 @@ class Chat:
                 # etc.)
                 self.system_messages.append(SystemMessage(rest, created_at))
 
-        save_config()
+        config.save()
 
         messages = len(self.messages) + len(self.system_messages)
         actors = len(self.actors)
 
-        message = f'Loaded {messages:,} messages and {actors:,} actors from ' \
-                  f'{name}.'
-
-        log('info', message)
+        msg = f'Loaded {messages:,} messages and {actors:,} actors from {name}.'
+        log('info', msg)
 
     @property
     def actors(self) -> List[Actor]:
@@ -153,10 +155,10 @@ class Chat:
         """
         return list(self._actors.values())
 
-    def __repr__(self) -> str:
-        filename = f'filename={self.filename!r}'
-        actors = f'actors={len(self._actors)}'
-        messages = f'messages={len(self.messages)}'
-        system_messages = f'system_messages={len(self.system_messages)}'
+#     def __repr__(self) -> str:
+#         filename = f'filename={self.filename!r}'
+#         actors = f'actors={len(self._actors)}'
+#         messages = f'messages={len(self.messages)}'
+#         system_messages = f'system_messages={len(self.system_messages)}'
 
-        return f'<Chat {filename} {actors} {messages} {system_messages}>'
+#         return f'<Chat {filename} {actors} {messages} {system_messages}>'

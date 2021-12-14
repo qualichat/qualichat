@@ -37,6 +37,7 @@ __all__ = (
     'LAUGHS_RE',
     'SHORT_YOUTUBE_LINK_RE',
     'YOUTUBE_LINK_RE',
+    'EMOTICONS_RE',
 )
 
 
@@ -103,5 +104,5 @@ YOUTUBE_LINK_RE = re.compile(r'''
 ''')
 
 EMOTICONS_RE = re.compile(r'''
-    \s*(:\)|:-\)|:\(|:-\(|:D)\s*
+    \s*(:-?\)|:-?\(|:-?D)\s*
 ''')

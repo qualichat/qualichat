@@ -23,29 +23,18 @@ SOFTWARE.
 """
 
 import logging
-from typing import Tuple, Union, Any, List, Optional, Dict
+from typing import Dict, List, Optional, Tuple, Union
 from pathlib import Path
 
 from .chat import Chat
-
 from .frames import BaseFrame, KeysFrame, ParticipationStatusFrame
 
 
-__all__ = (
-    'Qualichat',
-    'load_chats',
-)
+__all__ = ('Qualichat', 'load_chats')
 
 
 class Qualichat:
-    """Represents a set of chats for linguistic analysis.
-    
-    Attributes
-    ----------
-    chats: List[:class:`.Chat`]
-        All chats uploaded and parsed by Qualichat.
-    keys: :class:`.KeysFrame`
-        The Qualichat's keys frame.
+    """
     """
 
     __slots__: Tuple[str, ...] = ('chats', 'keys', 'participation_status')
@@ -53,7 +42,7 @@ class Qualichat:
     def __init__(self, chats: List[Chat], api_key: Optional[str]) -> None:
         self.chats = chats
 
-        self.keys = KeysFrame(chats, api_key)
+        self.keys = KeysFrame(chats, api_key=api_key)
         self.participation_status = ParticipationStatusFrame(chats)
 
     def __repr__(self) -> str:
@@ -66,7 +55,6 @@ class Qualichat:
         for name in self.__slots__[1:]:
             o = getattr(self, name)
             name = o.fancy_name
-            
             frames[name] = o
 
         return frames
@@ -74,9 +62,8 @@ class Qualichat:
 
 def load_chats(
     *paths: Union[str, Path],
-    debug: bool = False,
-    api_key: Optional[str] = None,
-    **kwargs: Any
+    debug: bool,
+    api_key: Optional[str] = None
 ) -> Qualichat:
     """Loads the given chats from a plain text files.
 
@@ -106,4 +93,93 @@ def load_chats(
     logger = logging.getLogger('qualichat')
     logger.setLevel(level)
 
-    return Qualichat([Chat(path, **kwargs) for path in paths], api_key)
+    chats = [Chat(path) for path in paths]
+    qualichat = Qualichat(chats, api_key=api_key)
+
+    return qualichat
+
+
+# import logging
+# from typing import Tuple, Union, Any, List, Optional, Dict
+# from pathlib import Path
+
+# from .chat import Chat
+
+# from .frames import BaseFrame, KeysFrame, ParticipationStatusFrame
+
+
+# __all__ = (
+#     'Qualichat',
+#     'load_chats',
+# )
+
+
+# class Qualichat:
+#     """Represents a set of chats for linguistic analysis.
+    
+#     Attributes
+#     ----------
+#     chats: List[:class:`.Chat`]
+#         All chats uploaded and parsed by Qualichat.
+#     keys: :class:`.KeysFrame`
+#         The Qualichat's keys frame.
+#     """
+
+#     __slots__: Tuple[str, ...] = ('chats', 'keys', 'participation_status')
+
+#     def __init__(self, chats: List[Chat], api_key: Optional[str]) -> None:
+#         self.chats = chats
+
+#         self.keys = KeysFrame(chats)
+#         self.participation_status = ParticipationStatusFrame(chats)
+
+#     def __repr__(self) -> str:
+#         return f'<Qualichat chats={self.chats}>'
+
+#     @property
+#     def frames(self) -> Dict[str, BaseFrame]:
+#         frames: Dict[str, BaseFrame] = {}
+
+#         for name in self.__slots__[1:]:
+#             o = getattr(self, name)
+#             name = o.fancy_name
+#             frames[name] = o
+
+#         return frames
+
+
+# def load_chats(
+#     *paths: Union[str, Path],
+#     debug: bool = False,
+#     api_key: Optional[str] = None,
+#     **kwargs: Any
+# ) -> Qualichat:
+#     """Loads the given chats from a plain text files.
+
+#     Parameters
+#     ----------
+#     *paths: Union[:class:`str`, :class:`pathlib.Path`]
+#         The paths to the chat files.
+#     debug: :class:`bool`
+#         Sets the logging level to debug.
+#     api_key: Optional[:class:`str`]
+#         The YouTube API Key to create rating videos charts.
+#     **kwargs: Any
+#         Keyword arguments that will be passed to :class:`.Chat`.
+
+#     Returns
+#     -------
+#     :class:`.Qualichat`
+#         The object that will be used for analysis of the chat.
+
+#     Raises
+#     ------
+#     :class:`FileNotFoundError`
+#         If one of the chat files could not been found.
+#     """
+#     level = logging.DEBUG if debug else logging.INFO
+
+#     logger = logging.getLogger('qualichat')
+#     logger.setLevel(level)
+
+#     return Qualichat([Chat(path, **kwargs) for path in paths], api_key)
