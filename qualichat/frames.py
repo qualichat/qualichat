@@ -39,12 +39,12 @@ from typing import (
 from types import FunctionType
 from functools import partial, cache
 from io import BytesIO
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, OrderedDict
 
 import questionary
 import spacy
 import qualitube # type: ignore
-from pandas import DataFrame, Index
+from pandas import DataFrame
 from plotly.subplots import make_subplots # type: ignore
 from plotly.graph_objs import Scatter, Figure # type: ignore
 from rich.progress import Progress
@@ -206,7 +206,7 @@ def generate_table(
 
 
 def _normalize_frame_name(name: str) -> str:
-    return name.replace('_', ' ').capitalize()
+    return name.replace('_', ' ').title()
 
 
 def _normalize_row(row: List[int], actor: str, chat: Chat) -> List[int]:
@@ -633,3 +633,65 @@ class ParticipationStatusFrame(BaseFrame):
             dataframes[chat] = dataframe
 
         generate_chart(dataframes, bars=bars, lines=lines, title=title)
+
+    @sorters.group_messages_by_users
+    def messages_per_actors(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Messages per Actors)'
+
+        bars = ['Qty_messages', 'Qty_char_text', 'Qty_char_net']
+        lines: List[str] = []
+
+        for chat, data in chat_data.items():
+            rows: List[List[int]] = []
+
+            for messages in data.values():
+                chars_text: int = 0
+                chars_net: int = 0
+
+                for message in messages:
+                    if message['Type'] is not MessageType.default:
+                        continue
+
+                    chars_text += len(message['Qty_char_text'].split())
+                    chars_net += len(message['Qty_char_net'].split())
+
+                rows.append([len(messages), chars_text, chars_net])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
+
+        generate_chart(dataframes, bars=bars, lines=lines, title=title)
+
+    def messages_per_actors_per_weekday(self, chats: List[Chat]) -> None:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Messages per Actors per Weekday)'
+
+        bars = [
+            'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+            'Thursday', 'Friday', 'Saturday'
+        ]
+
+        for chat in chats:
+            rows: List[List[int]] = []
+
+            for actor in chat.actors:
+                data = OrderedDict({weekday: 0 for weekday in bars})
+
+                for message in actor.messages:
+                    data[message.created_at.strftime('%A')] += 1
+
+                rows.append(list(data.values()))
+
+            index = [actor.display_name for actor in chat.actors]
+
+            dataframe = DataFrame(rows, index=index, columns=bars)
+            dataframes[chat] = dataframe
+
+        generate_chart(dataframes, bars=bars, lines=[], title=title)
