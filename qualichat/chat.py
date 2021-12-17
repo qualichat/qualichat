@@ -155,10 +155,10 @@ class Chat:
         """
         return list(self._actors.values())
 
-#     def __repr__(self) -> str:
-#         filename = f'filename={self.filename!r}'
-#         actors = f'actors={len(self._actors)}'
-#         messages = f'messages={len(self.messages)}'
-#         system_messages = f'system_messages={len(self.system_messages)}'
+    def __repr__(self) -> str:
+        filename = f'filename={self.filename!r}'
+        actors = f'actors={len(self._actors)}'
+        messages = f'messages={len(self.messages)}'
+        system_messages = f'system_messages={len(self.system_messages)}'
 
-#         return f'<Chat {filename} {actors} {messages} {system_messages}>'
+        return f'<Chat {filename} {actors} {messages} {system_messages}>'
