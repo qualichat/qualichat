@@ -85,6 +85,7 @@ def generate_chart(
     fig = make_subplots(specs=specs) # type: ignore
 
     buttons: List[Dict[str, Any]] = []
+    visible = True
 
     for i, (chat, dataframe) in enumerate(dataframes.items()):
         index = list(dataframe.index) # type: ignore
@@ -108,13 +109,16 @@ def generate_chart(
 
         for bar in bars:
             filtered = getattr(dataframe, bar)
-            options = dict(x=index, y=list(filtered), name=bar) # type: ignore
+            options = dict(x=index, y=list(filtered), name=bar, visible=visible) # type: ignore
             fig.add_bar(**options) # type: ignore
 
         for line in lines:
             filtered = getattr(dataframe, line)
-            scatter = Scatter(x=index, y=list(filtered), name=line) # type: ignore
+            scatter = Scatter(x=index, y=list(filtered), name=line, visible=visible) # type: ignore
             fig.add_trace(scatter, secondary_y=True) # type: ignore
+
+        if visible is True:
+            visible = False
 
     updatemenus = [{'buttons': buttons, 'active': 0}]
     fig.update_layout(updatemenus=updatemenus) # type: ignore
@@ -641,8 +645,8 @@ class ParticipationStatusFrame(BaseFrame):
         dataframes: Dict[Chat, DataFrame] = {}
         title = 'Participation Status Frame (Messages per Actors)'
 
-        bars = ['Qty_messages', 'Qty_char_text', 'Qty_char_net']
-        lines: List[str] = []
+        bars = ['Qty_char_text', 'Qty_char_net']
+        lines = ['Qty_messages']
 
         for chat, data in chat_data.items():
             rows: List[List[int]] = []
