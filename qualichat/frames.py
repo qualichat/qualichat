@@ -695,3 +695,33 @@ class ParticipationStatusFrame(BaseFrame):
             dataframes[chat] = dataframe
 
         generate_chart(dataframes, bars=bars, lines=[], title=title)
+
+    def laminations_per_actors(self, chats: List[Chat]) -> None:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Laminations per Actors)'
+
+        bars = ['Qty_char_net']
+        lines = ['Qty_messages']
+
+        for chat in chats:
+            rows: List[List[int]] = []
+
+            for actor in chat.actors:
+                chars_net = 0
+
+                for message in actor.messages:
+                    if message['Type'] is not MessageType.default:
+                        continue
+
+                    chars_net += len(message['Qty_char_net'].split())
+
+                rows.append([chars_net, len(actor.messages)])
+
+            index = [actor.display_name for actor in chat.actors]
+
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
+
+        generate_chart(dataframes, bars=bars, lines=lines, title=title)
