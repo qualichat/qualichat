@@ -61,12 +61,6 @@ def group_messages_by_users(func: Callable[..., None]):
     return decorator
 
 
-
-# Data = Dict[Chat, Optional[Union[Dict[str, List[Message]], List[Message]]]]
-
-
-
-
 def _sort_by_time(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
     ret: Dict[Chat, Dict[str, List[Message]]] = {}
 
@@ -146,26 +140,6 @@ def _sort_by_actor(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
     return ret
 
 
-# def _sort_by_groups(chats: List[Chat]) -> Data:
-#     choices = ['All', 'Choose a specific group']
-#     selected = select('Which groups should be selected?', choices).ask()
-
-#     if selected == 'All':
-#         return {chat: chat.messages for chat in chats}
-
-#     choices = [chat.filename for chat in chats]
-#     groups = checkbox('Choose a group:', choices).ask()
-
-#     if not groups:
-#         log('error', 'No groups were selected. Aborting.')
-#         return {chat: None for chat in chats}
-
-#     return {chat: chat.messages for chat in chats if chat.filename in groups}
-
-# def _sort_by_time_ignore_groups(chats: List[Chat]) -> Data:
-    
-
-
 def modes(func: Callable[..., None]):
     """
     """
@@ -185,32 +159,6 @@ def modes(func: Callable[..., None]):
         func(self, sorted_messages)
 
     return decorator
-
-
-# def sort_by_frames(func: Callable[..., None]):
-#     """
-#     """
-
-#     # Hack to avoid circular imports.
-#     from .frames import BaseFrame 
-
-#     def decorator(self: BaseFrame, chats: List[Chat]) -> None:
-#         modes = {
-#             'By Time': _sort_by_time,
-#             'By Groups': _sort_by_groups,
-#         }
-
-#         name = select('Now, choose your frame type:', modes).ask()
-#         mode = modes[name]
-
-#         sorted_messages = mode(chats)
-        
-#         if None in sorted_messages.values():
-#             return
-        
-#         func(self, sorted_messages)
-
-#     return decorator
 
 
 def wordcloud(func: Callable[..., None]):
