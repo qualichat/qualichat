@@ -725,3 +725,33 @@ class ParticipationStatusFrame(BaseFrame):
             dataframes[chat] = dataframe
 
         generate_chart(dataframes, bars=bars, lines=lines, title=title)
+
+    def machinations_per_actors(self, chats: List[Chat]) -> None:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Machinations per Actors)'
+
+        bars = ['Qty_char_text']
+        lines = ['Qty_messages']
+
+        for chat in chats:
+            rows: List[List[int]] = []
+
+            for actor in chat.actors:
+                chars_text = 0
+
+                for message in actor.messages:
+                    if message['Type'] is not MessageType.default:
+                        continue
+
+                    chars_text += len(message['Qty_char_text'].split())
+
+                rows.append([chars_text, len(actor.messages)])
+
+            index = [actor.display_name for actor in chat.actors]
+
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
+
+        generate_chart(dataframes, bars=bars, lines=lines, title=title)
