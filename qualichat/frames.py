@@ -639,6 +639,46 @@ class ParticipationStatusFrame(BaseFrame):
         generate_chart(dataframes, bars=bars, lines=lines, title=title)
 
     @sorters.group_messages_by_users
+    def messages_statistics(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Messages Statistics)'
+
+        bars = ['Avg_chars_net', 'Avg_chars_text', 'Sd_chars_net']
+        lines = ['Qty_messages']
+
+        for chat, data in chat_data.items():
+            rows: List[List[Union[int, float]]] = []
+
+            for messages in data.values():
+                chars_total: int = 0
+                chars_text: List[int] = []
+                chars_net: List[int] = []
+
+                for message in messages:
+                    chars_total += len(message.content)
+                    chars_text.append(len(message['Qty_char_text']))
+                    chars_net.append(len(message['Qty_char_net']))
+
+                average_text = sum(chars_text) / len(chars_text)
+                average_net = sum(chars_net) / len(chars_net)
+
+                # SD means "Standard Deviation".
+                # See more: https://en.wikipedia.org/wiki/Standard_deviation
+                sigma = sum([(x - average_net) ** 2 for x in chars_net])
+                sd_net = sqrt(sigma / len(chars_net))
+
+                rows.append([average_net, average_text, sd_net, len(messages)])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
+
+        generate_chart(dataframes, bars=bars, lines=lines, title=title)
+
+    @sorters.group_messages_by_users
     def messages_per_actors(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
         """
         """
