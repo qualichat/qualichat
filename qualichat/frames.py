@@ -40,6 +40,7 @@ from types import FunctionType
 from functools import partial, cache
 from io import BytesIO
 from collections import defaultdict, Counter, OrderedDict
+from math import sqrt
 
 import questionary
 import spacy
@@ -794,6 +795,35 @@ class ParticipationStatusFrame(BaseFrame):
                 rows.append([chars_text, len(actor.messages)])
 
             index = [actor.display_name for actor in chat.actors]
+
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
+
+        generate_chart(dataframes, bars=bars, lines=lines, title=title)
+
+    @sorters.group_messages_by_users
+    def media_repertoire(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Media Repertoire)'
+
+        bars = ['Avg_links']
+        lines = ['Qty_messages']
+
+        for chat, data in chat_data.items():
+            rows: List[List[Union[int, float]]] = []
+
+            for messages in data.values():
+                chars_urls: int = 0
+
+                for message in messages:
+                    chars_urls += len(message['Qty_char_links'])
+
+                average_links = (chars_urls * 100) / len(messages)
+                rows.append([average_links, len(messages)])
+
+            index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
