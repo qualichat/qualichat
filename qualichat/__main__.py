@@ -33,7 +33,6 @@ import plotly # type: ignore
 import questionary
 from rich import print
 from rich.logging import RichHandler
-from rich._log_render import LogRender
 
 import qualichat
 from qualichat.frames import BaseFrame

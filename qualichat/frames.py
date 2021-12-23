@@ -603,6 +603,7 @@ class ParticipationStatusFrame(BaseFrame):
 
     fancy_name = 'Participation Status'
 
+    @sorters.participation_status
     @sorters.group_messages_by_users
     def bots(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
         """
@@ -637,10 +638,13 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
 
-        generate_chart(dataframes, bars=bars, lines=lines, title=title)
+        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
+    @sorters.participation_status
     @sorters.group_messages_by_users
-    def messages_statistics(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
+    def messages_statistics(
+        self, chat_data: Dict[Chat, Dict[str, List[Message]]]
+    ) -> Tuple[Any, ...]:
         """
         """
         dataframes: Dict[Chat, DataFrame] = {}
@@ -677,8 +681,9 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
 
-        generate_chart(dataframes, bars=bars, lines=lines, title=title)
+        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
+    @sorters.participation_status
     @sorters.group_messages_by_users
     def messages_per_actors(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
         """
@@ -710,8 +715,9 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
 
-        generate_chart(dataframes, bars=bars, lines=lines, title=title)
+        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
+    @sorters.participation_status
     def messages_per_actors_per_weekday(self, chats: List[Chat]) -> None:
         """
         """
@@ -739,8 +745,9 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars)
             dataframes[chat] = dataframe
 
-        generate_chart(dataframes, bars=bars, lines=[], title=title)
+        return dataframes, {'bars': bars, 'lines': [], 'title': title}
 
+    @sorters.participation_status
     def laminations_per_actors(self, chats: List[Chat]) -> None:
         """
         """
@@ -769,8 +776,9 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
 
-        generate_chart(dataframes, bars=bars, lines=lines, title=title)
+        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
+    @sorters.participation_status
     def machinations_per_actors(self, chats: List[Chat]) -> None:
         """
         """
@@ -799,8 +807,9 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
 
-        generate_chart(dataframes, bars=bars, lines=lines, title=title)
+        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
+    @sorters.participation_status
     @sorters.group_messages_by_users
     def media_repertoire(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
         """
@@ -828,4 +837,4 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
 
-        generate_chart(dataframes, bars=bars, lines=lines, title=title)
+        return dataframes, {'bars': bars, 'lines': lines, 'title': title}

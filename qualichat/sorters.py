@@ -23,11 +23,14 @@ SOFTWARE.
 """
 
 from collections import defaultdict
-from typing import Callable, DefaultDict, Dict, List
+from typing import Any, Callable, DefaultDict, Dict, List, Optional, Tuple, Union
 from functools import partial
 
 import questionary
 from rich.progress import Progress
+from pandas import DataFrame
+from plotly.subplots import make_subplots # type: ignore
+from plotly.graph_objs import Scatter, Figure # type: ignore
 
 from .chat import Chat
 from .models import Message
@@ -40,6 +43,122 @@ __all__ = ('group_messages_by_users', 'modes', 'wordcloud')
 
 select = partial(questionary.select, qmark='[qualichat]')
 checkbox = partial(questionary.checkbox, qmark='[qualichat]')
+
+
+def generate_chart(
+    dataframes: Dict[Chat, DataFrame],
+    *,
+    bars: Optional[List[str]] = None,
+    lines: Optional[List[str]] = None,
+    title: Optional[str] = None,
+) -> None:
+    """
+    """
+    if bars is None:
+        bars = []
+
+    if lines is None:
+        lines = []
+
+    specs = [[{'secondary_y': True}]]
+    fig = make_subplots(specs=specs) # type: ignore
+
+    buttons: List[Dict[str, Any]] = []
+    visible = True
+
+    for i, (chat, dataframe) in enumerate(dataframes.items()):
+        index = list(dataframe.index) # type: ignore
+
+        button: Dict[str, Any] = {}
+        button['label'] = chat.filename
+        button['method'] = 'update'
+
+        args: List[Union[Dict[str, Any], List[Dict[str, Any]]]] = []
+
+        visibility: List[bool] = []
+        for j in range(len(dataframes)):
+            for _ in range(len(bars + lines)):
+                visibility.append(i == j)
+
+        args.append({'visible': visibility})
+        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+
+        button['args'] = args
+        buttons.append(button)
+
+        for bar in bars:
+            filtered = getattr(dataframe, bar)
+            options = dict(x=index, y=list(filtered), name=bar, visible=visible) # type: ignore
+            fig.add_bar(**options) # type: ignore
+
+        for line in lines:
+            filtered = getattr(dataframe, line)
+            scatter = Scatter(x=index, y=list(filtered), name=line, visible=visible) # type: ignore
+            fig.add_trace(scatter, secondary_y=True) # type: ignore
+
+        if visible is True:
+            visible = False
+
+    updatemenus = [{'buttons': buttons, 'active': 0}]
+    fig.update_layout(updatemenus=updatemenus) # type: ignore
+
+    fig.update_xaxes(rangeslider_visible=True) # type: ignore
+    fig.show() # type: ignore
+
+
+def generate_treemap(
+    dataframes: Dict[Chat, DataFrame],
+    *,
+    bars: Optional[List[str]] = None,
+    lines: Optional[List[str]] = None,
+    title: Optional[str] = None,
+) -> None:
+    """
+    """
+    if bars is None:
+        bars = []
+
+    if lines is None:
+        lines = []
+
+    specs = [[{'secondary_y': True}]]
+    fig = make_subplots(specs=specs) # type: ignore
+
+    buttons: List[Dict[str, Any]] = []
+    visible = True
+
+    for i, (chat, dataframe) in enumerate(dataframes.items()):
+        index = list(dataframe.index) # type: ignore
+
+        button: Dict[str, Any] = {}
+        button['label'] = chat.filename
+        button['method'] = 'update'
+
+        args: List[Union[Dict[str, Any], List[Dict[str, Any]]]] = []
+
+        visibility: List[bool] = []
+        for j in range(len(dataframes)):
+            for _ in range(len(bars + lines)):
+                visibility.append(i == j)
+
+        args.append({'visible': visibility})
+        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+
+        button['args'] = args
+        buttons.append(button)
+
+        parents = [''] * len(index) # type: ignore
+
+        fig.add_treemap(labels=index, parents=parents, visible=visible) # type: ignore
+
+        if visible:
+            visible = False
+
+    updatemenus = [{'buttons': buttons, 'active': 0}]
+    fig.update_layout(updatemenus=updatemenus) # type: ignore
+
+    fig.update_xaxes(rangeslider_visible=True) # type: ignore
+    fig.show() # type: ignore
 
 
 def group_messages_by_users(func: Callable[..., None]):
@@ -56,7 +175,7 @@ def group_messages_by_users(func: Callable[..., None]):
             messages = {act.display_name: act.messages for act in chat.actors}
             data[chat] = messages
 
-        func(self, data)
+        return func(self, data)
 
     return decorator
 
@@ -182,5 +301,26 @@ def wordcloud(func: Callable[..., None]):
             data[chat] = messages
 
         func(self, data)
+
+    return decorator
+
+
+def participation_status(func: Callable[..., Tuple[Any, ...]]):
+    """
+    """
+
+    # Hack to avoid circular imports.
+    from .frames import BaseFrame
+
+    def decorator(self: BaseFrame, chats: List[Chat]) -> None:
+        dataframes, kwargs = func(self, chats)
+
+        choices = ['Line Chart', 'Tree Map']
+        selected = select('Select your chart type:', choices).ask()
+
+        if selected == 'Line Chart':
+            generate_chart(dataframes, **kwargs)
+        else:
+            generate_treemap(dataframes, **kwargs)
 
     return decorator
