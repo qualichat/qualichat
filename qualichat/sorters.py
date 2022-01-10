@@ -22,15 +22,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import base64
 from collections import defaultdict
-from typing import Any, Callable, DefaultDict, Dict, List, Optional, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    DefaultDict,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 from functools import partial
+from io import BytesIO
 
 import questionary
 from rich.progress import Progress
 from pandas import DataFrame
 from plotly.subplots import make_subplots # type: ignore
 from plotly.graph_objs import Scatter, Figure # type: ignore
+from wordcloud import WordCloud # type: ignore
 
 from .chat import Chat
 from .models import Message
@@ -149,7 +161,12 @@ def generate_treemap(
 
         parents = [''] * len(index) # type: ignore
 
-        fig.add_treemap(labels=index, parents=parents, visible=visible) # type: ignore
+        fig.add_treemap( # type: ignore
+            labels=index,
+            parents=parents,
+            visible=visible,
+            values=dataframe.iloc[:,0].to_list() # type: ignore
+        )
 
         if visible:
             visible = False
@@ -158,6 +175,88 @@ def generate_treemap(
     fig.update_layout(updatemenus=updatemenus) # type: ignore
 
     fig.update_xaxes(rangeslider_visible=True) # type: ignore
+    fig.show() # type: ignore
+
+
+def generate_wordcloud(wordclouds: Dict[Chat, WordCloud], *, title: str):
+    """
+    """
+    fig = Figure() # type: ignore
+    buttons: List[Dict[str, Any]] = []
+
+    for i, (chat, wordcloud) in enumerate(wordclouds.items()):
+        button: Dict[str, Any] = {}
+        button['label'] = chat.filename
+        button['method'] = 'update'
+
+        args: List[Dict[str, Any]] = []
+
+        visibility: List[bool] = []
+        for j in range(len(wordclouds)):
+            visibility.append(i == j)
+
+        args.append({'visible': visibility})
+        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+
+        button['args'] = args
+
+        buffer = BytesIO()
+        image = wordcloud.to_image() # type: ignore
+
+        image.save(buffer, format='png')
+        buffer.seek(0)
+        encoded_file = base64.b64encode(buffer.read()).decode('utf-8')
+
+        source = f'data:image/png;base64, {encoded_file}'
+        fig.add_image(source=source) # type: ignore
+
+        buttons.append(button)
+
+    updatemenus = [{'buttons': buttons, 'active': 0}]
+    fig.update_layout(updatemenus=updatemenus) # type: ignore
+
+    fig.show() # type: ignore
+
+
+def generate_table(
+    tables: Dict[Chat, DataFrame],
+    *,
+    columns: Optional[List[str]] = None,
+    title: str
+):
+    """
+    """
+    if columns is None:
+        columns = []
+
+    fig = make_subplots() # type: ignore
+    buttons: List[Dict[str, Any]] = []
+
+    for chat, dataframe in tables.items():
+        button: Dict[str, Any] = {}
+        button['label'] = chat.filename
+        button['method'] = 'update'
+
+        args: List[Dict[str, Any]] = []
+        values: List[Any] = []
+
+        for column in columns:
+            values.append(dataframe[column].to_list()) # type: ignore
+
+        args.append({'cells': {'values': values}, 'header': {'values': columns}})
+        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+
+        button['args'] = args
+        buttons.append(button)
+
+    header: Dict[str, List[str]] = {'values': []}
+    cells: Dict[str, List[Any]] = {'values': []}
+
+    fig.add_table(header=header, cells=cells) # type: ignore
+
+    updatemenus = [{'buttons': buttons, 'active': 0}]
+    fig.update_layout(updatemenus=updatemenus) # type: ignore
+
     fig.show() # type: ignore
 
 
@@ -305,6 +404,9 @@ def wordcloud(func: Callable[..., None]):
     return decorator
 
 
+chart_type: Optional[Callable[..., None]] = None
+
+
 def participation_status(func: Callable[..., Tuple[Any, ...]]):
     """
     """
@@ -315,12 +417,15 @@ def participation_status(func: Callable[..., Tuple[Any, ...]]):
     def decorator(self: BaseFrame, chats: List[Chat]) -> None:
         dataframes, kwargs = func(self, chats)
 
-        choices = ['Line Chart', 'Tree Map']
-        selected = select('Select your chart type:', choices).ask()
+        global chart_type
 
-        if selected == 'Line Chart':
-            generate_chart(dataframes, **kwargs)
-        else:
-            generate_treemap(dataframes, **kwargs)
+        if chart_type is None:
+            charts = {'Line Chart': generate_chart, 'Tree Map': generate_treemap}
+            choices = list(charts.keys())
+
+            selected = select('Select your chart type:', choices).ask()
+            chart_type = charts[selected]
+
+        chart_type(dataframes, **kwargs)
 
     return decorator

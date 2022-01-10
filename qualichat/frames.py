@@ -23,7 +23,6 @@ SOFTWARE.
 """
 
 import inspect
-import base64
 from pathlib import Path
 from typing import (
     Any,
@@ -38,16 +37,13 @@ from typing import (
 )
 from types import FunctionType
 from functools import partial, cache
-from io import BytesIO
-from collections import defaultdict, Counter, OrderedDict
-from math import sqrt
+from collections import defaultdict, Counter
+from numpy import sqrt
 
 import questionary
 import spacy
 import qualitube # type: ignore
 from pandas import DataFrame
-from plotly.subplots import make_subplots # type: ignore
-from plotly.graph_objs import Scatter, Figure # type: ignore
 from rich.progress import Progress
 from wordcloud.wordcloud import WordCloud # type: ignore
 from tldextract import extract # type: ignore
@@ -58,6 +54,7 @@ from .models import Message
 from .enums import MessageType
 from .utils import log, parse_domain
 from .regex import *
+from .sorters import generate_chart, generate_table, generate_wordcloud
 
 
 __all__ = ('BaseFrame', 'KeysFrame', 'ParticipationStatusFrame')
@@ -65,149 +62,6 @@ __all__ = ('BaseFrame', 'KeysFrame', 'ParticipationStatusFrame')
 
 input = partial(questionary.text, qmark='[qualichat]')
 select = partial(questionary.select, qmark='[qualichat]')
-
-
-def generate_chart(
-    dataframes: Dict[Chat, DataFrame],
-    *,
-    bars: Optional[List[str]] = None,
-    lines: Optional[List[str]] = None,
-    title: Optional[str] = None,
-) -> None:
-    """
-    """
-    if bars is None:
-        bars = []
-
-    if lines is None:
-        lines = []
-
-    specs = [[{'secondary_y': True}]]
-    fig = make_subplots(specs=specs) # type: ignore
-
-    buttons: List[Dict[str, Any]] = []
-    visible = True
-
-    for i, (chat, dataframe) in enumerate(dataframes.items()):
-        index = list(dataframe.index) # type: ignore
-
-        button: Dict[str, Any] = {}
-        button['label'] = chat.filename
-        button['method'] = 'update'
-
-        args: List[Union[Dict[str, Any], List[Dict[str, Any]]]] = []
-
-        visibility: List[bool] = []
-        for j in range(len(dataframes)):
-            for _ in range(len(bars + lines)):
-                visibility.append(i == j)
-
-        args.append({'visible': visibility})
-        args.append({'title': {'text': f'{title} ({chat.filename})'}})
-
-        button['args'] = args
-        buttons.append(button)
-
-        for bar in bars:
-            filtered = getattr(dataframe, bar)
-            options = dict(x=index, y=list(filtered), name=bar, visible=visible) # type: ignore
-            fig.add_bar(**options) # type: ignore
-
-        for line in lines:
-            filtered = getattr(dataframe, line)
-            scatter = Scatter(x=index, y=list(filtered), name=line, visible=visible) # type: ignore
-            fig.add_trace(scatter, secondary_y=True) # type: ignore
-
-        if visible is True:
-            visible = False
-
-    updatemenus = [{'buttons': buttons, 'active': 0}]
-    fig.update_layout(updatemenus=updatemenus) # type: ignore
-
-    fig.update_xaxes(rangeslider_visible=True) # type: ignore
-    fig.show() # type: ignore
-
-
-def generate_wordcloud(wordclouds: Dict[Chat, WordCloud], *, title: str):
-    """
-    """
-    fig = Figure() # type: ignore
-    buttons: List[Dict[str, Any]] = []
-
-    for i, (chat, wordcloud) in enumerate(wordclouds.items()):
-        button: Dict[str, Any] = {}
-        button['label'] = chat.filename
-        button['method'] = 'update'
-
-        args: List[Dict[str, Any]] = []
-
-        visibility: List[bool] = []
-        for j in range(len(wordclouds)):
-            visibility.append(i == j)
-
-        args.append({'visible': visibility})
-        args.append({'title': {'text': f'{title} ({chat.filename})'}})
-
-        button['args'] = args
-
-        buffer = BytesIO()
-        image = wordcloud.to_image() # type: ignore
-
-        image.save(buffer, format='png')
-        buffer.seek(0)
-        encoded_file = base64.b64encode(buffer.read()).decode('utf-8')
-
-        source = f'data:image/png;base64, {encoded_file}'
-        fig.add_image(source=source) # type: ignore
-
-        buttons.append(button)
-
-    updatemenus = [{'buttons': buttons, 'active': 0}]
-    fig.update_layout(updatemenus=updatemenus) # type: ignore
-
-    fig.show() # type: ignore
-
-
-def generate_table(
-    tables: Dict[Chat, DataFrame],
-    *,
-    columns: Optional[List[str]] = None,
-    title: str
-):
-    """
-    """
-    if columns is None:
-        columns = []
-
-    fig = make_subplots() # type: ignore
-    buttons: List[Dict[str, Any]] = []
-
-    for chat, dataframe in tables.items():
-        button: Dict[str, Any] = {}
-        button['label'] = chat.filename
-        button['method'] = 'update'
-
-        args: List[Dict[str, Any]] = []
-        values: List[Any] = []
-
-        for column in columns:
-            values.append(dataframe[column].to_list()) # type: ignore
-
-        args.append({'cells': {'values': values}, 'header': {'values': columns}})
-        args.append({'title': {'text': f'{title} ({chat.filename})'}})
-
-        button['args'] = args
-        buttons.append(button)
-
-    header: Dict[str, List[str]] = {'values': []}
-    cells: Dict[str, List[Any]] = {'values': []}
-
-    fig.add_table(header=header, cells=cells) # type: ignore
-
-    updatemenus = [{'buttons': buttons, 'active': 0}]
-    fig.update_layout(updatemenus=updatemenus) # type: ignore
-
-    fig.show() # type: ignore
 
 
 def _normalize_frame_name(name: str) -> str:
@@ -603,9 +457,11 @@ class ParticipationStatusFrame(BaseFrame):
 
     fancy_name = 'Participation Status'
 
-    @sorters.participation_status
     @sorters.group_messages_by_users
-    def bots(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
+    @sorters.participation_status
+    def bots(
+        self, chats_data: Dict[Chat, Dict[str, List[Message]]]
+    ) -> Tuple[Any, ...]:
         """
         """
         dataframes: Dict[Chat, DataFrame] = {}
@@ -614,13 +470,13 @@ class ParticipationStatusFrame(BaseFrame):
         bars = ['Qty_score']
         lines = ['Qty_messages']
 
-        for chat, data in chat_data.items():
-            rows: List[List[int]] = []
+        for chat, data in chats_data.items():
+            rows: List[List[Union[int, float]]] = []
 
             for messages in data.values():
-                chars_net: int = 0
-                videos: int = 0
-                stickers: int = 0
+                chars_net = 0
+                videos = 0
+                stickers = 0
 
                 for message in messages:
                     if message['Type'] is MessageType.default:
@@ -630,18 +486,18 @@ class ParticipationStatusFrame(BaseFrame):
                     elif message['Type'] is MessageType.sticker_omitted:
                         stickers += 1
 
-                result = ((chars_net * 1) + (videos * 2) + (stickers * 3)) / 6
-                rows.append([int(result), len(messages)])
+                result = ((chars_net * 1) + (videos * 2) + (stickers + 3)) / 6
+                rows.append([result, len(messages)])
 
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
 
-        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
+        return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
 
-    @sorters.participation_status
     @sorters.group_messages_by_users
+    @sorters.participation_status
     def messages_statistics(
         self, chat_data: Dict[Chat, Dict[str, List[Message]]]
     ) -> Tuple[Any, ...]:
@@ -683,9 +539,11 @@ class ParticipationStatusFrame(BaseFrame):
 
         return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
-    @sorters.participation_status
     @sorters.group_messages_by_users
-    def messages_per_actors(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
+    @sorters.participation_status
+    def messages_per_actors(
+        self, chat_data: Dict[Chat, Dict[str, List[Message]]]
+    ) -> Tuple[Any, ...]:
         """
         """
         dataframes: Dict[Chat, DataFrame] = {}
@@ -717,124 +575,124 @@ class ParticipationStatusFrame(BaseFrame):
 
         return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
-    @sorters.participation_status
-    def messages_per_actors_per_weekday(self, chats: List[Chat]) -> None:
-        """
-        """
-        dataframes: Dict[Chat, DataFrame] = {}
-        title = 'Participation Status Frame (Messages per Actors per Weekday)'
+    # @sorters.participation_status
+    # def messages_per_actors_per_weekday(self, chats: List[Chat]) -> None:
+    #     """
+    #     """
+    #     dataframes: Dict[Chat, DataFrame] = {}
+    #     title = 'Participation Status Frame (Messages per Actors per Weekday)'
 
-        bars = [
-            'Sunday', 'Monday', 'Tuesday', 'Wednesday',
-            'Thursday', 'Friday', 'Saturday'
-        ]
+    #     bars = [
+    #         'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+    #         'Thursday', 'Friday', 'Saturday'
+    #     ]
 
-        for chat in chats:
-            rows: List[List[int]] = []
+    #     for chat in chats:
+    #         rows: List[List[int]] = []
 
-            for actor in chat.actors:
-                data = OrderedDict({weekday: 0 for weekday in bars})
+    #         for actor in chat.actors:
+    #             data = OrderedDict({weekday: 0 for weekday in bars})
 
-                for message in actor.messages:
-                    data[message.created_at.strftime('%A')] += 1
+    #             for message in actor.messages:
+    #                 data[message.created_at.strftime('%A')] += 1
 
-                rows.append(list(data.values()))
+    #             rows.append(list(data.values()))
 
-            index = [actor.display_name for actor in chat.actors]
+    #         index = [actor.display_name for actor in chat.actors]
 
-            dataframe = DataFrame(rows, index=index, columns=bars)
-            dataframes[chat] = dataframe
+    #         dataframe = DataFrame(rows, index=index, columns=bars)
+    #         dataframes[chat] = dataframe
 
-        return dataframes, {'bars': bars, 'lines': [], 'title': title}
+    #     return dataframes, {'bars': bars, 'lines': [], 'title': title}
 
-    @sorters.participation_status
-    def laminations_per_actors(self, chats: List[Chat]) -> None:
-        """
-        """
-        dataframes: Dict[Chat, DataFrame] = {}
-        title = 'Participation Status Frame (Laminations per Actors)'
+    # @sorters.participation_status
+    # def laminations_per_actors(self, chats: List[Chat]) -> None:
+    #     """
+    #     """
+    #     dataframes: Dict[Chat, DataFrame] = {}
+    #     title = 'Participation Status Frame (Laminations per Actors)'
 
-        bars = ['Qty_char_net']
-        lines = ['Qty_messages']
+    #     bars = ['Qty_char_net']
+    #     lines = ['Qty_messages']
 
-        for chat in chats:
-            rows: List[List[int]] = []
+    #     for chat in chats:
+    #         rows: List[List[int]] = []
 
-            for actor in chat.actors:
-                chars_net = 0
+    #         for actor in chat.actors:
+    #             chars_net = 0
 
-                for message in actor.messages:
-                    if message['Type'] is not MessageType.default:
-                        continue
+    #             for message in actor.messages:
+    #                 if message['Type'] is not MessageType.default:
+    #                     continue
 
-                    chars_net += len(message['Qty_char_net'].split())
+    #                 chars_net += len(message['Qty_char_net'].split())
 
-                rows.append([chars_net, len(actor.messages)])
+    #             rows.append([chars_net, len(actor.messages)])
 
-            index = [actor.display_name for actor in chat.actors]
+    #         index = [actor.display_name for actor in chat.actors]
 
-            dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
+    #         dataframe = DataFrame(rows, index=index, columns=bars + lines)
+    #         dataframes[chat] = dataframe
 
-        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
+    #     return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
-    @sorters.participation_status
-    def machinations_per_actors(self, chats: List[Chat]) -> None:
-        """
-        """
-        dataframes: Dict[Chat, DataFrame] = {}
-        title = 'Participation Status Frame (Machinations per Actors)'
+    # @sorters.participation_status
+    # def machinations_per_actors(self, chats: List[Chat]) -> None:
+    #     """
+    #     """
+    #     dataframes: Dict[Chat, DataFrame] = {}
+    #     title = 'Participation Status Frame (Machinations per Actors)'
 
-        bars = ['Qty_char_text']
-        lines = ['Qty_messages']
+    #     bars = ['Qty_char_text']
+    #     lines = ['Qty_messages']
 
-        for chat in chats:
-            rows: List[List[int]] = []
+    #     for chat in chats:
+    #         rows: List[List[int]] = []
 
-            for actor in chat.actors:
-                chars_text = 0
+    #         for actor in chat.actors:
+    #             chars_text = 0
 
-                for message in actor.messages:
-                    if message['Type'] is not MessageType.default:
-                        continue
+    #             for message in actor.messages:
+    #                 if message['Type'] is not MessageType.default:
+    #                     continue
 
-                    chars_text += len(message['Qty_char_text'].split())
+    #                 chars_text += len(message['Qty_char_text'].split())
 
-                rows.append([chars_text, len(actor.messages)])
+    #             rows.append([chars_text, len(actor.messages)])
 
-            index = [actor.display_name for actor in chat.actors]
+    #         index = [actor.display_name for actor in chat.actors]
 
-            dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
+    #         dataframe = DataFrame(rows, index=index, columns=bars + lines)
+    #         dataframes[chat] = dataframe
 
-        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
+    #     return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
-    @sorters.participation_status
-    @sorters.group_messages_by_users
-    def media_repertoire(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
-        """
-        """
-        dataframes: Dict[Chat, DataFrame] = {}
-        title = 'Participation Status Frame (Media Repertoire)'
+    # @sorters.participation_status
+    # @sorters.group_messages_by_users
+    # def media_repertoire(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
+    #     """
+    #     """
+    #     dataframes: Dict[Chat, DataFrame] = {}
+    #     title = 'Participation Status Frame (Media Repertoire)'
 
-        bars = ['Avg_links']
-        lines = ['Qty_messages']
+    #     bars = ['Avg_links']
+    #     lines = ['Qty_messages']
 
-        for chat, data in chat_data.items():
-            rows: List[List[Union[int, float]]] = []
+    #     for chat, data in chat_data.items():
+    #         rows: List[List[Union[int, float]]] = []
 
-            for messages in data.values():
-                chars_urls: int = 0
+    #         for messages in data.values():
+    #             chars_urls: int = 0
 
-                for message in messages:
-                    chars_urls += len(message['Qty_char_links'])
+    #             for message in messages:
+    #                 chars_urls += len(message['Qty_char_links'])
 
-                average_links = (chars_urls * 100) / len(messages)
-                rows.append([average_links, len(messages)])
+    #             average_links = (chars_urls * 100) / len(messages)
+    #             rows.append([average_links, len(messages)])
 
-            index = list(data.keys())
+    #         index = list(data.keys())
 
-            dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
+    #         dataframe = DataFrame(rows, index=index, columns=bars + lines)
+    #         dataframes[chat] = dataframe
 
-        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
+    #     return dataframes, {'bars': bars, 'lines': lines, 'title': title}
