@@ -133,15 +133,12 @@ def generate_treemap(
     if lines is None:
         lines = []
 
-    specs = [[{'secondary_y': True}]]
-    fig = make_subplots(specs=specs) # type: ignore
+    fig = make_subplots() # type: ignore
 
     buttons: List[Dict[str, Any]] = []
     visible = True
 
     for i, (chat, dataframe) in enumerate(dataframes.items()):
-        index = list(dataframe.index) # type: ignore
-
         button: Dict[str, Any] = {}
         button['label'] = chat.filename
         button['method'] = 'update'
@@ -159,14 +156,27 @@ def generate_treemap(
         button['args'] = args
         buttons.append(button)
 
-        parents = [''] * len(index) # type: ignore
+        columns = list(dataframe.columns) # type: ignore
+        parents = [''] * len(columns) # type: ignore
+        values = [1] * len(columns) # type: ignore
+
+        labels = [*columns] # type: ignore
+
+        for index, row in dataframe.iterrows():
+            for parent, value in row.iteritems():
+                labels.append(index) # type: ignore
+                parents.append(parent) # type: ignore
+                values.append(value) # type: ignore
 
         fig.add_treemap( # type: ignore
-            labels=index,
+            labels=labels,
             parents=parents,
-            visible=visible,
-            values=dataframe.iloc[:,0].to_list() # type: ignore
+            values=values,
+            visible=visible
         )
+
+        print(len(labels))
+        print(len(parents))
 
         if visible:
             visible = False
@@ -174,8 +184,52 @@ def generate_treemap(
     updatemenus = [{'buttons': buttons, 'active': 0}]
     fig.update_layout(updatemenus=updatemenus) # type: ignore
 
-    fig.update_xaxes(rangeslider_visible=True) # type: ignore
     fig.show() # type: ignore
+
+
+    # specs = [[{'secondary_y': True}]]
+    # fig = make_subplots(specs=specs) # type: ignore
+
+    # buttons: List[Dict[str, Any]] = []
+    # visible = True
+
+    # for i, (chat, dataframe) in enumerate(dataframes.items()):
+    #     index = list(dataframe.index) # type: ignore
+
+    #     button: Dict[str, Any] = {}
+    #     button['label'] = chat.filename
+    #     button['method'] = 'update'
+
+    #     args: List[Union[Dict[str, Any], List[Dict[str, Any]]]] = []
+
+    #     visibility: List[bool] = []
+    #     for j in range(len(dataframes)):
+    #         for _ in range(len(bars + lines)):
+    #             visibility.append(i == j)
+
+    #     args.append({'visible': visibility})
+    #     args.append({'title': {'text': f'{title} ({chat.filename})'}})
+
+    #     button['args'] = args
+    #     buttons.append(button)
+
+    #     parents = [''] * len(index) # type: ignore
+
+    #     fig.add_treemap( # type: ignore
+    #         labels=index,
+    #         parents=parents,
+    #         visible=visible,
+    #         values=dataframe.iloc[:,0].to_list() # type: ignore
+    #     )
+
+    #     if visible:
+    #         visible = False
+
+    # updatemenus = [{'buttons': buttons, 'active': 0}]
+    # fig.update_layout(updatemenus=updatemenus) # type: ignore
+
+    # fig.update_xaxes(rangeslider_visible=True) # type: ignore
+    # fig.show() # type: ignore
 
 
 def generate_wordcloud(wordclouds: Dict[Chat, WordCloud], *, title: str):
