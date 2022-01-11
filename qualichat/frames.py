@@ -37,7 +37,7 @@ from typing import (
 )
 from types import FunctionType
 from functools import partial, cache
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, OrderedDict
 from numpy import sqrt
 
 import questionary
@@ -578,35 +578,37 @@ class ParticipationStatusFrame(BaseFrame):
 
         return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
-    # @sorters.participation_status
-    # def messages_per_actors_per_weekday(self, chats: List[Chat]) -> None:
-    #     """
-    #     """
-    #     dataframes: Dict[Chat, DataFrame] = {}
-    #     title = 'Participation Status Frame (Messages per Actors per Weekday)'
+    @sorters.participation_status
+    def messages_per_actors_per_weekday(
+        self, chats: List[Chat]
+    ) -> Tuple[Any, ...]:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Messages per Actors per Weekday)'
 
-    #     bars = [
-    #         'Sunday', 'Monday', 'Tuesday', 'Wednesday',
-    #         'Thursday', 'Friday', 'Saturday'
-    #     ]
+        bars = [
+            'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+            'Thursday', 'Friday', 'Saturday'
+        ]
 
-    #     for chat in chats:
-    #         rows: List[List[int]] = []
+        for chat in chats:
+            rows: List[List[int]] = []
 
-    #         for actor in chat.actors:
-    #             data = OrderedDict({weekday: 0 for weekday in bars})
+            for actor in chat.actors:
+                data = OrderedDict({weekday: 0 for weekday in bars})
 
-    #             for message in actor.messages:
-    #                 data[message.created_at.strftime('%A')] += 1
+                for message in actor.messages:
+                    data[message.created_at.strftime('%A')] += 1
 
-    #             rows.append(list(data.values()))
+                rows.append(list(data.values()))
 
-    #         index = [actor.display_name for actor in chat.actors]
+            index = [actor.display_name for actor in chat.actors]
 
-    #         dataframe = DataFrame(rows, index=index, columns=bars)
-    #         dataframes[chat] = dataframe
+            dataframe = DataFrame(rows, index=index, columns=bars)
+            dataframes[chat] = dataframe
 
-    #     return dataframes, {'bars': bars, 'lines': [], 'title': title}
+        return dataframes, {'bars': bars, 'lines': [], 'title': title}
 
     # @sorters.participation_status
     # def laminations_per_actors(self, chats: List[Chat]) -> None:
