@@ -297,7 +297,8 @@ def _sort_by_time(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
         if selected == 'All':
             return dict(data)
 
-        if not (epochs := checkbox('Choose an epoch:', data).ask()):
+        choices = list(data.keys())
+        if not (epochs := checkbox('Choose an epoch:', choices).ask()):
             raise KeyError()
 
         return {epoch: data[epoch] for epoch in epochs}
@@ -325,7 +326,8 @@ def _sort_by_actor(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
         if selected == 'All':
             return dict(data)
 
-        if not (actors := checkbox('Choose an actor:', data).ask()):
+        choices = list(data.keys())
+        if not (actors := checkbox('Choose an actor:', choices).ask()):
             raise KeyError()
 
         if len(actors) != 1:
@@ -367,7 +369,9 @@ def modes(func: Callable[..., None]):
 
     def decorator(self: BaseFrame, chats: List[Chat]) -> None:
         modes = {'By Time': _sort_by_time, 'By Actor': _sort_by_actor}
-        name = select('Now, choose your mode:', modes).ask()
+        choices = list(modes.keys())
+        
+        name = select('Now, choose your mode:', choices).ask()
 
         try:
             sorted_messages = modes[name](chats)

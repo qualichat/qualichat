@@ -142,7 +142,10 @@ def _parse_nlp_messages(messages: List[Message]):
     global pos
 
     if pos is None:
-        morphological_class = select('Choose a morphological class:', types).ask()
+        choices = list(types.keys())
+        msg = 'Choose a morphological class:'
+
+        morphological_class = select(msg, choices).ask()
         pos = types[morphological_class]
 
     with Progress() as progress:
