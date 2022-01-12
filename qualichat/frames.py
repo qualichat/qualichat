@@ -540,7 +540,7 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
 
-        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
+        return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
 
     @sorters.group_messages_by_users
     @sorters.participation_status
@@ -576,7 +576,7 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
 
-        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
+        return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
 
     @sorters.participation_status
     def messages_per_actors_per_weekday(
@@ -608,69 +608,69 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars)
             dataframes[chat] = dataframe
 
-        return dataframes, {'bars': bars, 'lines': [], 'title': title}
+        return (dataframes, {'bars': bars, 'lines': [], 'title': title})
 
-    # @sorters.participation_status
-    # def laminations_per_actors(self, chats: List[Chat]) -> None:
-    #     """
-    #     """
-    #     dataframes: Dict[Chat, DataFrame] = {}
-    #     title = 'Participation Status Frame (Laminations per Actors)'
+    @sorters.participation_status
+    def laminations_per_actors(self, chats: List[Chat]) -> Tuple[Any, ...]:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Laminations per Actors)'
 
-    #     bars = ['Qty_char_net']
-    #     lines = ['Qty_messages']
+        bars = ['Qty_char_net']
+        lines = ['Qty_messages']
 
-    #     for chat in chats:
-    #         rows: List[List[int]] = []
+        for chat in chats:
+            rows: List[List[int]] = []
 
-    #         for actor in chat.actors:
-    #             chars_net = 0
+            for actor in chat.actors:
+                chars_net = 0
 
-    #             for message in actor.messages:
-    #                 if message['Type'] is not MessageType.default:
-    #                     continue
+                for message in actor.messages:
+                    if message['Type'] is not MessageType.default:
+                        continue
 
-    #                 chars_net += len(message['Qty_char_net'].split())
+                    chars_net += len(message['Qty_char_net'].split())
 
-    #             rows.append([chars_net, len(actor.messages)])
+                rows.append([chars_net, len(actor.messages)])
 
-    #         index = [actor.display_name for actor in chat.actors]
+            index = [actor.display_name for actor in chat.actors]
 
-    #         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-    #         dataframes[chat] = dataframe
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
 
-    #     return dataframes, {'bars': bars, 'lines': lines, 'title': title}
+        return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
 
-    # @sorters.participation_status
-    # def machinations_per_actors(self, chats: List[Chat]) -> None:
-    #     """
-    #     """
-    #     dataframes: Dict[Chat, DataFrame] = {}
-    #     title = 'Participation Status Frame (Machinations per Actors)'
+    @sorters.participation_status
+    def fabrication_per_actors(self, chats: List[Chat]) -> Tuple[Any, ...]:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Machinations per Actors)'
 
-    #     bars = ['Qty_char_text']
-    #     lines = ['Qty_messages']
+        bars = ['Qty_char_text']
+        lines = ['Qty_messages']
 
-    #     for chat in chats:
-    #         rows: List[List[int]] = []
+        for chat in chats:
+            rows: List[List[int]] = []
 
-    #         for actor in chat.actors:
-    #             chars_text = 0
+            for actor in chat.actors:
+                chars_text = 0
 
-    #             for message in actor.messages:
-    #                 if message['Type'] is not MessageType.default:
-    #                     continue
+                for message in actor.messages:
+                    if message['Type'] is not MessageType.default:
+                        continue
 
-    #                 chars_text += len(message['Qty_char_text'].split())
+                    chars_text += len(message['Qty_char_text'].split())
 
-    #             rows.append([chars_text, len(actor.messages)])
+                rows.append([chars_text, len(actor.messages)])
 
-    #         index = [actor.display_name for actor in chat.actors]
+            index = [actor.display_name for actor in chat.actors]
 
-    #         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-    #         dataframes[chat] = dataframe
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
 
-    #     return dataframes, {'bars': bars, 'lines': lines, 'title': title}
+        return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
 
     @sorters.group_messages_by_users
     @sorters.participation_status
@@ -702,4 +702,4 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
 
-        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
+        return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
