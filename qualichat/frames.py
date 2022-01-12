@@ -672,32 +672,34 @@ class ParticipationStatusFrame(BaseFrame):
 
     #     return dataframes, {'bars': bars, 'lines': lines, 'title': title}
 
-    # @sorters.participation_status
-    # @sorters.group_messages_by_users
-    # def media_repertoire(self, chat_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
-    #     """
-    #     """
-    #     dataframes: Dict[Chat, DataFrame] = {}
-    #     title = 'Participation Status Frame (Media Repertoire)'
+    @sorters.group_messages_by_users
+    @sorters.participation_status
+    def media_repertoire(
+        self, chat_data: Dict[Chat, Dict[str, List[Message]]]
+    ) -> Tuple[Any, ...]:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Media Repertoire)'
 
-    #     bars = ['Avg_links']
-    #     lines = ['Qty_messages']
+        bars = ['Avg_links']
+        lines = ['Qty_messages']
 
-    #     for chat, data in chat_data.items():
-    #         rows: List[List[Union[int, float]]] = []
+        for chat, data in chat_data.items():
+            rows: List[List[Union[int, float]]] = []
 
-    #         for messages in data.values():
-    #             chars_urls: int = 0
+            for messages in data.values():
+                chars_urls: int = 0
 
-    #             for message in messages:
-    #                 chars_urls += len(message['Qty_char_links'])
+                for message in messages:
+                    chars_urls += len(message['Qty_char_links'])
 
-    #             average_links = (chars_urls * 100) / len(messages)
-    #             rows.append([average_links, len(messages)])
+                average_links = (chars_urls * 100) / len(messages)
+                rows.append([average_links, len(messages)])
 
-    #         index = list(data.keys())
+            index = list(data.keys())
 
-    #         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-    #         dataframes[chat] = dataframe
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
 
-    #     return dataframes, {'bars': bars, 'lines': lines, 'title': title}
+        return dataframes, {'bars': bars, 'lines': lines, 'title': title}
