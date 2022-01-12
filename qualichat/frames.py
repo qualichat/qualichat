@@ -694,7 +694,7 @@ class ParticipationStatusFrame(BaseFrame):
                 for message in messages:
                     chars_urls += len(message['Qty_char_links'])
 
-                average_links = (chars_urls * 100) / len(messages)
+                average_links = chars_urls / len(messages)
                 rows.append([average_links, len(messages)])
 
             index = list(data.keys())
