@@ -20,6 +20,16 @@ __all__ = ()
 
 
 from typing import NamedTuple
+from functools import partial
+
+from rich.progress import (
+    SpinnerColumn,
+    TextColumn,
+    BarColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+    Progress,
+)
 
 
 class VersionInfo(NamedTuple):
@@ -30,3 +40,22 @@ class VersionInfo(NamedTuple):
     serial: int
 
 version_info = VersionInfo(1, 3, 7, 'stable', 0)
+
+# Custom progress bar
+spinner = SpinnerColumn()
+description = TextColumn("[progress.description]{task.description}")
+bar = BarColumn()
+percentage = TextColumn("[progress.percentage]{task.percentage:>3.0f}%")
+remaining = TimeRemainingColumn()
+elapsed = TimeElapsedColumn()
+
+progress = partial(
+    Progress,
+    spinner,
+    description,
+    bar,
+    percentage,
+    remaining,
+    elapsed,
+    transient=True
+)

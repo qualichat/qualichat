@@ -22,17 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import argparse
 import logging
 import sys
 import platform
 from typing import List, Tuple
+from argparse import ArgumentParser, Namespace, Action
 
 import plotly # type: ignore
 import spacy
-import spacy.cli.download
+from rich import print
+from rich.prompt import Prompt
+from spacy.cli.download import download
 
 import qualichat
+from qualichat.utils import config
 
 
 def show_version() -> None:
@@ -50,36 +53,45 @@ def show_version() -> None:
     print('\n'.join(entries))
 
 
-def core(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+def core(parser: ArgumentParser, args: Namespace) -> None:
     if args.version:
         show_version()
 
 
-def loadchat() -> None:
+def loadchat(parser: ArgumentParser, args: Namespace) -> None:
+    # debug = args.debug
+    # api_key
     pass
 
 
-def setup() -> None:
-    pass
+def setup(parser: ArgumentParser, args: Namespace) -> None:
+    api_key = Prompt.ask('[red]Enter your Google API key[/]')
+
+    config['google_api_key'] = api_key
+    config.save()
+
+    with qualichat.progress() as progress:
+        progress.add_task('[green]Downloading spaCy models', start=False)
+        download('pt_core_news_md', False, False, '-q')
+
+    print('\n[green]✔ You can now use Qualichat.[/green]')
 
 
-def add_loadchat_args(subparser: argparse.Action) -> None:
+def add_loadchat_args(subparser: Action) -> None:
     parser_help = 'start an interactive session with Qualichat'
     parser = subparser.add_parser('load', help=parser_help) # type: ignore
     parser.set_defaults(func=loadchat) # type: ignore
 
 
-def add_setup_args(subparser: argparse.Action) -> None:
+def add_setup_args(subparser: Action) -> None:
     parser_help = 'setup internal libraries'
     parser = subparser.add_parser('setup', help=parser_help) # type: ignore
     parser.set_defaults(func=setup) # type: ignore
 
-    spacy.cli.download('pt_core_news_md') # type: ignore
 
-
-def parse_args() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:
+def parse_args() -> Tuple[ArgumentParser, Namespace]:
     desc = 'Tools for using Qualichat.'
-    parser = argparse.ArgumentParser(prog='qualichat', description=desc)
+    parser = ArgumentParser(prog='qualichat', description=desc)
 
     help = 'show the library version'
     parser.add_argument('-v', '--version', action='store_true', help=help)
