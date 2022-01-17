@@ -23,8 +23,11 @@ SOFTWARE.
 """
 
 import json
+import logging
+import os
+import random
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Literal
 
 
 __all__ = ('config',)
@@ -75,4 +78,40 @@ class Config:
             json.dump(self.data, file, indent=2, sort_keys=True)
 
 
+def _get_all_names() -> List[str]:
+    path = os.path.dirname(__file__)
+    books = os.path.join(path, 'books.txt')
+
+    with open(books, encoding='utf-8') as f:
+        return f.read().split('\n')
+
+
+def get_random_name() -> str:
+    name = random.choice(names)
+    # Remove the book from the list so there is no risk that two 
+    # actors have the same display name.
+    names.remove(name)
+    return name.strip()
+
+
+names = _get_all_names()
 config = Config()
+
+
+logger = logging.getLogger('qualichat')
+
+
+def log(
+    level: Literal['debug', 'info', 'warn', 'error'], message: str
+) -> None:
+    """Logs a message to ``qualichat`` logger.
+
+    Parameters
+    ----------
+    level: :class:`str`
+        The logging level to send. It must be one of these: `debug`,
+        `info`, `warn`, `error`.
+    message: :class:`str`
+        The message content to send.
+    """
+    getattr(logger, level)(message)

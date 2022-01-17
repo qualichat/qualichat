@@ -32,6 +32,7 @@ import plotly # type: ignore
 import spacy
 from rich import print
 from rich.prompt import Prompt
+from rich.logging import RichHandler
 from spacy.cli.download import download
 
 import qualichat
@@ -59,9 +60,9 @@ def core(parser: ArgumentParser, args: Namespace) -> None:
 
 
 def loadchat(parser: ArgumentParser, args: Namespace) -> None:
-    # debug = args.debug
-    # api_key
-    pass
+    debug = args.debug
+
+    qc = qualichat.load_chats(*args.paths, debug=debug)
 
 
 def setup(parser: ArgumentParser, args: Namespace) -> None:
@@ -81,6 +82,15 @@ def add_loadchat_args(subparser: Action) -> None:
     parser_help = 'start an interactive session with Qualichat'
     parser = subparser.add_parser('load', help=parser_help) # type: ignore
     parser.set_defaults(func=loadchat) # type: ignore
+
+    path_arg_help = 'the paths for the chats'
+    parser.add_argument('paths', help=path_arg_help, nargs='+') # type: ignore
+
+    debug_args = ('-d', '--debug')
+    debug_args_help = 'set the logging level to debug'
+    parser.add_argument( # type: ignore
+        *debug_args, help=debug_args_help, action='store_true'
+    )
 
 
 def add_setup_args(subparser: Action) -> None:
@@ -105,10 +115,11 @@ def parse_args() -> Tuple[ArgumentParser, Namespace]:
 
 
 def main() -> None:
-    logger = logging.getLogger('qualichat')
-    logger.setLevel(logging.DEBUG)
+    handler = RichHandler(
+        omit_repeated_times=False, show_path=False, markup=True
+    )
 
-    handler = logging.StreamHandler()
+    logger = logging.getLogger('qualichat')
     logger.addHandler(handler)
 
     parser, args = parse_args()

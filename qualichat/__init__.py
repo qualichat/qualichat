@@ -31,6 +31,8 @@ from rich.progress import (
     Progress,
 )
 
+from .core import load_chats as load_chats
+
 
 class VersionInfo(NamedTuple):
     major: int
