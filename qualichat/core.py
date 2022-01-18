@@ -20,9 +20,10 @@ SOFTWARE.
 
 import logging
 from pathlib import Path
-from typing import List, Union
+from typing import Dict, List, Tuple, Union
 
-from .chats import Chat
+from .chat import Chat
+from .frames import BaseFrame, KeysFrame, ParticipationStatusFrame
 
 
 __all__ = ('Qualichat', 'load_chats')
@@ -33,15 +34,28 @@ class Qualichat:
     """
     """
 
-    __slots__ = ('chats', 'keys', 'participation_status')
+    __slots__: Tuple[str, ...] = ('chats', 'keys', 'participation_status')
 
     def __init__(self, chats: List[Chat]) -> None:
         self.chats = chats
 
         # Frames
+        self.keys = KeysFrame(chats)
+        self.participation_status = ParticipationStatusFrame(chats)
 
     def __repr__(self) -> str:
         return f'<Qualichat chats={self.chats}>'
+
+    @property
+    def frames(self) -> Dict[str, BaseFrame]:
+        frames: Dict[str, BaseFrame] = {}
+
+        for name in self.__slots__[1:]:
+            o = getattr(self, name)
+            name = o.fancy_name
+            frames[name] = o
+
+        return frames
 
 
 def load_chats(*paths: Union[str, Path], debug: bool) -> Qualichat:

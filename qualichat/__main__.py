@@ -31,12 +31,28 @@ from argparse import ArgumentParser, Namespace, Action
 import plotly # type: ignore
 import spacy
 from rich import print
-from rich.prompt import Prompt
 from rich.logging import RichHandler
 from spacy.cli.download import download
 
 import qualichat
-from qualichat.utils import config
+from ._partials import *
+from qualichat.frames import BaseFrame
+from qualichat.utils import config, log
+
+
+ascii = '''
+                                ████   ███           █████                 █████   
+                               ░░███  ░░░           ░░███                 ░░███    
+  ████████ █████ ████  ██████   ░███  ████   ██████  ░███████    ██████   ███████  
+ ███░░███ ░░███ ░███  ░░░░░███  ░███ ░░███  ███░░███ ░███░░███  ░░░░░███ ░░░███░   
+░███ ░███  ░███ ░███   ███████  ░███  ░███ ░███ ░░░  ░███ ░███   ███████   ░███    
+░███ ░███  ░███ ░███  ███░░███  ░███  ░███ ░███  ███ ░███ ░███  ███░░███   ░███ ███
+░░███████  ░░████████░░████████ █████ █████░░██████  ████ █████░░████████  ░░█████ 
+ ░░░░░███   ░░░░░░░░  ░░░░░░░░ ░░░░░ ░░░░░  ░░░░░░  ░░░░ ░░░░░  ░░░░░░░░    ░░░░░  
+     ░███                                                                          
+     █████                                                                         
+    ░░░░░                                                                          
+'''
 
 
 def show_version() -> None:
@@ -61,17 +77,39 @@ def core(parser: ArgumentParser, args: Namespace) -> None:
 
 def loadchat(parser: ArgumentParser, args: Namespace) -> None:
     debug = args.debug
-
     qc = qualichat.load_chats(*args.paths, debug=debug)
+
+    print(ascii)
+    log('info', 'Welcome to Qualichat.')
+
+    while True:
+        choices = list(qc.frames.keys())
+        frame_name: str = select('Choose a frame:', choices).ask()
+
+        if not frame_name:
+            return log('error', 'Operation canceled. Aborting.')
+
+        frame: BaseFrame = qc.frames[frame_name]
+
+        choices = list(frame.charts.keys())
+        names = checkbox('Choose your charts:', choices).ask()
+
+        if not names:
+            return log('error', 'No charts were selected. Aborting.')
+
+        for name in names:
+            frame.charts[name](qc.chats)
+
+        log('info', 'Restarting menu...')
 
 
 def setup(parser: ArgumentParser, args: Namespace) -> None:
-    api_key = Prompt.ask('[red]Enter your Google API key[/]')
+    api_key = password('Enter your Google API key:').ask()
 
     config['google_api_key'] = api_key
     config.save()
 
-    with qualichat.progress() as progress:
+    with progress_bar(transient=True) as progress:
         progress.add_task('[green]Downloading spaCy models', start=False)
         download('pt_core_news_md', False, False, '-q')
 
