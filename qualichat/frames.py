@@ -27,7 +27,7 @@ from functools import cache
 import spacy
 from wordcloud import WordCloud # type: ignore
 
-
+from . import sorters
 from .chat import Chat
 from ._partials import *
 from .enums import MessageType
@@ -141,6 +141,7 @@ class KeysFrame(BaseFrame):
 
     fancy_name = 'Keys'
 
+    @sorters.keys
     def keyword(self, chats: List[Chat]) -> None:
         """
         """

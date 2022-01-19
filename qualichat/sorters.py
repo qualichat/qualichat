@@ -20,15 +20,52 @@ SOFTWARE.
 
 import base64
 from io import BytesIO
-from typing import Any, Dict, List
+from collections import defaultdict
+from typing import Any, Callable, DefaultDict, Dict, List, Optional
 
 from wordcloud import WordCloud # type: ignore
 from plotly.graph_objs import Figure # type: ignore
 
 from .chat import Chat
+from .models import Message
+from .utils import log
+from ._partials import progress_bar, select, checkbox
 
 
-__all__ = ('generate_wordcloud',)
+__all__ = ('generate_wordcloud', 'keys')
+
+
+# chart_type: Optional[Callable[..., None]] = None
+sorter_type: Optional[None] = None
+
+
+def _sort_by_time(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
+    ret: Dict[Chat, Dict[str, List[Message]]] = {}
+
+    def sort(messages: List[Message]):
+        data: DefaultDict[str, List[Message]] = defaultdict(list)
+
+        with progress_bar() as progress:
+            for m in progress.track(messages, description='Sorting...'):
+                data[m.created_at.strftime('%B %Y')].append(m)
+
+        choices = ['All', 'Choose an epoch']
+        message = f'[{chat.filename}] Which messages should be selected?'
+        selected = select(message, choices).ask()
+
+        if selected == 'All':
+            return dict(data)
+
+        choices = list(data.keys())
+        if not (epochs := checkbox('Choose an epoch:', choices).ask()):
+            raise KeyError()
+
+        return {epoch: data[epoch] for epoch in epochs}
+
+    for chat in chats:
+        ret[chat] = sort(chat.messages)
+
+    return ret
 
 
 def generate_wordcloud(wordclouds: Dict[Chat, WordCloud], *, title: str):
@@ -69,3 +106,29 @@ def generate_wordcloud(wordclouds: Dict[Chat, WordCloud], *, title: str):
     fig.update_layout(updatemenus=updatemenus) # type: ignore
 
     fig.show() # type: ignore
+
+
+def keys(func: Callable[..., None]):
+    """
+    """
+
+    # Hack to avoid circular imports.
+    from .frames import BaseFrame
+
+    def decorator(self: BaseFrame, chats: List[Chat]) -> None:
+        global sorter_type
+
+        if sorter_type is None:
+            modes = {'By Time': _sort_by_time}
+            choices = list(modes.keys())
+
+            name = select('Choose your mode:', choices).ask()
+
+            try:
+                sorted_messages = modes[name](chats)
+            except (KeyError, TypeError):
+                return log('error', 'Option not selected. Aborting.')
+
+            func(self, sorted_messages)
+
+    return decorator
