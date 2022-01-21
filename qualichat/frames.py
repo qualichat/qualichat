@@ -32,7 +32,9 @@ from typing import (
     Optional,
     Pattern,
     Tuple,
+    Union
 )
+from numpy import char
 
 import spacy
 from wordcloud import WordCloud # type: ignore
@@ -473,3 +475,39 @@ class ParticipationStatusFrame(BaseFrame):
     """
 
     fancy_name = 'Participation Status'
+
+    @sorters.group_users
+    def bots(self, chats_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status (Bots - Beta)'
+
+        bars = ['Qty_score']
+        lines = ['Qty_messages']
+
+        for chat, data in chats_data.items():
+            rows: List[List[Union[int, float]]] = []
+
+            for messages in data.values():
+                chars_net = 0
+                videos = 0
+                stickers = 0
+
+                for message in messages:
+                    if message['Type'] is MessageType.default:
+                        chars_net += len(message['Qty_char_net'].split())
+                    elif message['Type'] is MessageType.video_omitted:
+                        videos += 1
+                    elif message['Type'] is MessageType.sticker_omitted:
+                        stickers += 1
+
+                result = ((chars_net * 1) + (videos * 2) + (stickers * 3)) / 6
+                rows.append([result, len(messages)])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
+            
+        return generate_chart(dataframes, bars=bars, lines=lines, title=title)

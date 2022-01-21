@@ -287,3 +287,22 @@ def keys(func: Callable[..., None]):
             func(self, sorted_messages)
 
     return decorator
+
+
+def group_users(func: Callable[..., None]):
+    """
+    """
+
+    # Hack to avoid circular imports.
+    from .frames import BaseFrame 
+
+    def decorator(self: BaseFrame, chats: List[Chat]) -> None:
+        data: Dict[Chat, Dict[str, List[Message]]] = {}
+
+        for chat in chats:
+            messages = {act.display_name: act.messages for act in chat.actors}
+            data[chat] = messages
+
+        return func(self, data)
+
+    return decorator
