@@ -18,21 +18,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from collections import defaultdict
 import inspect
 from pathlib import Path
 from types import FunctionType
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import (
+    Any,
+    ClassVar,
+    Counter,
+    DefaultDict,
+    Dict,
+    List,
+    Optional,
+    Pattern,
+    Tuple,
+)
 
 import spacy
 from wordcloud import WordCloud # type: ignore
 from pandas import DataFrame
+from qualitube import Client # type: ignore
+from tldextract import extract # type: ignore
 
 from . import sorters
 from .chat import Chat
 from ._partials import *
 from .enums import MessageType
 from .models import Message
-from .sorters import generate_wordcloud, generate_chart
+from .sorters import generate_wordcloud, generate_chart, generate_table
+from .utils import config, log, parse_domain
+from .regex import SHORT_YOUTUBE_LINK_RE, YOUTUBE_LINK_RE
 
 
 __all__ = ('BaseFrame', 'KeysFrame', 'ParticipationStatusFrame')
@@ -245,7 +260,7 @@ class KeysFrame(BaseFrame):
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
     @sorters.keys
-    def links(self, chats_data: Dict[Chat, Dict[str, List[Message]]]):
+    def links(self, chats_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
         """
         """
         title = 'Keys Frame (Links)'
@@ -274,7 +289,9 @@ class KeysFrame(BaseFrame):
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
     @sorters.keys
-    def mentions(self, chats_data: Dict[Chat, Dict[str, List[Message]]]):
+    def mentions(
+        self, chats_data: Dict[Chat, Dict[str, List[Message]]]
+    ) -> None:
         """
         """
         title = 'Keys Frame (Mentions)'
@@ -303,7 +320,7 @@ class KeysFrame(BaseFrame):
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
     @sorters.keys
-    def emails(self, chats_data: Dict[Chat, Dict[str, List[Message]]]):
+    def emails(self, chats_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
         """
         """
         title = 'Keys Frame (E-mails)'
@@ -332,7 +349,9 @@ class KeysFrame(BaseFrame):
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
     @sorters.keys
-    def textual_symbols(self, chats_data: Dict[Chat, Dict[str, List[Message]]]):
+    def textual_symbols(
+        self, chats_data: Dict[Chat, Dict[str, List[Message]]]
+    ) -> None:
         """
         """
         title = 'Keys Frame (Textual symbols)'
@@ -361,6 +380,93 @@ class KeysFrame(BaseFrame):
             dataframes[chat] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
+
+    @sorters.keys
+    def ratings(
+        self, chats_data: Dict[Chat, Dict[str, List[Message]]]
+    ) -> None:
+        """
+        """
+        if not (api_key := config['google_api_key']):
+            return log('error', 'No API Key provided. Please provide one.')
+
+        client = Client(api_key)
+
+        title = 'Keys Frame (Ratings)'
+        tables: Dict[Chat, DataFrame] = {}
+
+        columns = [
+            'Media', 'Actor', 'Date', 'Link',
+            'Views', 'Likes', 'Comments', 'Title'
+        ]
+
+        regexes: Dict[Tuple[str, str], Pattern[str]] = {
+            ('youtu', 'be'): SHORT_YOUTUBE_LINK_RE,
+            ('youtube', 'com'): YOUTUBE_LINK_RE
+        }
+
+        for chat, data in chats_data.items():
+            rows: List[List[Any]] = []
+            url_counter: Counter[str] = Counter()
+
+            views_cache: DefaultDict[str, Optional[int]] = defaultdict(int)
+            likes_cache: DefaultDict[str, Optional[int]] = defaultdict(int)
+            comments_cache: DefaultDict[str, Optional[int]] = defaultdict(int)
+            titles_cache: DefaultDict[str, Optional[str]] = defaultdict(str)
+
+            all_messages: List[Message] = []
+            
+            for messages in data.values():
+                all_messages.extend(messages)
+
+            with progress_bar() as progress:
+                for message in progress.track(all_messages):
+                    created_at = str(message.created_at)
+                    actor = message.actor.display_name
+
+                    for url in message['Qty_char_links']:
+                        domain = parse_domain(url)
+
+                        if domain == 'YouTube':
+                            url_counter[url] += 1
+
+                            # Only repeated items are parsed.
+                            if url_counter[url] != 2:
+                                continue
+
+                            _, domain, suffix = extract(url) # type: ignore
+                            regex = regexes[(domain, suffix)] # type: ignore
+
+                            if not (match := regex.match(url)):
+                                continue
+
+                            id = match.group(1)
+                            videos = client.get_videos([id]).videos
+
+                            if not videos:
+                                continue
+
+                            video = videos[0]
+
+                            views_cache[url] = video.view_count
+                            likes_cache[url] = video.like_count
+                            comments_cache[url] = video.comment_count
+                            titles_cache[url] = video.title
+
+                        views = views_cache[url] or ''
+                        likes = likes_cache[url] or ''
+                        comments = comments_cache[url] or ''
+                        video_title = titles_cache[url]
+
+                        rows.append([
+                            domain, actor, created_at, url,
+                            views, likes, comments, video_title
+                        ])
+
+            dataframe = DataFrame(rows, columns=columns)
+            tables[chat] = dataframe
+
+        generate_table(tables, columns=columns, title=title)
 
 class ParticipationStatusFrame(BaseFrame):
     """

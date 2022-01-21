@@ -101,6 +101,48 @@ def generate_chart(
     fig.show() # type: ignore
 
 
+def generate_table(
+    tables: Dict[Chat, DataFrame],
+    *,
+    columns: Optional[List[str]] = None,
+    title: str
+):
+    """
+    """
+    if columns is None:
+        columns = []
+
+    fig = make_subplots() # type: ignore
+    buttons: List[Dict[str, Any]] = []
+
+    for chat, dataframe in tables.items():
+        button: Dict[str, Any] = {}
+        button['label'] = chat.filename
+        button['method'] = 'update'
+
+        args: List[Dict[str, Any]] = []
+        values: List[Any] = []
+
+        for column in columns:
+            values.append(dataframe[column].to_list()) # type: ignore
+
+        args.append({'cells': {'values': values}, 'header': {'values': columns}})
+        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+
+        button['args'] = args
+        buttons.append(button)
+
+    header: Dict[str, List[str]] = {'values': []}
+    cells: Dict[str, List[Any]] = {'values': []}
+
+    fig.add_table(header=header, cells=cells) # type: ignore
+
+    updatemenus = [{'buttons': buttons, 'active': 0}]
+    fig.update_layout(updatemenus=updatemenus) # type: ignore
+
+    fig.show() # type: ignore
+
+
 def _sort_by_time(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
     ret: Dict[Chat, Dict[str, List[Message]]] = {}
 
