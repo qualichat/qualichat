@@ -34,7 +34,6 @@ from typing import (
     Tuple,
     Union
 )
-from numpy import char
 
 import spacy
 from wordcloud import WordCloud # type: ignore
@@ -59,6 +58,12 @@ nlp = spacy.load('pt_core_news_md')
 
 keyword: Optional[str] = None
 pos: Optional[str] = None
+message_type: Optional[str] = None
+
+weekdays = (
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+    'Friday', 'Saturday', 'Sunday'
+)
 
 
 def _normalize_frame_name(name: str) -> str:
@@ -153,9 +158,6 @@ class BaseFrame:
 
     def __repr__(self) -> str:
         return '<%s>' % self.__class__.__name__
-
-
-keyword: Optional[str] = None
 
 
 class KeysFrame(BaseFrame):
@@ -470,6 +472,7 @@ class KeysFrame(BaseFrame):
 
         generate_table(tables, columns=columns, title=title)
 
+
 class ParticipationStatusFrame(BaseFrame):
     """
     """
@@ -511,3 +514,30 @@ class ParticipationStatusFrame(BaseFrame):
             dataframes[chat] = dataframe
             
         return generate_chart(dataframes, bars=bars, lines=lines, title=title)
+
+    def media_repertoire(self, chats: List[Chat]) -> None:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status (Media Repertoire)'
+
+        global message_type
+
+        if not message_type:
+            types = {
+                'User Messages': 'messages',
+                'System Messages': 'system_messages'
+            }
+
+            message = 'Choose the message type:'
+            result = select(message, list(types.keys())).ask()
+
+            message_type = types[result]
+
+        for chat in chats:
+            data = {weekday: 0 for weekday in weekdays}
+
+            for message in getattr(chat, message_type):
+                data[message.created_at.strftime('%A')] += 1
+
+            
