@@ -32,6 +32,7 @@ from typing import (
     Optional,
     OrderedDict,
     Pattern,
+    Set,
     Tuple,
     Union
 )
@@ -546,3 +547,58 @@ class ParticipationStatusFrame(BaseFrame):
             dataframes[chat] = dataframe
 
         generate_chart(dataframes, bars=bars, lines=[], title=title)
+
+    def media_repertoire(self, chats: List[Chat]) -> None:
+        """
+        """
+        # dataframes: Dict[Chat, DataFrame] = {}
+        # ttitle = 'Participation Status (Media Repertoire)'
+
+        choices = ['Choose Media', 'Average Media']
+
+        msg = 'Choose you action'
+        result = select(msg, choices).ask()
+
+        if result == 'Choose Media':
+            return _choose_media(chats)
+
+
+def _choose_media(chats: List[Chat]) -> None:
+    dataframes: Dict[Chat, DataFrame] = {}
+    all_media: Set[str] = set()
+
+    for chat in chats:
+        for message in chat.messages:
+            for url in message['Qty_char_links']:
+                all_media.add(parse_domain(url))
+
+    msg = 'Choose a Media'
+    whitelist = checkbox(msg, list(all_media)).ask()
+
+    for chat in chats:
+        rows: List[List[int]] = []
+
+        for actor in chat.actors:
+            data = {domain: 0 for domain in whitelist}
+
+            for message in actor.messages:
+                for url in message['Qty_char_links']:
+                    domain = parse_domain(url)
+
+                    if domain not in whitelist:
+                        continue
+
+                    data[domain] += 1
+
+            rows.append(list(data.values()))
+
+        index = [actor.display_name for actor in chat.actors]
+
+        dataframe = DataFrame(rows, index=index, columns=whitelist)
+        dataframes[chat] = dataframe
+
+    print(dataframes)
+                
+    # for chat in chats:
+    #     for actor in chat.actors:
+
