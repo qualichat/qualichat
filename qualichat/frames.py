@@ -30,6 +30,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    OrderedDict,
     Pattern,
     Tuple,
     Union
@@ -58,7 +59,6 @@ nlp = spacy.load('pt_core_news_md')
 
 keyword: Optional[str] = None
 pos: Optional[str] = None
-message_type: Optional[str] = None
 
 weekdays = (
     'Monday', 'Tuesday', 'Wednesday', 'Thursday',
@@ -513,31 +513,36 @@ class ParticipationStatusFrame(BaseFrame):
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
             dataframes[chat] = dataframe
             
-        return generate_chart(dataframes, bars=bars, lines=lines, title=title)
+        generate_chart(dataframes, bars=bars, lines=lines, title=title)
 
-    def media_repertoire(self, chats: List[Chat]) -> None:
+    def messages_per_actors_per_weekday(self, chats: List[Chat]) -> None:
         """
         """
         dataframes: Dict[Chat, DataFrame] = {}
-        title = 'Participation Status (Media Repertoire)'
+        title = 'Participation Status (Messages per Actors per Weekday)'
 
-        global message_type
+        bars = ['Qtd_messages']
 
-        if not message_type:
-            types = {
-                'User Messages': 'messages',
-                'System Messages': 'system_messages'
-            }
+        types = {
+            'User Messages': 'messages',
+            'System Messages': 'system_messages'
+        }
 
-            message = 'Choose the message type:'
-            result = select(message, list(types.keys())).ask()
+        msg = 'Choose the message type:'
+        result = select(msg, list(types.keys())).ask()
 
-            message_type = types[result]
+        message_type = types[result]
 
         for chat in chats:
-            data = {weekday: 0 for weekday in weekdays}
+            data = OrderedDict({weekday: 0 for weekday in weekdays})
 
             for message in getattr(chat, message_type):
                 data[message.created_at.strftime('%A')] += 1
 
-            
+            index = list(data.keys())
+            rows = list(data.values())
+
+            dataframe = DataFrame(rows, index=index, columns=bars)
+            dataframes[chat] = dataframe
+
+        generate_chart(dataframes, bars=bars, lines=[], title=title)
