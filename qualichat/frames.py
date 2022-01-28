@@ -551,19 +551,59 @@ class ParticipationStatusFrame(BaseFrame):
     def media_repertoire(self, chats: List[Chat]) -> None:
         """
         """
-        # dataframes: Dict[Chat, DataFrame] = {}
-        # ttitle = 'Participation Status (Media Repertoire)'
-
+        title = 'Participation Status (Media Repertoire)'
         choices = ['Choose Media', 'Average Media']
 
         msg = 'Choose you action'
         result = select(msg, choices).ask()
 
         if result == 'Choose Media':
-            return _choose_media(chats)
+            return _choose_media(chats, title)
+        else:
+            return _average_media(chats, title)
 
+    @sorters.participation_status
+    @sorters.group_users
+    def messages_per_actors(
+        self, chats_data: Dict[Chat, Dict[str, List[Message]]]
+    ) -> Tuple[Dict[Chat, DataFrame], Dict[str, Any]]:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Messages per Actors)'
 
-def _choose_media(chats: List[Chat]) -> None:
+        bars = ['Qty_char_text', 'Qty_char_net', 'Qty_char_total']
+        lines = ['Qty_messages']
+
+        for chat, data in chats_data.items():
+            rows: List[List[Union[int, float]]] = []
+
+            for messages in data.values():
+                chars_text = 0
+                chars_net = 0
+                chars_total = 0
+
+                for message in messages:
+                    if message['Type'] is not MessageType.default:
+                        continue
+
+                    chars_text += len(message['Qty_char_text'].split())
+                    chars_net += len(message['Qty_char_net'].split())
+                    chars_total += len(message.content.split())
+
+                rows.append([
+                    chars_text, chars_net, chars_total, len(messages)
+                ])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
+
+        return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
+        
+
+def _choose_media(chats: List[Chat], title: str) -> None:
     dataframes: Dict[Chat, DataFrame] = {}
     all_media: Set[str] = set()
 
@@ -597,8 +637,30 @@ def _choose_media(chats: List[Chat]) -> None:
         dataframe = DataFrame(rows, index=index, columns=whitelist)
         dataframes[chat] = dataframe
 
-    print(dataframes)
-                
-    # for chat in chats:
-    #     for actor in chat.actors:
+    generate_chart(dataframes, bars=whitelist, title=title)    
 
+
+def _average_media(chats: List[Chat], title: str) -> None:
+    dataframes: Dict[Chat, DataFrame] = {}
+
+    bars = ['Qty_average']
+    lines = ['Qty_messages']
+
+    for chat in chats:
+        rows: List[List[Union[int, float]]] = []
+
+        for actor in chat.actors:
+            total_urls = 0
+            
+            for message in actor.messages:
+                total_urls += len(message['Qty_char_links'])
+
+            average = total_urls / len(actor.messages)
+            rows.append([average, len(actor.messages)])
+
+        index = [actor.display_name for actor in chat.actors]
+
+        dataframe = DataFrame(rows, index=index, columns=bars + lines)
+        dataframes[chat] = dataframe
+
+    generate_chart(dataframes, lines=lines, bars=bars, title=title)

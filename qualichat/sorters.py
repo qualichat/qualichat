@@ -21,7 +21,16 @@ SOFTWARE.
 import base64
 from io import BytesIO
 from collections import defaultdict
-from typing import Any, Callable, DefaultDict, Dict, List, Optional, Union
+from typing import (
+    Any,
+    Callable,
+    DefaultDict,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 from wordcloud import WordCloud # type: ignore
 from plotly.graph_objs import Scatter, Figure # type: ignore
@@ -37,7 +46,9 @@ from ._partials import progress_bar, select, checkbox
 __all__ = ('generate_wordcloud', 'keys')
 
 
-sorter_type: Optional[Callable[..., None]] = None
+sorter_type: Optional[
+    Callable[..., Dict[Chat, Dict[str, List[Message]]]]
+] = None
 
 
 def generate_chart(
@@ -223,6 +234,17 @@ def _sort_by_actor(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
     return ret
 
 
+def generate_treemap(dataframes: Dict[Chat, DataFrame], **kwargs: Any):
+    """
+    """
+    specs = [[{'secondary_y': True}]]
+    fig = make_subplots(specs=specs) # type: ignore
+
+    fig.add_treemap(labels=['1', '2', '1'], values=[2, 4, 6], parents=['', '', '2'])
+
+    fig.show() # type: ignore
+
+
 def generate_wordcloud(wordclouds: Dict[Chat, WordCloud], *, title: str):
     """
     """
@@ -278,18 +300,45 @@ def keys(func: Callable[..., None]):
             choices = list(modes.keys())
 
             name = select('Choose your mode:', choices).ask()
+            sorter_type = modes[name]
 
-            try:
-                sorted_messages = modes[name](chats)
-            except (KeyError, TypeError):
-                return log('error', 'Option not selected. Aborting.')
+        try:
+            sorted_messages = sorter_type(chats)
+        except (KeyError, TypeError):
+            return log('error', 'Option not selected. Aborting.')
 
-            func(self, sorted_messages)
+        func(self, sorted_messages)
 
     return decorator
 
 
-def group_users(func: Callable[..., None]):
+def participation_status(
+    func: Callable[..., Tuple[Dict[Chat, DataFrame], Dict[str, Any]]]
+):
+    """
+    """
+
+    # Hack to avoid circular imports.
+    from .frames import BaseFrame
+
+    def decorator(self: BaseFrame, chats: List[Chat]) -> None:
+        global sorter_type
+
+        if sorter_type is None:
+            modes: Dict[str, Any] = {'Treemap': generate_treemap}
+            choices = list(modes.keys())
+
+            name = select('Choose your mode:', choices).ask()
+            sorter_type = modes[name]
+
+        dataframes, kwargs = func(self, chats)
+        assert sorter_type is not None
+        sorter_type(dataframes, **kwargs)
+
+    return decorator
+
+
+def group_users(func: Callable[..., Any]):
     """
     """
 
