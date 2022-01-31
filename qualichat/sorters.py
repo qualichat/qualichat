@@ -237,10 +237,49 @@ def _sort_by_actor(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
 def generate_treemap(dataframes: Dict[Chat, DataFrame], **kwargs: Any):
     """
     """
+    title = kwargs.pop('title', None)
+
     specs = [[{'secondary_y': True}]]
     fig = make_subplots(specs=specs) # type: ignore
 
-    fig.add_treemap(labels=['1', '2', '1'], values=[2, 4, 6], parents=['', '', '2'])
+    buttons: List[Dict[str, Any]] = []
+    visible = True
+
+    for i, (chat, dataframe) in enumerate(dataframes.items()):
+        index = list(dataframe.index) # type: ignore
+
+        button: Dict[str, Any] = {}
+        button['label'] = chat.filename
+        button['method'] = 'update'
+
+        args: List[Union[Dict[str, Any], List[Dict[str, Any]]]] = []
+
+        visibility: List[bool] = []
+        for j in range(len(dataframes)):
+            for _ in range(len(list(dataframe))):
+                visibility.append(i == j)
+
+        args.append({'visible': visibility})
+        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+
+        button['args'] = args
+        buttons.append(button)
+
+        labels: List[str] = []
+        values: List[int] = []
+        parents: List[str] = []
+
+        for index, row in dataframe.iterrows():
+            labels.append(index)
+            values.append(0)
+            parents.append('')
+
+            for column, value in zip(list(dataframe), row):
+                labels.append(f'{column} ({index})')
+                values.append(value)
+                parents.append(index)
+
+        fig.add_treemap(labels=labels, values=values, parents=parents)
 
     fig.show() # type: ignore
 
