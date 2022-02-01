@@ -19,6 +19,7 @@ SOFTWARE.
 """
 
 import base64
+from functools import partial
 from io import BytesIO
 from collections import defaultdict
 from typing import (
@@ -364,14 +365,16 @@ def participation_status(
         global sorter_type
 
         if sorter_type is None:
-            modes: Dict[str, Any] = {'Treemap': generate_treemap}
+            modes: Dict[str, Any] = {
+                'By Time': generate_chart,
+                'Treemap': generate_treemap
+            }
             choices = list(modes.keys())
 
             name = select('Choose your mode:', choices).ask()
             sorter_type = modes[name]
 
         dataframes, kwargs = func(self, chats)
-        assert sorter_type is not None
         sorter_type(dataframes, **kwargs)
 
     return decorator
