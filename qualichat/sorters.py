@@ -19,7 +19,6 @@ SOFTWARE.
 """
 
 import base64
-from functools import partial
 from io import BytesIO
 from collections import defaultdict
 from typing import (
@@ -74,6 +73,9 @@ def generate_chart(
     visible = True
 
     for i, (chat, dataframe) in enumerate(dataframes.items()):
+        dataframe = dataframe.sort_values( # type: ignore
+            by=bars + lines, ascending=False
+        )
         index = list(dataframe.index) # type: ignore
 
         button: Dict[str, Any] = {}
@@ -375,6 +377,7 @@ def participation_status(
             sorter_type = modes[name]
 
         dataframes, kwargs = func(self, chats)
+        assert sorter_type is not None
         sorter_type(dataframes, **kwargs)
 
     return decorator

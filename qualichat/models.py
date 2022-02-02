@@ -114,12 +114,12 @@ class Message(BaseMessage):
             pattern.
     - ``Qty_char_marks``: List[:class:`str`]
         The union of ``Qty_char_!`` and ``Qty_char_?``.
-    - ``Qty_char_mentions``: List[:class:`str`]
-        All mentions found in the message content.
+    - ``Qty_char_call``: List[:class:`str`]
+        All calls found in the message content.
         .. versionadded:: 1.3
     - ``Qty_char_net``: :class:`str`
         Represents the net content of the message. This removes all
-        mentions, URLs, emails and emojis from the message content.
+        calls, URLs, emails and emojis from the message content.
     - ``Qty_char_text``: :class:`str`
         Represents the pure content of the message. This takes the net
         content (via ``Qty_char_net``) and removes laughs, marks and
@@ -178,7 +178,7 @@ class Message(BaseMessage):
 
         data['Qty_char_?'] = QUESTION_MARK_RE.findall(content)
         data['Qty_char_!'] = EXCLAMATION_MARK_RE.findall(content)
-        data['Qty_char_mentions'] = MENTION_RE.findall(content)
+        data['Qty_char_calls'] = MENTION_RE.findall(content)
         data['Qty_char_numbers'] = NUMBERS_RE.findall(content)
         data['Qty_char_laughs'] = LAUGHS_RE.findall(content)
         data['Qty_char_emoticons'] = EMOTICONS_RE.findall(content)
@@ -187,7 +187,7 @@ class Message(BaseMessage):
         data['Qty_char_marks'] = all_marks
 
         net_incidences_fields = [
-            'Qty_char_mentions',
+            'Qty_char_calls',
             'Qty_char_links',
             'Qty_char_emails',
             'Qty_char_emoji'

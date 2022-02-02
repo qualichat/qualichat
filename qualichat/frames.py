@@ -18,6 +18,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from math import sqrt
 from collections import defaultdict
 import inspect
 from pathlib import Path
@@ -235,7 +236,7 @@ class KeysFrame(BaseFrame):
 
         bars = [
             'Qty_char_links', 'Qty_char_emails',
-            'Qty_char_mentions', 'Qty_char_emoji'
+            'Qty_char_calls', 'Qty_char_emoji'
         ]
         lines = ['Qty_messages']
 
@@ -246,15 +247,15 @@ class KeysFrame(BaseFrame):
                 links = 0
                 emojis = 0
                 emails = 0
-                mentions = 0
+                calls = 0
 
                 for message in messages:
                     links += len(message['Qty_char_links'])
                     emojis += len(message['Qty_char_emoji'])
                     emails += len(message['Qty_char_emails'])
-                    mentions += len(message['Qty_char_mentions'])
+                    calls += len(message['Qty_char_calls'])
 
-                row = [links, emojis, emails, mentions, len(messages)]
+                row = [links, emojis, emails, calls, len(messages)]
                 rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
@@ -294,27 +295,27 @@ class KeysFrame(BaseFrame):
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
     @sorters.keys
-    def mentions(
+    def calls(
         self, chats_data: Dict[Chat, Dict[str, List[Message]]]
     ) -> None:
         """
         """
-        title = 'Keys Frame (Mentions)'
+        title = 'Keys Frame (Calls)'
         dataframes: Dict[Chat, DataFrame] = {}
 
-        bars = ['Qty_char_mentions']
+        bars = ['Qty_char_calls']
         lines = ['Qty_messages']
 
         for chat, data in chats_data.items():
             rows: List[List[int]] = []
 
             for actor, messages in data.items():
-                mentions = 0
+                calls = 0
 
                 for message in messages:
-                    mentions += len(message['Qty_char_mentions'])
+                    calls += len(message['Qty_char_calls'])
 
-                row = [mentions, len(messages)]
+                row = [calls, len(messages)]
                 rows.append(_normalize_row(row, actor, chat))
 
             index = list(data.keys())
@@ -562,8 +563,8 @@ class ParticipationStatusFrame(BaseFrame):
         else:
             return _average_media(chats, title)
 
-    @sorters.participation_status
     @sorters.group_users
+    @sorters.participation_status
     def messages_per_actors(
         self, chats_data: Dict[Chat, Dict[str, List[Message]]]
     ) -> Tuple[Dict[Chat, DataFrame], Dict[str, Any]]:
@@ -601,7 +602,198 @@ class ParticipationStatusFrame(BaseFrame):
             dataframes[chat] = dataframe
 
         return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
+
+    @sorters.group_users
+    @sorters.participation_status
+    def message_statistics(
+        self, chats_data: Dict[Chat, Dict[str, List[Message]]]
+    ) -> Tuple[Dict[Chat, DataFrame], Dict[str, Any]]:
+        """
+        """
+        dataframes: Dict[Chat, DataFrame] = {}
+        title = 'Participation Status Frame (Message Statistics)'
+
+        bars = ['Avg_chars_net', 'Avg_chars_text', 'Sd_chars_net']
+        lines = ['Qty_messages']
+
+        for chat, data in chats_data.items():
+            rows: List[List[Union[int, float]]] = []
+
+            for messages in data.values():
+                chars_total = 0
+                chars_net: List[int] = []
+                chars_text: List[int] = []
+
+                for message in messages:
+                    chars_total += len(message.content)
+                    chars_net.append(len(message['Qty_char_net']))
+                    chars_text.append(len(message['Qty_char_text']))
+
+                average_net = sum(chars_net) / len(chars_net)
+                average_text = sum(chars_text) / len(chars_text)
+
+                # SD means "Standard Deviation".
+                # See more: https://en.wikipedia.org/wiki/Standard_deviation
+                sigma = sum([(x - average_net) ** 2 for x in chars_net])
+                sd_net = sqrt(sigma / len(chars_net))
+
+                rows.append([average_net, average_text, sd_net, len(messages)])
+
+            index = list(data.keys())
+
+            dataframe = DataFrame(rows, index=index, columns=bars + lines)
+            dataframes[chat] = dataframe
+
+        return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
+
+    @sorters.participation_status
+    def laminations_per_actors(
+        self, chats: List[Chat]
+    ) -> Tuple[Dict[Chat, DataFrame], Dict[str, Any]]:
+        """
+        """
+        title = 'Participation Status (Laminations per Actors)'
+        choices = ['Laminations per Actors', 'Average Laminations']
+
+        msg = 'Choose you action'
+        result = select(msg, choices).ask()
+
+        if result == 'Laminations per Actors':
+            return _laminations_per_actors(chats, title)
+        else:
+            return _average_laminations(chats, title)
+            
+    @sorters.participation_status
+    def machinations_per_actors(
+        self, chats: List[Chat]
+    ) -> Tuple[Dict[Chat, DataFrame], Dict[str, Any]]:
+        """
+        """
+        title = 'Participation Status (Machinations per Actors)'
+        choices = ['Machinations per Actors', 'Average Machinations']
+
+        msg = 'Choose you action'
+        result = select(msg, choices).ask()
+
+        if result == 'Machinations per Actors':
+            return _machinations_per_actors(chats, title)
+        else:
+            return _average_machinations(chats, title)
         
+
+def _machinations_per_actors(chats: List[Chat], title: str) -> Any:
+    dataframes: Dict[Chat, DataFrame] = {}
+
+    bars = ['Qty_char_text']
+    lines = ['Qty_messages']
+
+    for chat in chats:
+        rows: List[List[Union[int, float]]] = []
+
+        for actor in chat.actors:
+            chars_text = 0
+            
+            for message in actor.messages:
+                chars_text += len(message['Qty_char_text'].split())
+
+            rows.append([chars_text, len(actor.messages)])
+
+        index = [actor.display_name for actor in chat.actors]
+
+        dataframe = DataFrame(rows, index=index, columns=bars + lines)
+        dataframes[chat] = dataframe
+
+    return (dataframes, {'lines': lines, 'bars': bars, 'title': title})
+
+
+def _average_machinations(chats: List[Chat], title: str) -> Any:
+    dataframes: Dict[Chat, DataFrame] = {}
+
+    bars = ['Avg_chars_text', 'Sd_chars_text']
+    lines = ['Qty_messages']
+
+    for chat in chats:
+        rows: List[List[Union[int, float]]] = []
+
+        for actor in chat.actors:
+            chars_text: List[int] = []
+
+            for message in actor.messages:
+                chars_text.append(len(message['Qty_char_text']))
+
+            average_text = sum(chars_text) / len(chars_text)
+
+            # SD means "Standard Deviation".
+            # See more: https://en.wikipedia.org/wiki/Standard_deviation
+            sigma = sum([(x - average_text) ** 2 for x in chars_text])
+            sd_text = sqrt(sigma / len(chars_text))
+
+            rows.append([average_text, sd_text, len(actor.messages)])
+
+        index = [actor.display_name for actor in chat.actors]
+
+        dataframe = DataFrame(rows, index=index, columns=bars + lines)
+        dataframes[chat] = dataframe
+
+    return (dataframes, {'lines': lines, 'bars': bars, 'title': title})
+
+
+def _laminations_per_actors(chats: List[Chat], title: str) -> Any:
+    dataframes: Dict[Chat, DataFrame] = {}
+
+    bars = ['Qty_char_net']
+    lines = ['Qty_messages']
+
+    for chat in chats:
+        rows: List[List[Union[int, float]]] = []
+
+        for actor in chat.actors:
+            chars_net = 0
+            
+            for message in actor.messages:
+                chars_net += len(message['Qty_char_net'].split())
+
+            rows.append([chars_net, len(actor.messages)])
+
+        index = [actor.display_name for actor in chat.actors]
+
+        dataframe = DataFrame(rows, index=index, columns=bars + lines)
+        dataframes[chat] = dataframe
+
+    return (dataframes, {'lines': lines, 'bars': bars, 'title': title})
+
+
+def _average_laminations(chats: List[Chat], title: str) -> Any:
+    dataframes: Dict[Chat, DataFrame] = {}
+
+    bars = ['Avg_chars_net', 'Sd_chars_net']
+    lines = ['Qty_messages']
+
+    for chat in chats:
+        rows: List[List[Union[int, float]]] = []
+
+        for actor in chat.actors:
+            chars_net: List[int] = []
+
+            for message in actor.messages:
+                chars_net.append(len(message['Qty_char_net']))
+
+            average_net = sum(chars_net) / len(chars_net)
+
+            # SD means "Standard Deviation".
+            # See more: https://en.wikipedia.org/wiki/Standard_deviation
+            sigma = sum([(x - average_net) ** 2 for x in chars_net])
+            sd_net = sqrt(sigma / len(chars_net))
+
+            rows.append([average_net, sd_net, len(actor.messages)])
+
+        index = [actor.display_name for actor in chat.actors]
+
+        dataframe = DataFrame(rows, index=index, columns=bars + lines)
+        dataframes[chat] = dataframe
+
+    return (dataframes, {'lines': lines, 'bars': bars, 'title': title})
+
 
 def _choose_media(chats: List[Chat], title: str) -> None:
     dataframes: Dict[Chat, DataFrame] = {}
