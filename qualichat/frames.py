@@ -662,41 +662,49 @@ class ParticipationStatusFrame(BaseFrame):
             return _laminations_per_actors(chats, title)
         else:
             return _average_laminations(chats, title)
-            
+
     @sorters.participation_status
-    def machinations_per_actors(
+    def fabrications_per_actors(
         self, chats: List[Chat]
     ) -> Tuple[Dict[Chat, DataFrame], Dict[str, Any]]:
         """
         """
-        title = 'Participation Status (Machinations per Actors)'
-        choices = ['Machinations per Actors', 'Average Machinations']
+        title = 'Participation Status (Fabrications per Actors)'
+        choices = ['Fabrications per Actors', 'Average Fabrications']
 
         msg = 'Choose you action'
         result = select(msg, choices).ask()
 
         if result == 'Machinations per Actors':
-            return _machinations_per_actors(chats, title)
+            return _fabrications_per_actors(chats, title)
         else:
-            return _average_machinations(chats, title)
+            return _average_fabrications(chats, title)
         
 
-def _machinations_per_actors(chats: List[Chat], title: str) -> Any:
+def _fabrications_per_actors(chats: List[Chat], title: str) -> Any:
     dataframes: Dict[Chat, DataFrame] = {}
 
-    bars = ['Qty_char_text']
-    lines = ['Qty_messages']
+    bars = ['Qty_char_laughs', 'Qty_char_marks', 'Qty_char_numbers']
+    lines = ['Qty_char_pure']
 
     for chat in chats:
         rows: List[List[Union[int, float]]] = []
 
         for actor in chat.actors:
+            laughs = 0
+            marks = 0
+            numbers = 0
             chars_text = 0
             
             for message in actor.messages:
+                laughs += len(message['Qty_char_laughs'])
+                marks += len(message['Qty_char_marks'])
+                numbers += len(message['Qty_char_numbers'])
                 chars_text += len(message['Qty_char_text'].split())
 
-            rows.append([chars_text, len(actor.messages)])
+            rows.append([
+                laughs, marks, numbers, chars_text
+            ])
 
         index = [actor.display_name for actor in chat.actors]
 
@@ -706,7 +714,7 @@ def _machinations_per_actors(chats: List[Chat], title: str) -> Any:
     return (dataframes, {'lines': lines, 'bars': bars, 'title': title})
 
 
-def _average_machinations(chats: List[Chat], title: str) -> Any:
+def _average_fabrications(chats: List[Chat], title: str) -> Any:
     dataframes: Dict[Chat, DataFrame] = {}
 
     bars = ['Avg_chars_text', 'Sd_chars_text']
@@ -741,19 +749,32 @@ def _average_machinations(chats: List[Chat], title: str) -> Any:
 def _laminations_per_actors(chats: List[Chat], title: str) -> Any:
     dataframes: Dict[Chat, DataFrame] = {}
 
-    bars = ['Qty_char_net']
-    lines = ['Qty_messages']
+    bars = [
+        'Qty_char_calls', 'Qty_char_links',
+        'Qty_char_emails', 'Qty_char_emoji'
+    ]
+    lines = ['Qty_char_net']
 
     for chat in chats:
         rows: List[List[Union[int, float]]] = []
 
         for actor in chat.actors:
+            calls = 0
+            links = 0
+            emails = 0
+            emoji = 0
             chars_net = 0
             
             for message in actor.messages:
+                calls += len(message['Qty_char_calls'])
+                links += len(message['Qty_char_links'])
+                emails += len(message['Qty_char_emails'])
+                emoji += len(message['Qty_char_emoji'])
                 chars_net += len(message['Qty_char_net'].split())
 
-            rows.append([chars_net, len(actor.messages)])
+            rows.append([
+                calls, links, emails, emoji, chars_net
+            ])
 
         index = [actor.display_name for actor in chat.actors]
 

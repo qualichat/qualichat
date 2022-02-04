@@ -46,11 +46,6 @@ from ._partials import progress_bar, select, checkbox
 __all__ = ('generate_wordcloud', 'keys')
 
 
-sorter_type: Optional[
-    Callable[..., Dict[Chat, Dict[str, List[Message]]]]
-] = None
-
-
 def generate_chart(
     dataframes: Dict[Chat, DataFrame],
     *,
@@ -259,7 +254,7 @@ def generate_treemap(dataframes: Dict[Chat, DataFrame], **kwargs: Any):
 
         visibility: List[bool] = []
         for j in range(len(dataframes)):
-            for _ in range(len(list(dataframe))):
+            for _ in range(len(list(dataframe))): # type: ignore
                 visibility.append(i == j)
 
         args.append({'visible': visibility})
@@ -273,16 +268,21 @@ def generate_treemap(dataframes: Dict[Chat, DataFrame], **kwargs: Any):
         parents: List[str] = []
 
         for index, row in dataframe.iterrows():
-            labels.append(index)
+            labels.append(index) # type: ignore
             values.append(0)
             parents.append('')
 
-            for column, value in zip(list(dataframe), row):
+            for column, value in zip(list(dataframe), row): # type: ignore
                 labels.append(f'{column} ({index})')
-                values.append(value)
-                parents.append(index)
+                values.append(value) # type: ignore
+                parents.append(index) # type: ignore
 
-        fig.add_treemap(labels=labels, values=values, parents=parents)
+        fig.add_treemap( # type: ignore
+            labels=labels, values=values, parents=parents, visible=visible
+        )
+
+        if visible is True:
+            visible = False
 
     fig.show() # type: ignore
 
@@ -335,14 +335,11 @@ def keys(func: Callable[..., None]):
     from .frames import BaseFrame
 
     def decorator(self: BaseFrame, chats: List[Chat]) -> None:
-        global sorter_type
+        modes = {'By Time': _sort_by_time, 'By Actor': _sort_by_actor}
+        choices = list(modes.keys())
 
-        if sorter_type is None:
-            modes = {'By Time': _sort_by_time, 'By Actor': _sort_by_actor}
-            choices = list(modes.keys())
-
-            name = select('Choose your mode:', choices).ask()
-            sorter_type = modes[name]
+        name = select('Choose your mode:', choices).ask()
+        sorter_type = modes[name]
 
         try:
             sorted_messages = sorter_type(chats)
@@ -364,20 +361,15 @@ def participation_status(
     from .frames import BaseFrame
 
     def decorator(self: BaseFrame, chats: List[Chat]) -> None:
-        global sorter_type
+        modes: Dict[str, Any] = {
+            'By Time': generate_chart, 'Treemap': generate_treemap
+        }
+        choices = list(modes.keys())
 
-        if sorter_type is None:
-            modes: Dict[str, Any] = {
-                'By Time': generate_chart,
-                'Treemap': generate_treemap
-            }
-            choices = list(modes.keys())
-
-            name = select('Choose your mode:', choices).ask()
-            sorter_type = modes[name]
+        name = select('Choose your mode:', choices).ask()
+        sorter_type = modes[name]
 
         dataframes, kwargs = func(self, chats)
-        assert sorter_type is not None
         sorter_type(dataframes, **kwargs)
 
     return decorator
