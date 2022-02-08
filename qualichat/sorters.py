@@ -236,6 +236,7 @@ def generate_treemap(dataframes: Dict[Chat, DataFrame], **kwargs: Any):
     """
     """
     title = kwargs.pop('title', None)
+    have_parents = kwargs.pop('have_parents', True)
 
     specs = [[{'secondary_y': True}]]
     fig = make_subplots(specs=specs) # type: ignore
@@ -267,15 +268,23 @@ def generate_treemap(dataframes: Dict[Chat, DataFrame], **kwargs: Any):
         values: List[int] = []
         parents: List[str] = []
 
-        for index, row in dataframe.iterrows():
-            labels.append(index) # type: ignore
-            values.append(0)
-            parents.append('')
+        if have_parents:
+            for index, row in dataframe.iterrows():
+                labels.append(index) # type: ignore
+                values.append(0)
+                parents.append('')
 
-            for column, value in zip(list(dataframe), row): # type: ignore
-                labels.append(f'{column} ({index})')
+                for column, value in zip(list(dataframe), row): # type: ignore
+                    labels.append(f'{column} ({index})')
+                    values.append(value) # type: ignore
+                    parents.append(index) # type: ignore
+        else:
+            for i, row in dataframe.iterrows():
+                value = row.values[0] # type: ignore
+
+                labels.append(i) # type: ignore
                 values.append(value) # type: ignore
-                parents.append(index) # type: ignore
+                parents.append('')
 
         fig.add_treemap( # type: ignore
             labels=labels, values=values, parents=parents, visible=visible

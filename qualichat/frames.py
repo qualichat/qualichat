@@ -49,7 +49,7 @@ from .chat import Chat
 from ._partials import *
 from .enums import MessageType
 from .models import Message
-from .sorters import generate_wordcloud, generate_chart, generate_table
+from .sorters import generate_treemap, generate_wordcloud, generate_chart, generate_table
 from .utils import config, log, parse_domain
 from .regex import SHORT_YOUTUBE_LINK_RE, YOUTUBE_LINK_RE
 
@@ -58,9 +58,6 @@ __all__ = ('BaseFrame', 'KeysFrame', 'ParticipationStatusFrame')
 
 
 nlp = spacy.load('pt_core_news_md')
-
-keyword: Optional[str] = None
-pos: Optional[str] = None
 
 weekdays = (
     'Monday', 'Tuesday', 'Wednesday', 'Thursday',
@@ -94,14 +91,11 @@ def _parse_nlp(word: str, *, pos: str):
 def _parse_nlp_messages(messages: List[Message]):
     types = {'Verbs': 'VERB', 'Nouns': 'NOUN', 'Adjectives': 'ADJ'}
 
-    global pos
+    choices = list(types.keys())
+    msg = 'Choose a morphological class:'
 
-    if pos is None:
-        choices = list(types.keys())
-        msg = 'Choose a morphological class:'
-
-        morphological_class = select(msg, choices).ask()
-        pos = types[morphological_class]
+    morphological_class = select(msg, choices).ask()
+    pos = types[morphological_class]
 
     with progress_bar() as progress:
         for message in progress.track(messages, description='Parsing...'):
@@ -177,11 +171,8 @@ class KeysFrame(BaseFrame):
         wordclouds: Dict[Chat, WordCloud] = {}
         title = 'Keys Frame (Keyword)'
 
-        global keyword
-
-        if not keyword:
-            result: str = input('Enter the keyword:').ask()
-            keyword = result
+        result: str = input('Enter the keyword:').ask()
+        keyword = result
 
         for chat, data in chats_data.items():
             new_messages: List[Message] = []
@@ -553,15 +544,17 @@ class ParticipationStatusFrame(BaseFrame):
         """
         """
         title = 'Participation Status (Media Repertoire)'
-        choices = ['Choose Media', 'Average Media']
+        choices = ['Choose Media', 'Average Media', 'Treemap']
 
         msg = 'Choose you action'
         result = select(msg, choices).ask()
 
         if result == 'Choose Media':
             return _choose_media(chats, title)
-        else:
+        elif result == 'Average Media':
             return _average_media(chats, title)
+        else:
+            return _media_treemap(chats, title)
 
     @sorters.group_users
     @sorters.participation_status
@@ -877,3 +870,22 @@ def _average_media(chats: List[Chat], title: str) -> None:
         dataframes[chat] = dataframe
 
     generate_chart(dataframes, lines=lines, bars=bars, title=title)
+
+
+def _media_treemap(chats: List[Chat], title: str) -> None:
+    dataframes: Dict[Chat, DataFrame] = {}
+
+    urls: DefaultDict[str, int] = defaultdict(int)
+
+    for chat in chats:
+        for message in chat.messages:
+            for url in message['Qty_char_links']:
+                urls[parse_domain(url)] += 1
+
+        index = list(urls.keys())
+        rows = list(urls.values())
+        
+        dataframe = DataFrame(rows, index=index)
+        dataframes[chat] = dataframe
+
+    generate_treemap(dataframes, title=title, have_parents=False)
