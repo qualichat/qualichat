@@ -849,7 +849,7 @@ def _choose_media(chats: List[Chat], title: str) -> None:
 def _average_media(chats: List[Chat], title: str) -> None:
     dataframes: Dict[Chat, DataFrame] = {}
 
-    bars = ['Qty_average']
+    bars = ['Qty_average', 'Qty_total']
     lines = ['Qty_messages']
 
     for chat in chats:
@@ -862,7 +862,7 @@ def _average_media(chats: List[Chat], title: str) -> None:
                 total_urls += len(message['Qty_char_links'])
 
             average = total_urls / len(actor.messages)
-            rows.append([average, len(actor.messages)])
+            rows.append([average, total_urls, len(actor.messages)])
 
         index = [actor.display_name for actor in chat.actors]
 
