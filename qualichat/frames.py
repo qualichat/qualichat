@@ -476,37 +476,16 @@ class ParticipationStatusFrame(BaseFrame):
     def bots(self, chats_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
         """
         """
-        dataframes: Dict[Chat, DataFrame] = {}
-        title = 'Participation Status (Bots - Beta)'
+        title = ''
+        choices = ['Index', 'Components']
 
-        bars = ['Qty_score']
-        lines = ['Qty_messages']
+        msg = 'Choose you action'
+        result = select(msg, choices).ask()
 
-        for chat, data in chats_data.items():
-            rows: List[List[Union[int, float]]] = []
-
-            for messages in data.values():
-                chars_net = 0
-                videos = 0
-                stickers = 0
-
-                for message in messages:
-                    if message['Type'] is MessageType.default:
-                        chars_net += len(message['Qty_char_net'].split())
-                    elif message['Type'] is MessageType.video_omitted:
-                        videos += 1
-                    elif message['Type'] is MessageType.sticker_omitted:
-                        stickers += 1
-
-                result = ((chars_net * 1) + (videos * 2) + (stickers * 3)) / 6
-                rows.append([result, len(messages)])
-
-            index = list(data.keys())
-
-            dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
-            
-        generate_chart(dataframes, bars=bars, lines=lines, title=title)
+        if result == 'Index':
+            return _bots_index(chats_data, title)
+        else:
+            return _bots_components(chats_data, title)
 
     def messages_per_actors_per_weekday(self, chats: List[Chat]) -> None:
         """
@@ -889,3 +868,77 @@ def _media_treemap(chats: List[Chat], title: str) -> None:
         dataframes[chat] = dataframe
 
     generate_treemap(dataframes, title=title, have_parents=False)
+
+
+def _bots_index(
+    chats_data: Dict[Chat, Dict[str, List[Message]]],
+    title: str
+) -> None:
+    dataframes: Dict[Chat, DataFrame] = {}
+    title = 'Participation Status (Bots - Beta)'
+
+    bars = ['Qty_score']
+    lines = ['Qty_messages']
+
+    for chat, data in chats_data.items():
+        rows: List[List[Union[int, float]]] = []
+
+        for messages in data.values():
+            chars_net = 0
+            videos = 0
+            stickers = 0
+
+            for message in messages:
+                if message['Type'] is MessageType.default:
+                    chars_net += len(message['Qty_char_net'].split())
+                elif message['Type'] is MessageType.video_omitted:
+                    videos += 1
+                elif message['Type'] is MessageType.sticker_omitted:
+                    stickers += 1
+
+            result = ((chars_net * 1) + (videos * 2) + (stickers * 3)) / 6
+            rows.append([result, len(messages)])
+
+        index = list(data.keys())
+
+        dataframe = DataFrame(rows, index=index, columns=bars + lines)
+        dataframes[chat] = dataframe
+        
+    generate_chart(dataframes, bars=bars, lines=lines, title=title)
+
+
+def _bots_components(
+    chats_data: Dict[Chat, Dict[str, List[Message]]],
+    title: str
+) -> None:
+    dataframes: Dict[Chat, DataFrame] = {}
+    title = 'Participation Status (Bots - Beta)'
+
+    bars = ['Qty_char_net', 'Qty_videos', 'Qty_stickers']
+    lines = ['Qty_messages']
+
+    for chat, data in chats_data.items():
+        rows: List[List[Union[int, float]]] = []
+
+        for messages in data.values():
+            chars_net = 0
+            videos = 0
+            stickers = 0
+
+            for message in messages:
+                if message['Type'] is MessageType.default:
+                    chars_net += len(message['Qty_char_net'].split())
+                elif message['Type'] is MessageType.video_omitted:
+                    videos += 1
+                elif message['Type'] is MessageType.sticker_omitted:
+                    stickers += 1
+
+            rows.append([chars_net, videos, stickers, len(messages)])
+
+        index = list(data.keys())
+
+        dataframe = DataFrame(rows, index=index, columns=bars + lines)
+        dataframes[chat] = dataframe
+        
+    generate_chart(dataframes, bars=bars, lines=lines, title=title)
+
