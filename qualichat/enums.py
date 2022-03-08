@@ -54,6 +54,26 @@ class MessageType(IntEnum):
     deleted_message      = 8
 
 
+
+class ChatType(Enum):
+    friends    = 'Friends'
+    political  = 'Political'
+    religious  = 'Religious'
+    scientific = 'Scientific'
+    scholar    = 'Scholar'
+    co_workers = 'Co-workers'
+    random     = 'Random'
+    family     = 'Family'
+    green      = 'Green'
+    innovation = 'Innovation'
+    health     = 'Health'
+    spiritual  = 'Spiritual'
+    mentoring  = 'Mentoring'
+    wellness   = 'Wellness'
+    media      = 'Media'
+    brand      = 'Brand'
+
+
 def get_period(created_at: datetime.datetime) -> Period:
     if 0 <= created_at.hour < 6:
         period = Period.dawn

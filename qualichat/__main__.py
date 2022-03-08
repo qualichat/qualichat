@@ -30,13 +30,14 @@ from argparse import ArgumentParser, Namespace, Action
 
 import plotly # type: ignore
 import spacy
+import nltk # type: ignore
 from rich import print
 from rich.logging import RichHandler
 from spacy.cli.download import download
 
 import qualichat
 from ._partials import *
-from qualichat.frames import BaseFrame
+from qualichat.core import load_chats
 from qualichat.utils import config, log
 
 
@@ -77,7 +78,7 @@ def core(parser: ArgumentParser, args: Namespace) -> None:
 
 def loadchat(parser: ArgumentParser, args: Namespace) -> None:
     debug = args.debug
-    qc = qualichat.load_chats(*args.paths, debug=debug)
+    qc = load_chats(*args.paths, debug=debug)
 
     print(ascii)
     log('info', 'Welcome to Qualichat.')
@@ -89,7 +90,7 @@ def loadchat(parser: ArgumentParser, args: Namespace) -> None:
         if not frame_name:
             return log('error', 'Operation canceled. Aborting.')
 
-        frame: BaseFrame = qc.frames[frame_name]
+        frame = qc.frames[frame_name]
 
         choices = list(frame.charts.keys())
         names = checkbox('Choose your charts:', choices).ask()
@@ -110,8 +111,9 @@ def setup(parser: ArgumentParser, args: Namespace) -> None:
     config.save()
 
     with progress_bar(transient=True) as progress:
-        progress.add_task('[green]Downloading spaCy models', start=False)
+        progress.add_task('[green]Downloading spaCy models[/]', start=False)
         download('pt_core_news_md', False, False, '-q')
+        download('en_core_web_sm', False, False, '-q')
 
     print('\n[green]✔ You can now use Qualichat.[/green]')
 

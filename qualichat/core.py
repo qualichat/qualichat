@@ -23,7 +23,12 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
 from .chat import Chat
-from .frames import BaseFrame, KeysFrame, ParticipationStatusFrame
+from .frames import (
+    BaseFrame,
+    KeysFrame,
+    ParticipationStatusFrame,
+    PublicOpinionFrame,
+)
 
 
 __all__ = ('Qualichat', 'load_chats')
@@ -34,7 +39,9 @@ class Qualichat:
     """
     """
 
-    __slots__: Tuple[str, ...] = ('chats', 'keys', 'participation_status')
+    __slots__: Tuple[str, ...] = (
+        'chats', 'keys', 'participation_status', 'public_opinion',
+    )
 
     def __init__(self, chats: List[Chat]) -> None:
         self.chats = chats
@@ -42,6 +49,7 @@ class Qualichat:
         # Frames
         self.keys = KeysFrame(chats)
         self.participation_status = ParticipationStatusFrame(chats)
+        self.public_opinion = PublicOpinionFrame(chats)
 
     def __repr__(self) -> str:
         return f'<Qualichat chats={self.chats}>'

@@ -43,6 +43,8 @@ from wordcloud import WordCloud # type: ignore
 from pandas import DataFrame
 from qualitube import Client # type: ignore
 from tldextract import extract # type: ignore
+from deep_translator import GoogleTranslator # type: ignore
+from spacytextblob.spacytextblob import SpacyTextBlob # type: ignore
 
 from . import sorters
 from .chat import Chat
@@ -54,10 +56,10 @@ from .utils import config, log, parse_domain
 from .regex import SHORT_YOUTUBE_LINK_RE, YOUTUBE_LINK_RE
 
 
-__all__ = ('BaseFrame', 'KeysFrame', 'ParticipationStatusFrame')
+__all__ = (
+    'BaseFrame', 'KeysFrame', 'ParticipationStatusFrame', 'PublicOpinionFrame'
+)
 
-
-nlp = spacy.load('pt_core_news_md')
 
 weekdays = (
     'Monday', 'Tuesday', 'Wednesday', 'Thursday',
@@ -77,6 +79,7 @@ def _normalize_row(row: List[int], actor: str, chat: Chat) -> List[int]:
 
 
 def _parse_nlp(word: str, *, pos: str):
+    nlp = spacy.load('pt_core_news_md')
     doc = nlp(word)
     endings = ('ar', 'er', 'ir')
 
@@ -942,3 +945,64 @@ def _bots_components(
         
     generate_chart(dataframes, bars=bars, lines=lines, title=title)
 
+
+class PublicOpinionFrame(BaseFrame):
+    """
+    """
+
+    __slots__ = ('translator',)
+
+    fancy_name = 'Public Opinion'
+
+    def __init__(self, chats: List[Chat]) -> None:
+        super().__init__(chats)
+        self.translator = GoogleTranslator(target='en')
+
+    def sentiments(self, chats: List[Chat]) -> None:
+        """
+        """
+        
+
+        # chat = chats[0]
+
+        # a = [(actor, len(actor.messages)) for actor in chat.actors]
+        # a.sort(reverse=True, key=lambda x: x[1])
+        # for b, c in a:
+        #     print(b.display_name, c)
+        # nlp = spacy.load('en_core_web_sm')
+        # nlp.add_pipe('spacytextblob')
+
+        # chat = chats[0]
+        # message = chat.messages[2]
+
+        # content: str = self.translator.translate(text=message.content) # type: ignore
+        # print(content)
+
+        # doc = nlp(content)
+        # print(doc._.polarity)
+
+
+    # def action(self, chats: List[Chat]) -> None:
+    #     """
+    #     """
+    #     ...
+
+    # def space(self, chats: List[Chat]) -> None:
+    #     """
+    #     """
+    #     ...
+
+    # def time(self, chats: List[Chat]) -> None:
+    #     """
+    #     """
+    #     ...
+
+    # def object(self, chats: List[Chat]) -> None:
+    #     """
+    #     """
+    #     ...
+
+    # def person(self, chats: List[Chat]) -> None:
+    #     """
+    #     """
+    #     ...

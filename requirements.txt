@@ -8,3 +8,4 @@ tldextract
 questionary
 rich
 qualichat-qualitube
+deep-translator
