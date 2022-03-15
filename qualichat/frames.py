@@ -958,28 +958,31 @@ class PublicOpinionFrame(BaseFrame):
         super().__init__(chats)
         self.translator = GoogleTranslator(target='en')
 
-    def sentiments(self, chats: List[Chat]) -> None:
+    def matrix(self, chats: List[Chat]) -> None:
         """
         """
-        
+        chat = chats[0]
 
-        # chat = chats[0]
+        actors_messages = [(actor, len(actor.messages)) for actor in chat.actors]
+        actors_messages.sort(reverse=True, key=lambda x: x[1])
 
-        # a = [(actor, len(actor.messages)) for actor in chat.actors]
-        # a.sort(reverse=True, key=lambda x: x[1])
-        # for b, c in a:
-        #     print(b.display_name, c)
-        # nlp = spacy.load('en_core_web_sm')
-        # nlp.add_pipe('spacytextblob')
+        messages = actors_messages[:15]
 
-        # chat = chats[0]
-        # message = chat.messages[2]
+        nlp = spacy.load('en_core_web_sm')
+        nlp.add_pipe('spacytextblob')
 
-        # content: str = self.translator.translate(text=message.content) # type: ignore
-        # print(content)
+        sentiments = defaultdict(int)
 
-        # doc = nlp(content)
-        # print(doc._.polarity)
+        for actor, _ in messages:
+            for message in actor.messages:
+                if message['Type'] is not MessageType.default:
+                    continue
+                
+                if len(message['Qty_char_text']) >= 5000:
+                    continue
+                
+                content = self.translator.translate(text=message['Qty_char_text'])
+                doc = nlp(content)
 
 
     # def action(self, chats: List[Chat]) -> None:
