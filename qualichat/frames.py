@@ -971,19 +971,27 @@ class PublicOpinionFrame(BaseFrame):
         nlp = spacy.load('en_core_web_sm')
         nlp.add_pipe('spacytextblob')
 
-        sentiments = defaultdict(int)
+        # actors: List[str] = []
+        rows: List[List[Union[str, int]]] = []
 
         for actor, _ in messages:
-            for message in actor.messages:
-                if message['Type'] is not MessageType.default:
-                    continue
-                
-                if len(message['Qty_char_text']) >= 5000:
-                    continue
-                
-                content = self.translator.translate(text=message['Qty_char_text'])
-                doc = nlp(content)
+            with progress_bar() as progress:
+                for message in progress.track(actor.messages):
+                    if message['Type'] is not MessageType.default:
+                        continue
+                    
+                    if len(message['Qty_char_text']) >= 5000:
+                        continue
+                    
+                    content = self.translator.translate(text=message['Qty_char_text'])
+                    doc = nlp(content)
 
+                    rows.append([actor.display_name, doc._.polarity])
+
+        dataframe = DataFrame(rows, columns=['Actor', 'Polarity'])
+        import plotly.express as px
+        fig = px.scatter(dataframe, x='Actor', y='Polarity')
+        fig.show()
 
     # def action(self, chats: List[Chat]) -> None:
     #     """
