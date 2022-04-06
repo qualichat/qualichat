@@ -971,7 +971,6 @@ class PublicOpinionFrame(BaseFrame):
         nlp = spacy.load('en_core_web_sm')
         nlp.add_pipe('spacytextblob')
 
-        # actors: List[str] = []
         rows: List[List[Union[str, int]]] = []
 
         for actor, _ in messages:
@@ -989,31 +988,8 @@ class PublicOpinionFrame(BaseFrame):
                     rows.append([actor.display_name, doc._.polarity])
 
         dataframe = DataFrame(rows, columns=['Actor', 'Polarity'])
+
         import plotly.express as px
         fig = px.scatter(dataframe, x='Actor', y='Polarity')
+        
         fig.show()
-
-    # def action(self, chats: List[Chat]) -> None:
-    #     """
-    #     """
-    #     ...
-
-    # def space(self, chats: List[Chat]) -> None:
-    #     """
-    #     """
-    #     ...
-
-    # def time(self, chats: List[Chat]) -> None:
-    #     """
-    #     """
-    #     ...
-
-    # def object(self, chats: List[Chat]) -> None:
-    #     """
-    #     """
-    #     ...
-
-    # def person(self, chats: List[Chat]) -> None:
-    #     """
-    #     """
-    #     ...
