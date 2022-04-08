@@ -30,7 +30,6 @@ from argparse import ArgumentParser, Namespace, Action
 
 import plotly # type: ignore
 import spacy
-import nltk # type: ignore
 from rich import print
 from rich.logging import RichHandler
 from spacy.cli.download import download
