@@ -13,15 +13,10 @@ __title__ = 'qualichat'
 __author__ = 'Ernest Manheim'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2021-present Ernest Manheim'
-__version__ = '1.3.8'
-
-
-# __all__ = ('load_chats',)
+__version__ = '1.3.9'
 
 
 from typing import NamedTuple
-
-# from .core import load_chats as load_chats
 
 
 class VersionInfo(NamedTuple):
@@ -31,4 +26,4 @@ class VersionInfo(NamedTuple):
     releaselevel: str
     serial: int
 
-version_info = VersionInfo(1, 3, 8, 'stable', 0)
+version_info = VersionInfo(1, 3, 9, 'stable', 0)
