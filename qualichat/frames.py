@@ -50,7 +50,7 @@ from . import sorters
 from .chat import Chat
 from ._partials import *
 from .enums import MessageType
-from .models import Message
+from .models import Actor, Message
 from .sorters import generate_treemap, generate_wordcloud, generate_chart, generate_table
 from .utils import config, log, parse_domain
 from .regex import SHORT_YOUTUBE_LINK_RE, YOUTUBE_LINK_RE
@@ -958,22 +958,21 @@ class PublicOpinionFrame(BaseFrame):
         super().__init__(chats)
         self.translator = GoogleTranslator(target='en')
 
-    def matrix(self, chats: List[Chat]) -> None:
+    def matrix_polarity(self, chats: List[Chat]) -> None:
         """
         """
         chat = chats[0]
-
-        actors_messages = [(actor, len(actor.messages)) for actor in chat.actors]
-        actors_messages.sort(reverse=True, key=lambda x: x[1])
-
-        messages = actors_messages[:15]
+        average_messages = len(chat.messages) / len(chat.actors)
 
         nlp = spacy.load('en_core_web_sm')
         nlp.add_pipe('spacytextblob')
 
         rows: List[List[Union[str, int]]] = []
 
-        for actor, _ in messages:
+        for actor in chat.actors:
+            if not (len(actor.messages) > average_messages):
+                continue
+
             with progress_bar() as progress:
                 for message in progress.track(actor.messages):
                     if message['Type'] is not MessageType.default:
@@ -987,7 +986,7 @@ class PublicOpinionFrame(BaseFrame):
 
                     rows.append([actor.display_name, doc._.polarity])
 
-        dataframe = DataFrame(rows, columns=['Actor', 'Polarity'])
+        dataframe = DataFrame(rows, columns=['Actor', 'Figure Polarity'])
 
         import plotly.express as px
         fig = px.scatter(dataframe, x='Actor', y='Polarity')
