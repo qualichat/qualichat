@@ -13,7 +13,7 @@ __title__ = 'qualichat'
 __author__ = 'Ernest Manheim'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2021-present Ernest Manheim'
-__version__ = '1.4.0'
+__version__ = '1.4.1'
 
 
 from typing import NamedTuple
@@ -26,4 +26,4 @@ class VersionInfo(NamedTuple):
     releaselevel: str
     serial: int
 
-version_info = VersionInfo(1, 4, 0, 'stable', 0)
+version_info = VersionInfo(1, 4, 1, 'stable', 0)
