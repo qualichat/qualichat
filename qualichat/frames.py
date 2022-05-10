@@ -1009,12 +1009,11 @@ class PublicOpinionFrame(BaseFrame):
         nlp.add_pipe('spacytextblob')
 
         special_words = [
-            "bar", "lula", "bolsonaro", "ciro", "doria", "alckmin",
-            "orar", "congresso", "aula", "happyhour", "jantar", "mãe",
-            "aquecimento global", "startup", "hospital", "meditação",
-            "coaching", "competição", "assistir", "patrocinou",
-            "soberania nacional", "greve", "violencia contra", "legitimar",
-            "parada gay",
+            "bar", "protestar", "lula", "bolsonaro", "ciro", "doria", "alckmin",
+            "jejuar", "congresso", "aula", "happyhour", "jantar", "mãe",
+            "aquecimento global", "startup", "hospital", "meditação", "coaching",
+            "assistir", "competição", "patrocinou", "soberania nacional", "greve",
+            "violencia contra", "legitimar"
         ]
 
         file = open(connector, newline="")
