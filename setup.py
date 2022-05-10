@@ -42,7 +42,7 @@ setup(
     python_requires='>=3.7.1',
     package_dir={'qualichat': 'qualichat'},
     package_data={
-        'qualichat': ['books.txt'],
+        'qualichat': ['books.txt', "connector.csv"],
         '': ['fonts/*.ttf']
     },
     classifiers=[

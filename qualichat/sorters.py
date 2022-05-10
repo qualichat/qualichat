@@ -19,6 +19,7 @@ SOFTWARE.
 """
 
 import base64
+from datetime import datetime
 from io import BytesIO
 from collections import defaultdict
 from typing import (
@@ -32,6 +33,7 @@ from typing import (
     Union,
 )
 
+import pandas
 from wordcloud import WordCloud # type: ignore
 from plotly.graph_objs import Scatter, Figure # type: ignore
 from plotly.subplots import make_subplots # type: ignore
@@ -47,7 +49,7 @@ __all__ = ('generate_wordcloud', 'keys')
 
 
 def generate_chart(
-    dataframes: Dict[Chat, DataFrame],
+    dataframes: Dict[str, DataFrame],
     *,
     bars: Optional[List[str]] = None,
     lines: Optional[List[str]] = None,
@@ -67,14 +69,30 @@ def generate_chart(
     buttons: List[Dict[str, Any]] = []
     visible = True
 
+    total = None
+
+    for df in dataframes.values():
+        if total is None:
+            total = df
+        else:
+            total = total.add(df, fill_value=0, axis=0)
+
+    assert total is not None
+    dataframes["All Chats"] = total
+
+    def sort_index(index):
+        return pandas.Index([datetime.strptime(i, "%B %Y") for i in index])
+
     for i, (chat, dataframe) in enumerate(dataframes.items()):
-        dataframe = dataframe.sort_values( # type: ignore
-            by=bars + lines, ascending=False
+        dataframe.sort_values( # type: ignore
+            by=bars + lines, ascending=False, inplace=True
         )
+        # dataframe.sort_index(key=sort_index, inplace=True)
+
         index = list(dataframe.index) # type: ignore
 
         button: Dict[str, Any] = {}
-        button['label'] = chat.filename
+        button['label'] = chat
         button['method'] = 'update'
 
         args: List[Union[Dict[str, Any], List[Dict[str, Any]]]] = []
@@ -85,7 +103,7 @@ def generate_chart(
                 visibility.append(i == j)
 
         args.append({'visible': visibility})
-        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+        args.append({'title': {'text': f'{title} ({chat})'}})
 
         button['args'] = args
         buttons.append(button)
@@ -111,7 +129,7 @@ def generate_chart(
 
 
 def generate_table(
-    tables: Dict[Chat, DataFrame],
+    tables: Dict[str, DataFrame],
     *,
     columns: Optional[List[str]] = None,
     title: str
@@ -126,7 +144,7 @@ def generate_table(
 
     for chat, dataframe in tables.items():
         button: Dict[str, Any] = {}
-        button['label'] = chat.filename
+        button['label'] = chat
         button['method'] = 'update'
 
         args: List[Dict[str, Any]] = []
@@ -136,7 +154,7 @@ def generate_table(
             values.append(dataframe[column].to_list()) # type: ignore
 
         args.append({'cells': {'values': values}, 'header': {'values': columns}})
-        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+        args.append({'title': {'text': f'{title} ({chat})'}})
 
         button['args'] = args
         buttons.append(button)
@@ -232,7 +250,7 @@ def _sort_by_actor(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
     return ret
 
 
-def generate_treemap(dataframes: Dict[Chat, DataFrame], **kwargs: Any):
+def generate_treemap(dataframes: Dict[str, DataFrame], **kwargs: Any):
     """
     """
     title = kwargs.pop('title', None)
@@ -248,7 +266,7 @@ def generate_treemap(dataframes: Dict[Chat, DataFrame], **kwargs: Any):
         index = list(dataframe.index) # type: ignore
 
         button: Dict[str, Any] = {}
-        button['label'] = chat.filename
+        button['label'] = chat
         button['method'] = 'update'
 
         args: List[Union[Dict[str, Any], List[Dict[str, Any]]]] = []
@@ -259,7 +277,7 @@ def generate_treemap(dataframes: Dict[Chat, DataFrame], **kwargs: Any):
                 visibility.append(i == j)
 
         args.append({'visible': visibility})
-        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+        args.append({'title': {'text': f'{title} ({chat})'}})
 
         button['args'] = args
         buttons.append(button)
@@ -296,7 +314,7 @@ def generate_treemap(dataframes: Dict[Chat, DataFrame], **kwargs: Any):
     fig.show() # type: ignore
 
 
-def generate_wordcloud(wordclouds: Dict[Chat, WordCloud], *, title: str):
+def generate_wordcloud(wordclouds: Dict[str, WordCloud], *, title: str):
     """
     """
     fig = Figure() # type: ignore
@@ -304,7 +322,7 @@ def generate_wordcloud(wordclouds: Dict[Chat, WordCloud], *, title: str):
 
     for i, (chat, wordcloud) in enumerate(wordclouds.items()):
         button: Dict[str, Any] = {}
-        button['label'] = chat.filename
+        button['label'] = chat
         button['method'] = 'update'
 
         args: List[Dict[str, Any]] = []
@@ -314,7 +332,7 @@ def generate_wordcloud(wordclouds: Dict[Chat, WordCloud], *, title: str):
             visibility.append(i == j)
 
         args.append({'visible': visibility})
-        args.append({'title': {'text': f'{title} ({chat.filename})'}})
+        args.append({'title': {'text': f'{title} ({chat})'}})
 
         button['args'] = args
 
@@ -361,7 +379,7 @@ def keys(func: Callable[..., None]):
 
 
 def participation_status(
-    func: Callable[..., Tuple[Dict[Chat, DataFrame], Dict[str, Any]]]
+    func: Callable[..., Tuple[Dict[str, DataFrame], Dict[str, Any]]]
 ):
     """
     """

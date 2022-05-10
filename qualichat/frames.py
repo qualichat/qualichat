@@ -18,9 +18,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import csv
 from math import sqrt
 from collections import defaultdict
 import inspect
+import os
+from functools import lru_cache
 from pathlib import Path
 from types import FunctionType
 from typing import (
@@ -50,7 +53,7 @@ from . import sorters
 from .chat import Chat
 from ._partials import *
 from .enums import MessageType
-from .models import Actor, Message
+from .models import Message
 from .sorters import generate_treemap, generate_wordcloud, generate_chart, generate_table
 from .utils import config, log, parse_domain
 from .regex import SHORT_YOUTUBE_LINK_RE, YOUTUBE_LINK_RE
@@ -78,6 +81,7 @@ def _normalize_row(row: List[int], actor: str, chat: Chat) -> List[int]:
     return [int(i / len(chat.actors)) for i in row]
 
 
+@lru_cache(maxsize=1000)
 def _parse_nlp(word: str, *, pos: str):
     nlp = spacy.load('pt_core_news_md')
     doc = nlp(word)
@@ -171,7 +175,7 @@ class KeysFrame(BaseFrame):
     ) -> None:
         """
         """
-        wordclouds: Dict[Chat, WordCloud] = {}
+        wordclouds: Dict[str, WordCloud] = {}
         title = 'Keys Frame (Keyword)'
 
         result: str = input('Enter the keyword:').ask()
@@ -191,7 +195,7 @@ class KeysFrame(BaseFrame):
                     new_messages.append(message)
 
             messages_data: List[str] = list(_parse_nlp_messages(new_messages))
-            wordclouds[chat] = _generate_wordcloud(messages_data)
+            wordclouds[chat.filename] = _generate_wordcloud(messages_data)
 
         generate_wordcloud(wordclouds, title=title)
 
@@ -201,7 +205,7 @@ class KeysFrame(BaseFrame):
     ) -> None:
         """
         """
-        wordclouds: Dict[Chat, WordCloud] = {}
+        wordclouds: Dict[str, WordCloud] = {}
         title = 'Keys Frame (Messages)'
 
         for chat, data in chats_data.items():
@@ -215,7 +219,7 @@ class KeysFrame(BaseFrame):
                     new_messages.append(message)
 
             messages_data: List[str] = list(_parse_nlp_messages(new_messages))
-            wordclouds[chat] = _generate_wordcloud(messages_data)
+            wordclouds[chat.filename] = _generate_wordcloud(messages_data)
 
         generate_wordcloud(wordclouds, title=title)
 
@@ -226,7 +230,7 @@ class KeysFrame(BaseFrame):
         """
         """
         title = 'Keys Frame (Laminations)'
-        dataframes: Dict[Chat, DataFrame] = {}
+        dataframes: Dict[str, DataFrame] = {}
 
         bars = [
             'Qty_char_links', 'Qty_char_emails',
@@ -255,7 +259,7 @@ class KeysFrame(BaseFrame):
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
+            dataframes[chat.filename] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
@@ -264,7 +268,7 @@ class KeysFrame(BaseFrame):
         """
         """
         title = 'Keys Frame (Links)'
-        dataframes: Dict[Chat, DataFrame] = {}
+        dataframes: Dict[str, DataFrame] = {}
 
         bars = ['Qty_char_links']
         lines = ['Qty_messages']
@@ -284,7 +288,7 @@ class KeysFrame(BaseFrame):
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
+            dataframes[chat.filename] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
@@ -295,7 +299,7 @@ class KeysFrame(BaseFrame):
         """
         """
         title = 'Keys Frame (Calls)'
-        dataframes: Dict[Chat, DataFrame] = {}
+        dataframes: Dict[str, DataFrame] = {}
 
         bars = ['Qty_char_calls']
         lines = ['Qty_messages']
@@ -315,7 +319,7 @@ class KeysFrame(BaseFrame):
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
+            dataframes[chat.filename] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
@@ -324,7 +328,7 @@ class KeysFrame(BaseFrame):
         """
         """
         title = 'Keys Frame (E-mails)'
-        dataframes: Dict[Chat, DataFrame] = {}
+        dataframes: Dict[str, DataFrame] = {}
 
         bars = ['Qty_char_emails']
         lines = ['Qty_messages']
@@ -344,7 +348,7 @@ class KeysFrame(BaseFrame):
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
+            dataframes[chat.filename] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
@@ -355,7 +359,7 @@ class KeysFrame(BaseFrame):
         """
         """
         title = 'Keys Frame (Textual symbols)'
-        dataframes: Dict[Chat, DataFrame] = {}
+        dataframes: Dict[str, DataFrame] = {}
 
         bars = ['Qty_char_marks', 'Qty_char_emoji']
         lines = ['Qty_messages']
@@ -377,7 +381,7 @@ class KeysFrame(BaseFrame):
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
+            dataframes[chat.filename] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
@@ -393,7 +397,7 @@ class KeysFrame(BaseFrame):
         client = Client(api_key)
 
         title = 'Keys Frame (Ratings)'
-        tables: Dict[Chat, DataFrame] = {}
+        tables: Dict[str, DataFrame] = {}
 
         columns = [
             'Media', 'Actor', 'Date', 'Link',
@@ -464,7 +468,7 @@ class KeysFrame(BaseFrame):
                         ])
 
             dataframe = DataFrame(rows, columns=columns)
-            tables[chat] = dataframe
+            tables[chat.filename] = dataframe
 
         generate_table(tables, columns=columns, title=title)
 
@@ -493,7 +497,7 @@ class ParticipationStatusFrame(BaseFrame):
     def messages_per_actors_per_weekday(self, chats: List[Chat]) -> None:
         """
         """
-        dataframes: Dict[Chat, DataFrame] = {}
+        dataframes: Dict[str, DataFrame] = {}
         title = 'Participation Status (Messages per Actors per Weekday)'
 
         bars = ['Qtd_messages']
@@ -518,7 +522,7 @@ class ParticipationStatusFrame(BaseFrame):
             rows = list(data.values())
 
             dataframe = DataFrame(rows, index=index, columns=bars)
-            dataframes[chat] = dataframe
+            dataframes[chat.filename] = dataframe
 
         generate_chart(dataframes, bars=bars, lines=[], title=title)
 
@@ -542,10 +546,10 @@ class ParticipationStatusFrame(BaseFrame):
     @sorters.participation_status
     def messages_per_actors(
         self, chats_data: Dict[Chat, Dict[str, List[Message]]]
-    ) -> Tuple[Dict[Chat, DataFrame], Dict[str, Any]]:
+    ) -> Tuple[Dict[str, DataFrame], Dict[str, Any]]:
         """
         """
-        dataframes: Dict[Chat, DataFrame] = {}
+        dataframes: Dict[str, DataFrame] = {}
         title = 'Participation Status Frame (Messages per Actors)'
 
         bars = ['Qty_char_text', 'Qty_char_net', 'Qty_char_total']
@@ -574,7 +578,7 @@ class ParticipationStatusFrame(BaseFrame):
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
+            dataframes[chat.filename] = dataframe
 
         return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
 
@@ -585,7 +589,7 @@ class ParticipationStatusFrame(BaseFrame):
     ) -> Tuple[Dict[Chat, DataFrame], Dict[str, Any]]:
         """
         """
-        dataframes: Dict[Chat, DataFrame] = {}
+        dataframes: Dict[str, DataFrame] = {}
         title = 'Participation Status Frame (Message Statistics)'
 
         bars = ['Avg_chars_net', 'Avg_chars_text', 'Sd_chars_net']
@@ -617,7 +621,7 @@ class ParticipationStatusFrame(BaseFrame):
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            dataframes[chat] = dataframe
+            dataframes[chat.filename] = dataframe
 
         return (dataframes, {'bars': bars, 'lines': lines, 'title': title})
 
@@ -641,7 +645,7 @@ class ParticipationStatusFrame(BaseFrame):
     @sorters.participation_status
     def fabrications_per_actors(
         self, chats: List[Chat]
-    ) -> Tuple[Dict[Chat, DataFrame], Dict[str, Any]]:
+    ) -> Tuple[Dict[str, DataFrame], Dict[str, Any]]:
         """
         """
         title = 'Participation Status (Fabrications per Actors)'
@@ -657,7 +661,7 @@ class ParticipationStatusFrame(BaseFrame):
         
 
 def _fabrications_per_actors(chats: List[Chat], title: str) -> Any:
-    dataframes: Dict[Chat, DataFrame] = {}
+    dataframes: Dict[str, DataFrame] = {}
 
     bars = ['Qty_char_laughs', 'Qty_char_marks', 'Qty_char_numbers']
     lines = ['Qty_char_pure']
@@ -684,13 +688,13 @@ def _fabrications_per_actors(chats: List[Chat], title: str) -> Any:
         index = [actor.display_name for actor in chat.actors]
 
         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-        dataframes[chat] = dataframe
+        dataframes[chat.filename] = dataframe
 
     return (dataframes, {'lines': lines, 'bars': bars, 'title': title})
 
 
 def _average_fabrications(chats: List[Chat], title: str) -> Any:
-    dataframes: Dict[Chat, DataFrame] = {}
+    dataframes: Dict[str, DataFrame] = {}
 
     bars = ['Avg_chars_text', 'Sd_chars_text']
     lines = ['Qty_messages']
@@ -716,13 +720,13 @@ def _average_fabrications(chats: List[Chat], title: str) -> Any:
         index = [actor.display_name for actor in chat.actors]
 
         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-        dataframes[chat] = dataframe
+        dataframes[chat.filename] = dataframe
 
     return (dataframes, {'lines': lines, 'bars': bars, 'title': title})
 
 
 def _laminations_per_actors(chats: List[Chat], title: str) -> Any:
-    dataframes: Dict[Chat, DataFrame] = {}
+    dataframes: Dict[str, DataFrame] = {}
 
     bars = [
         'Qty_char_calls', 'Qty_char_links',
@@ -754,13 +758,13 @@ def _laminations_per_actors(chats: List[Chat], title: str) -> Any:
         index = [actor.display_name for actor in chat.actors]
 
         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-        dataframes[chat] = dataframe
+        dataframes[chat.filename] = dataframe
 
     return (dataframes, {'lines': lines, 'bars': bars, 'title': title})
 
 
 def _average_laminations(chats: List[Chat], title: str) -> Any:
-    dataframes: Dict[Chat, DataFrame] = {}
+    dataframes: Dict[str, DataFrame] = {}
 
     bars = ['Avg_chars_net', 'Sd_chars_net']
     lines = ['Qty_messages']
@@ -786,13 +790,13 @@ def _average_laminations(chats: List[Chat], title: str) -> Any:
         index = [actor.display_name for actor in chat.actors]
 
         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-        dataframes[chat] = dataframe
+        dataframes[chat.filename] = dataframe
 
     return (dataframes, {'lines': lines, 'bars': bars, 'title': title})
 
 
 def _choose_media(chats: List[Chat], title: str) -> None:
-    dataframes: Dict[Chat, DataFrame] = {}
+    dataframes: Dict[str, DataFrame] = {}
     all_media: Set[str] = set()
 
     for chat in chats:
@@ -823,13 +827,13 @@ def _choose_media(chats: List[Chat], title: str) -> None:
         index = [actor.display_name for actor in chat.actors]
 
         dataframe = DataFrame(rows, index=index, columns=whitelist)
-        dataframes[chat] = dataframe
+        dataframes[chat.filename] = dataframe
 
     generate_chart(dataframes, bars=whitelist, title=title)    
 
 
 def _average_media(chats: List[Chat], title: str) -> None:
-    dataframes: Dict[Chat, DataFrame] = {}
+    dataframes: Dict[str, DataFrame] = {}
 
     bars = ['Qty_average', 'Qty_total']
     lines = ['Qty_messages']
@@ -849,13 +853,13 @@ def _average_media(chats: List[Chat], title: str) -> None:
         index = [actor.display_name for actor in chat.actors]
 
         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-        dataframes[chat] = dataframe
+        dataframes[chat.filename] = dataframe
 
     generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
 
 def _media_treemap(chats: List[Chat], title: str) -> None:
-    dataframes: Dict[Chat, DataFrame] = {}
+    dataframes: Dict[str, DataFrame] = {}
 
     urls: DefaultDict[str, int] = defaultdict(int)
 
@@ -868,7 +872,7 @@ def _media_treemap(chats: List[Chat], title: str) -> None:
         rows = list(urls.values())
         
         dataframe = DataFrame(rows, index=index)
-        dataframes[chat] = dataframe
+        dataframes[chat.filename] = dataframe
 
     generate_treemap(dataframes, title=title, have_parents=False)
 
@@ -877,7 +881,7 @@ def _bots_index(
     chats_data: Dict[Chat, Dict[str, List[Message]]],
     title: str
 ) -> None:
-    dataframes: Dict[Chat, DataFrame] = {}
+    dataframes: Dict[str, DataFrame] = {}
     title = 'Participation Status (Bots - Beta)'
 
     bars = ['Qty_score']
@@ -905,7 +909,7 @@ def _bots_index(
         index = list(data.keys())
 
         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-        dataframes[chat] = dataframe
+        dataframes[chat.filename] = dataframe
         
     generate_chart(dataframes, bars=bars, lines=lines, title=title)
 
@@ -914,7 +918,7 @@ def _bots_components(
     chats_data: Dict[Chat, Dict[str, List[Message]]],
     title: str
 ) -> None:
-    dataframes: Dict[Chat, DataFrame] = {}
+    dataframes: Dict[str, DataFrame] = {}
     title = 'Participation Status (Bots - Beta)'
 
     bars = ['Qty_char_net', 'Qty_videos', 'Qty_stickers']
@@ -941,7 +945,7 @@ def _bots_components(
         index = list(data.keys())
 
         dataframe = DataFrame(rows, index=index, columns=bars + lines)
-        dataframes[chat] = dataframe
+        dataframes[chat.filename] = dataframe
         
     generate_chart(dataframes, bars=bars, lines=lines, title=title)
 
@@ -974,7 +978,7 @@ class PublicOpinionFrame(BaseFrame):
                 continue
 
             with progress_bar() as progress:
-                for message in progress.track(actor.messages):
+                for message in progress.track(actor.messages[:5]):
                     if message['Type'] is not MessageType.default:
                         continue
                     
@@ -989,6 +993,82 @@ class PublicOpinionFrame(BaseFrame):
         dataframe = DataFrame(rows, columns=['Actor', 'Figure Polarity'])
 
         import plotly.express as px
-        fig = px.scatter(dataframe, x='Actor', y='Polarity')
+        fig = px.scatter(dataframe, x='Actor', y='Figure Polarity', color="Polarity")
+        
+        fig.show()
+
+    def linkage(self, chats: List[Chat]) -> None:
+        """
+        """
+        chat = chats[0]
+        
+        path = os.path.dirname(__file__)
+        connector = os.path.join(path, 'connector.csv')
+
+        nlp = spacy.load('en_core_web_sm')
+        nlp.add_pipe('spacytextblob')
+
+        special_words = [
+            "bar", "lula", "bolsonaro", "ciro", "doria", "alckmin",
+            "orar", "congresso", "aula", "happyhour", "jantar", "mãe",
+            "aquecimento global", "startup", "hospital", "meditação",
+            "coaching", "competição", "assistir", "patrocinou",
+            "soberania nacional", "greve", "violencia contra", "legitimar",
+            "parada gay",
+        ]
+
+        file = open(connector, newline="")
+        pounds = csv.reader(file)
+
+        pounds_words: Dict[str, str] = {}
+        data: Dict[str, int] = {}
+        
+        first = True
+        for row in pounds:
+            if first:
+                first = False
+                continue
+
+            group_type, *words = row
+            if group_type == "grupo":
+                continue
+
+            data[group_type] = 0
+
+            for word in words:
+                pounds_words[word] = group_type
+
+        file.close()
+
+        with progress_bar() as progress:
+            for message in progress.track(chat.messages, description="Parsing..."):
+                for word in pounds_words:
+                    if message["Type"] is not MessageType.default:
+                        continue
+
+                    if word not in message["Qty_char_net"]:
+                        continue
+
+                    if any(w in message["Qty_char_net"] for w in special_words):
+                        score = 10
+                    else:
+                        score = 1
+
+                    data[pounds_words[word]] += score
+
+        parsed_data = [(k, (v * 100) / len(chat.messages)) for k, v in data.items()]
+        average = sum(dict(parsed_data).values()) / len(dict(parsed_data).values())
+        new_data: List[List[Union[str, float]]] = []
+
+        for k, v in parsed_data:
+            if v >= average:
+                new_data.append([k, v])
+
+        new_data = [(k, v) for k, v in parsed_data]
+
+        dataframe = DataFrame(new_data, columns=["Type", "Score"])
+
+        import plotly.express as px
+        fig = px.scatter(dataframe, x="Type", y="Score", color="Score")
         
         fig.show()

@@ -54,7 +54,6 @@ class MessageType(IntEnum):
     deleted_message      = 8
 
 
-
 class ChatType(Enum):
     friends    = 'Friends'
     political  = 'Political'
@@ -107,21 +106,21 @@ def get_sub_period(created_at: datetime.datetime) -> SubPeriod:
 
 
 def get_message_type(content: str) -> MessageType:
-    if content == 'image omitted':
+    if content == 'imagem ocultada':
         message_type = MessageType.image_omitted
-    elif content == 'GIF omitted':
+    elif content == 'GIF omitido':
         message_type = MessageType.gif_omitted
-    elif content == 'video omitted':
+    elif content == 'vídeo omitido':
         message_type = MessageType.video_omitted
-    elif content == 'audio omitted':
+    elif content == 'áudio ocultado':
         message_type = MessageType.audio_omitted
-    elif content == 'sticker omitted':
+    elif content == 'figurinha omitida':
         message_type = MessageType.sticker_omitted
-    elif content.endswith('document omitted'):
+    elif content.endswith('documento omitido'):
         message_type = MessageType.document_omitted
-    elif content == 'Contact card omitted':
+    elif content == 'Cartão do contato omitido':
         message_type = MessageType.contact_card_omitted
-    elif content == 'This message was deleted.':
+    elif content == 'Mensagem apagada':
         message_type = MessageType.deleted_message
     else:
         message_type = MessageType.default

@@ -32,7 +32,7 @@ from .enums import get_message_type, get_period, get_sub_period
 __all__ = ('Actor', 'Message', 'SystemMessage')
 
 
-TIME_FORMAT = r'%d/%m/%y %H:%M:%S'
+TIME_FORMAT = r'%d/%m/%Y %H:%M:%S'
 
 def parse_time(string: str) -> datetime.datetime:
     """Converts the message creation time string to a
