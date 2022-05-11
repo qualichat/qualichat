@@ -993,7 +993,7 @@ class PublicOpinionFrame(BaseFrame):
         dataframe = DataFrame(rows, columns=['Actor', 'Figure Polarity'])
 
         import plotly.express as px
-        fig = px.scatter(dataframe, x='Actor', y='Figure Polarity', color="Polarity")
+        fig = px.scatter(dataframe, x='Actor', y='Figure Polarity', color="Figure Polarity")
         
         fig.show()
 
@@ -1009,6 +1009,7 @@ class PublicOpinionFrame(BaseFrame):
         nlp.add_pipe('spacytextblob')
 
         special_words = [
+            "esquerda", "direita", "fascismo", "comunismo",
             "bar", "protestar", "lula", "bolsonaro", "ciro", "doria", "alckmin",
             "jejuar", "congresso", "aula", "happyhour", "jantar", "mãe",
             "aquecimento global", "startup", "hospital", "meditação", "coaching",
@@ -1049,7 +1050,7 @@ class PublicOpinionFrame(BaseFrame):
                         continue
 
                     if any(w in message["Qty_char_net"] for w in special_words):
-                        score = 10
+                        score = 3
                     else:
                         score = 1
 
