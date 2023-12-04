@@ -122,7 +122,7 @@ def _generate_wordcloud(data: List[str]):
     configs['background_color'] = 'white'
 
     all_words = ' '.join(data)
-    print(data)
+
     return WordCloud(**configs).generate(all_words) # type: ignore
 
 
@@ -199,7 +199,6 @@ class KeysFrame(BaseFrame):
             messages_data: List[str] = list(_parse_nlp_messages(new_messages))
             wordclouds[chat.filename] = _generate_wordcloud(messages_data)
 
-        print(wordclouds)
         generate_wordcloud(wordclouds, title=title)
 
     @sorters.keys
@@ -291,7 +290,7 @@ class KeysFrame(BaseFrame):
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
-            print(dataframe)
+
             dataframes[chat.filename] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
@@ -527,7 +526,6 @@ class ParticipationStatusFrame(BaseFrame):
 
             dataframe = DataFrame(rows, index=index, columns=bars)
             dataframes[chat.filename] = dataframe
-            print("teste")
 
         generate_chart(dataframes, bars=bars, lines=[], title=title)
 
@@ -801,7 +799,6 @@ def _average_laminations(chats: List[Chat], title: str) -> Any:
 
 
 def _choose_media(chats: List[Chat], title: str) -> None:
-    print("teste")
     dataframes: Dict[str, DataFrame] = {}
     all_media: Set[str] = set()
 
