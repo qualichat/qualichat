@@ -195,6 +195,7 @@ def _sort_by_time(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
 
     for chat in chats:
         ret[chat] = sort(chat.messages)
+    print("TESTE")
 
     return ret
 
@@ -245,7 +246,10 @@ def _sort_by_actor(chats: List[Chat]) -> Dict[Chat, Dict[str, List[Message]]]:
         return dict(new_data)
 
     for chat in chats:
+        print("TESTe")
         ret[chat] = sort(chat.messages)
+        print("TESTe")
+        print(ret[chat])
 
     return ret
 

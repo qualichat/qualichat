@@ -59,6 +59,7 @@ class Config:
 
         folder = home / '.qualichat'
         config = folder / 'config.json'
+        print(config)
 
         if not folder.is_dir():
             folder.mkdir(exist_ok=True)

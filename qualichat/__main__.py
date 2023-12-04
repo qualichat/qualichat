@@ -92,7 +92,9 @@ def loadchat(parser: ArgumentParser, args: Namespace) -> None:
         frame = qc.frames[frame_name]
 
         choices = list(frame.charts.keys())
+        print(choices)
         names = checkbox('Choose your charts:', choices).ask()
+        print(names)
 
         if not names:
             return log('error', 'No charts were selected. Aborting.')
