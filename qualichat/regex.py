@@ -36,14 +36,14 @@ __all__ = (
     'EMOTICONS_RE',
 )
 
-
 CHAT_FORMAT_RE = re.compile(r'''
     ^\[
-        (?P<datetime>\d{2}/\d{2}/\d{4}\s\d{2}:\d{2}:\d{2})
+        (?P<datetime>\d{1,2}/\d{1,2}(?:/\d{2,4})?\s\d{2}:\d{2}:\d{2})
     \]\s
     (?P<rest>[\S\s]+?)
     (?=\n\[.+\]|\Z)
 ''', re.M | re.X)
+
 
 USER_MESSAGE_RE = re.compile(r'''
     (?P<actor>.*?)

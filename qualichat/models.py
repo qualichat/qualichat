@@ -34,10 +34,12 @@ __all__ = ('Actor', 'Message', 'SystemMessage')
 
 TIME_FORMAT = r'%d/%m/%Y %H:%M:%S'
 
+import datetime
+
 def parse_time(string: str) -> datetime.datetime:
     """Converts the message creation time string to a
     :class:`datetime.datetime` object.
-    
+
     Parameters
     ----------
     string: :class:`str`
@@ -48,7 +50,22 @@ def parse_time(string: str) -> datetime.datetime:
         A :class:`datetime.datetime` object of when the message was
         sent.
     """
-    return datetime.datetime.strptime(string, TIME_FORMAT)
+    # Define the possible formats for parsing
+    possible_formats = ["%d/%m/%y %H:%M:%S", "%d/%m/%Y %H:%M:%S"]
+
+    # Try each format until one succeeds
+    for format_str in possible_formats:
+        try:
+            parsed_time = datetime.datetime.strptime(string, format_str)
+
+            # Check if the parsed year is reasonable
+            if 2000 <= parsed_time.year <= 2100:
+                return parsed_time
+        except ValueError:
+            pass
+
+    # If none of the formats match, raise an exception
+    raise ValueError(f"Cannot parse timestamp: {string}")
 
 
 def remove_all_incidences(content: str, *iterables: Iterable[str]) -> str:

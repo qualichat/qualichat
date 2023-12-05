@@ -75,6 +75,7 @@ class Chat:
 
         self._actors: Dict[str, Actor] = {}
 
+
         for match in CHAT_FORMAT_RE.finditer(raw_data):
             if not match:
                 # An unknown message? Anyway, 
@@ -119,6 +120,7 @@ class Chat:
 
         messages = len(self.messages) + len(self.system_messages)
         actors = len(self.actors)
+        print(messages, " mensagens ", actors)
 
         msg = f'Loaded {messages:,} messages and {actors:,} actors from {name}.'
         log('info', msg)

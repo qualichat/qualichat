@@ -23,6 +23,7 @@ from math import sqrt
 from collections import defaultdict
 import inspect
 import os
+import en_core_web_sm
 from functools import lru_cache
 from pathlib import Path
 from types import FunctionType
@@ -83,7 +84,7 @@ def _normalize_row(row: List[int], actor: str, chat: Chat) -> List[int]:
 
 @lru_cache(maxsize=1000)
 def _parse_nlp(word: str, *, pos: str):
-    nlp = spacy.load('pt_core_news_md')
+    nlp = spacy.load('pt_core_news_sm')
     doc = nlp(word)
     endings = ('ar', 'er', 'ir')
 
@@ -121,6 +122,7 @@ def _generate_wordcloud(data: List[str]):
     configs['background_color'] = 'white'
 
     all_words = ' '.join(data)
+
     return WordCloud(**configs).generate(all_words) # type: ignore
 
 
@@ -288,6 +290,7 @@ class KeysFrame(BaseFrame):
             index = list(data.keys())
 
             dataframe = DataFrame(rows, index=index, columns=bars + lines)
+
             dataframes[chat.filename] = dataframe
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
@@ -358,7 +361,7 @@ class KeysFrame(BaseFrame):
     ) -> None:
         """
         """
-        title = 'Keys Frame (Textual symbols)'
+        title = 'Keys Frame (Textuasl symbols)'
         dataframes: Dict[str, DataFrame] = {}
 
         bars = ['Qty_char_marks', 'Qty_char_emoji']
