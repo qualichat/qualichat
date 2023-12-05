@@ -23,7 +23,6 @@ from math import sqrt
 from collections import defaultdict
 import inspect
 import os
-import en_core_web_sm
 from functools import lru_cache
 from pathlib import Path
 from types import FunctionType
