@@ -325,6 +325,11 @@ class KeysFrame(BaseFrame):
 
         generate_chart(dataframes, lines=lines, bars=bars, title=title)
 
+    def cancel(
+        self, chats_data: Dict[Chat, Dict[str, List[Message]]]
+    ):
+        return
+
     @sorters.keys
     def emails(self, chats_data: Dict[Chat, Dict[str, List[Message]]]) -> None:
         """
@@ -528,6 +533,9 @@ class ParticipationStatusFrame(BaseFrame):
 
         generate_chart(dataframes, bars=bars, lines=[], title=title)
 
+    def cancel(self, chats: List[Chat]) -> None:
+        return
+    
     def media_repertoire(self, chats: List[Chat]) -> None:
         """
         """
@@ -995,7 +1003,7 @@ class PublicOpinionFrame(BaseFrame):
         dataframe = DataFrame(rows, columns=['Actor', 'Figure Polarity'])
 
         import plotly.express as px
-        fig = px.scatter(dataframe, x='Actor', y='Figure Polarity', color="Figure Polarity")
+        fig = px.scatter(dataframe, x='Actor', y='Figure Polarity', color="Figure Polarity", color_continuous_scale='mrybm')
         
         fig.show()
 
@@ -1071,6 +1079,10 @@ class PublicOpinionFrame(BaseFrame):
         dataframe = DataFrame(new_data, columns=["Type", "Score"])
 
         import plotly.express as px
-        fig = px.scatter(dataframe, x="Type", y="Score", color="Score")
+
+        fig = px.scatter(dataframe, x="Type", y="Score", color="Score", color_continuous_scale='mrybm')
         
         fig.show()
+
+    def cancel(self, chats: List[Chat] ) -> None:
+        return
