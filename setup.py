@@ -26,7 +26,7 @@ class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
         install.run(self)
-        subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+        subprocess.run(["pip", "install", "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz"])
 
 class CheckVisualStudioCommand(Command):
     description = 'Verifica se o Visual Studio C++ 2019 está instalado'
