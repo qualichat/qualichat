@@ -22,11 +22,11 @@ with open('README.md') as f:
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-class PostInstallCommand(install):
-    """Post-installation for installation mode."""
-    def run(self):
-        install.run(self)
-        subprocess.run(["pip", "install", "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz"])
+# class PostInstallCommand(install):
+#     """Post-installation for installation mode."""
+#     def run(self):
+#         install.run(self)
+#         subprocess.run(["pip", "install", "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1.tar.gz"])
 
 class CheckVisualStudioCommand(Command):
     description = 'Verifica se o Visual Studio C++ 2019 está instalado'
@@ -68,7 +68,7 @@ setup(
     package_dir={'qualichat': 'qualichat'},
     package_data={
         'qualichat': ['books.txt', "connector.csv"],
-        '': ['fonts/*.ttf']
+        '': ['fonts/*.ttf', 'resources/en_core_web_sm-3.7.1.tar.gz']
     },
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -84,7 +84,7 @@ setup(
         'Topic :: Utilities',
     ],
     cmdclass={
-        'install': PostInstallCommand,
+        # 'install': PostInstallCommand,
         'check_visualstudio': CheckVisualStudioCommand,
     },
 )
