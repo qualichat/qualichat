@@ -40,7 +40,7 @@ class CheckVisualStudioCommand(Command):
 
     def run(self):
         if platform.system() == 'Windows':
-            # Verifique se o Visual Studio C++ está instalado verificando a presença do compilador cl.exe
+            # Checking Visual Studio C++ is installed
             try:
                 subprocess.check_output(['cl'], stderr=subprocess.STDOUT)
                 print("O Visual Studio C++ 2019 está instalado!")
