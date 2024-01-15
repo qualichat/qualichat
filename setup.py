@@ -1,29 +1,54 @@
 import re
-from setuptools import setup # type: ignore
-
+import subprocess
+import sys
+import platform
+from setuptools import setup, Command
+from setuptools.command.install import install
 
 # Get library version
 VERSION_REGEX = re.compile(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', re.M)
 
 version = ''
 with open('qualichat/__init__.py') as f:
-    version = VERSION_REGEX.search(f.read()).group(1) # type: ignore
-
+    version = VERSION_REGEX.search(f.read()).group(1)
 if not version:
     raise RuntimeError('version is not set')
 
-
 # Get README file
-readme = ''
 with open('README.md') as f:
     readme = f.read()
 
-
-# Get requeirements
-requirements = []
+# Get requirements
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        install.run(self)
+        subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+
+class CheckVisualStudioCommand(Command):
+    description = 'Verifica se o Visual Studio C++ 2019 está instalado'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        if platform.system() == 'Windows':
+            # Verifique se o Visual Studio C++ está instalado verificando a presença do compilador cl.exe
+            try:
+                subprocess.check_output(['cl'], stderr=subprocess.STDOUT)
+                print("O Visual Studio C++ 2019 está instalado!")
+            except FileNotFoundError:
+                print("O Visual Studio C++ 2019 não está instalado.")
+                print("Para usar este projeto, você precisa instalar o Visual Studio C++ 2019 com a opção 'Desenvolvimento para desktop com C++'.")
+                print("Você pode encontrar o Visual Studio C++ 2019 no site oficial da Microsoft: https://visualstudio.microsoft.com/visual-cpp-build-tools/")
+                sys.exit(1)
 
 setup(
     name='qualichat',
@@ -49,7 +74,6 @@ setup(
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Information Technology',
-        'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.9',
@@ -58,6 +82,9 @@ setup(
         'Topic :: Internet',
         'Topic :: Software Development :: Libraries',
         'Topic :: Utilities',
-    ]
+    ],
+    cmdclass={
+        'install': PostInstallCommand,
+        'check_visualstudio': CheckVisualStudioCommand,
+    },
 )
-
