@@ -1,0 +1,7 @@
+[01/01/2021, 07:52:45] Joel: Primeira linha de uma mensagem longa.
+Segunda linha.
+Terceira linha com emoji 🚀
+[01/01/2021, 07:52:47] Mary: Resposta curta.
+[01/01/2021, 07:52:49] Joel: Outra mensagem
+em duas linhas.
+[01/01/2021, 07:53:00] Olivia: Final.

@@ -18,5 +18,8 @@ dist
 # Python folders
 __pycache__
 
+# Test caches
+.pytest_cache
+
 # Docs files
 notes.txt

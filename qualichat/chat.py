@@ -18,33 +18,103 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import tempfile
+import zipfile
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Iterator, List, Union
 
-from .utils import log, config, get_random_name
+from chatminer.chatparsers import WhatsAppParser
+
 from .models import Actor, Message, SystemMessage
-from .regex import CHAT_FORMAT_RE, USER_MESSAGE_RE
+from .utils import config, get_random_name, log
 
 
 __all__ = ('Chat',)
 
 
-def _clean_impurities(content: str) -> str:
-    # Regex will not be used here since
-    # :meth:`str.replace` is faster and simpler.
-    content = content.replace('\u200e', '')
-    content = content.replace('\u2002', '')
-    content = content.replace('\u202c', '')
-    content = content.replace('\u202a', '')
+# Invisible characters frequently seen in WhatsApp exports (LRM, NBSP, etc.).
+# Stripped before delegating to chat-miner so its regex-based detection is not
+# thrown off by directional marks injected by iOS.
+_IMPURITIES = (
+    ('‎', ''),    # Left-to-Right Mark
+    (' ', ''),    # En space
+    ('‬', ''),    # Pop Directional Formatting
+    ('‪', ''),    # Left-to-Right Embedding
+    ('\xa0', ' '),     # No-Break Space → space
+    ('‑', '-'),   # Non-breaking hyphen → hyphen
+)
 
-    content = content.replace('\xa0', ' ')
-    content = content.replace('\u2011', '-')
 
+def _clean_text(content: str) -> str:
+    for old, new in _IMPURITIES:
+        content = content.replace(old, new)
     return content
 
 
-class Chat:
+@contextmanager
+def _cleaned_copy(src: Path) -> Iterator[Path]:
+    """Yield a temp file with WhatsApp invisible chars stripped from `src`."""
+    raw = src.read_text(encoding='utf-8')
+    cleaned = _clean_text(raw)
+
+    fd, name = tempfile.mkstemp(suffix='.txt', prefix='qualichat_')
+    tmp = Path(name)
+    try:
+        with open(fd, 'w', encoding='utf-8', newline='') as f:
+            f.write(cleaned)
+        yield tmp
+    finally:
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+
+
+def _extract_txt_from_zip(zip_path: Path, dest: Path) -> Path:
+    """Extract the chat .txt from a WhatsApp .zip export.
+
+    Prefers ``_chat.txt`` (iOS convention); falls back to the first ``.txt``
+    found in the archive (Android may name it ``WhatsApp Chat with X.txt``).
     """
+    with zipfile.ZipFile(zip_path) as zf:
+        names = zf.namelist()
+        candidates = [n for n in names if n.lower().endswith('.txt')]
+        if not candidates:
+            raise ValueError(f'No .txt file found inside {zip_path.name!r}')
+
+        chosen = next(
+            (n for n in candidates if Path(n).name.lower() == '_chat.txt'),
+            candidates[0],
+        )
+        zf.extract(chosen, path=str(dest))
+        return dest / chosen
+
+
+class Chat:
+    """Represents a WhatsApp chat export.
+
+    Parameters
+    ----------
+    path: Union[:class:`str`, :class:`pathlib.Path`]
+        Path to a WhatsApp chat export. Accepts:
+
+        - ``.txt`` plain export (Android, iOS, any locale supported by
+          `chat-miner <https://github.com/joweich/chat-miner>`_)
+        - ``.zip`` archive containing a chat ``.txt`` file (e.g. iOS export
+          with attached media)
+
+    Attributes
+    ----------
+    path: :class:`pathlib.Path`
+        Resolved absolute path of the export file.
+    filename: :class:`str`
+        Basename of the export.
+    messages: List[:class:`.Message`]
+        User messages, in chronological order.
+    system_messages: List[:class:`.SystemMessage`]
+        Always empty in the current release — chat-miner discards system
+        events. See ``CHANGELOG.md`` for context.
     """
 
     __slots__ = ('path', 'filename', 'messages', 'system_messages', '_actors')
@@ -59,84 +129,87 @@ class Chat:
         self.path = path.resolve()
         self.filename = self.path.name
 
-        name = f'[green]{str(path)}[/]'
-        log('info', f'Loading chat {name}...')
+        log_name = f'[green]{self.path}[/]'
+        log('info', f'Loading chat {log_name}...')
 
-        log('debug', f'Reading {name} file content...')
-        encoding = kwargs.pop('encoding', 'utf-8')
-        content = path.read_text(encoding=encoding)
+        df = self._parse(self.path)
 
-        log('debug', f'File {name} read. Cleaning it...')
-        raw_data = _clean_impurities(content)
-
-        log('debug', f'Contents of the file {name} cleaned. Parsing it...')
         self.messages: List[Message] = []
         self.system_messages: List[SystemMessage] = []
-
         self._actors: Dict[str, Actor] = {}
 
+        path_key = str(self.path)
+        if path_key not in config:
+            config[path_key] = {}
+        group: Dict[str, str] = config[path_key]
 
-        for match in CHAT_FORMAT_RE.finditer(raw_data):
-            if not match:
-                # An unknown message? Anyway, 
-                # let's just ignore it and move on.
-                continue
+        for row in df.itertuples(index=False):
+            contact_name = str(row.author)
 
-            created_at = match.group(1)
-            rest = match.group(2)
+            if contact_name not in self._actors:
+                if contact_name not in group:
+                    group[contact_name] = get_random_name()
+                self._actors[contact_name] = Actor(group[contact_name])
 
-            is_user_message = USER_MESSAGE_RE.match(rest)
+            actor = self._actors[contact_name]
+            message = Message(actor, str(row.message), row.timestamp)
 
-            if is_user_message:
-                contact_name = is_user_message.group(1)
-                content = is_user_message.group(2)
-
-                if contact_name not in self._actors:
-                    path = str(self.path)
-
-                    if path not in config:
-                        config[path] = {}
-
-                    group: Dict[str, str] = config[path]
-
-                    if contact_name not in group:
-                        group[contact_name] = get_random_name()
-
-                    display_name = group[contact_name]
-                    self._actors[contact_name] = Actor(display_name)
-
-                actor = self._actors[contact_name]                
-                message = Message(actor, content, created_at)
-
-                self.messages.append(message)
-                actor.messages.append(message)
-            else:
-                # It is a system message, indicating some group 
-                # event (actor left/joined, changed the group icon,
-                # etc.)
-                self.system_messages.append(SystemMessage(rest, created_at))
+            self.messages.append(message)
+            actor.messages.append(message)
 
         config.save()
 
-        messages = len(self.messages) + len(self.system_messages)
-        actors = len(self.actors)
-        print(messages, " mensagens ", actors)
+        log(
+            'info',
+            f'Loaded {len(self.messages):,} messages and '
+            f'{len(self._actors):,} actors from {log_name}.',
+        )
 
-        msg = f'Loaded {messages:,} messages and {actors:,} actors from {name}.'
-        log('info', msg)
+    @staticmethod
+    def _parse(path: Path):
+        """Run chat-miner against a (possibly zipped, possibly dirty) export."""
+        with ExitStack() as stack:
+            if path.suffix.lower() == '.zip':
+                tmpdir = Path(stack.enter_context(
+                    tempfile.TemporaryDirectory(prefix='qualichat_zip_')
+                ))
+                source = _extract_txt_from_zip(path, tmpdir)
+            else:
+                source = path
+
+            cleaned = stack.enter_context(_cleaned_copy(source))
+
+            parser = WhatsAppParser(str(cleaned))
+            try:
+                parser.parse_file()
+                df = parser.parsed_messages.get_df(as_pandas=True)
+            except (IndexError, ValueError) as exc:
+                # chat-miner raises IndexError when no message line matches
+                # (empty or unrecognised file). Translate to a useful error.
+                raise ValueError(
+                    f"No messages parsed from {path.name!r}. "
+                    "Verify the file is a valid WhatsApp .txt export "
+                    "(Android or iOS, any supported locale)."
+                ) from exc
+
+        if df.empty:
+            raise ValueError(
+                f"No messages parsed from {path.name!r}. "
+                "Verify the file is a valid WhatsApp .txt export "
+                "(Android or iOS, any supported locale)."
+            )
+
+        return df
 
     @property
     def actors(self) -> List[Actor]:
-        """List[:class:`.Actor`]: The list of actors present in the
-        chat.
-        """
+        """List[:class:`.Actor`]: The list of actors present in the chat."""
         return list(self._actors.values())
 
     def __repr__(self) -> str:
-        filename = f'filename={self.filename!r}'
-        actors = f'actors={len(self._actors)}'
-        messages = f'messages={len(self.messages)}'
-        system_messages = f'system_messages={len(self.system_messages)}'
-
-        return f'<Chat {filename} {actors} {messages} {system_messages}>'
-
+        return (
+            f'<Chat filename={self.filename!r} '
+            f'actors={len(self._actors)} '
+            f'messages={len(self.messages)} '
+            f'system_messages={len(self.system_messages)}>'
+        )

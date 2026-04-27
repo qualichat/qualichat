@@ -1,0 +1,9 @@
+[1/1/21, 7:52:45 AM] Joel: Hello everyone!
+[1/1/21, 7:52:47 AM] Mary: Hi!
+[1/1/21, 7:52:49 AM] Joel: How are you guys?
+[1/1/21, 7:52:52 AM] Mary: We are fine! 😊
+How about you?
+[1/1/21, 7:52:55 AM] Olivia: Everything's great!
+[1/1/21, 7:52:59 AM] Joel: Cool! I'm fine too!
+[1/1/21, 7:53:03 AM] Joel: ‎image omitted
+[1/1/21, 7:53:10 AM] Olivia: Sent a link https://example.com/foo

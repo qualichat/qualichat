@@ -50,13 +50,12 @@ We recommend using Python 3.7.1 or higher, but not exceeding version 3.11 for th
 
 ### Quickstart
 
-To use this library, you need a plain chat text file, following this format:
+Qualichat parses WhatsApp chat exports across **iOS, Android and most locales**
+(parsing is delegated to [`chat-miner`](https://github.com/joweich/chat-miner)).
+Both `.txt` files and `.zip` archives (iOS exports with media) are accepted.
 
-```
-[dd/mm/yy hh:mm:ss] <contact name>: <message>
-```
-
-After inserting a chat file (e.g., _chat.txt), you can execute the program with the following command:
+To export a chat, in WhatsApp open the conversation → menu → *Export Chat*.
+Then run:
 
 ```sh
 python -m qualichat load <path-to-chat-file>
@@ -66,26 +65,19 @@ For example:
 
 ```sh
 python -m qualichat load _chat.txt
+python -m qualichat load "WhatsApp Chat with Joel.zip"
+python -m qualichat load chat_a.txt chat_b.txt   # several at once
 ```
 
-For example, see this following sample chat file named `_chat.txt`:
+Supported timestamp formats include (non-exhaustive):
 
-```
-[01/01/2021 07:52:45] Joel: Hello!
-[01/01/2021 07:52:47] Mary: Hi!
-[01/01/2021 07:52:49] Joel: How are you guys?
-[01/01/2021 07:52:52] Mary: We are fine! 😊
-How about you?
-[01/01/2021 07:52:55] Oliva: Everything's great!
-[01/01/2021 07:52:59] Joel: Cool! I am also fine!
-[01/01/2021 07:53:03] John left
-```
-
-In a terminal, you will just load the chat using the command mentioned before:
-
-```sh
-python -m qualichat load _chat.txt
-```
+| Platform / locale | Example |
+|---|---|
+| iOS (recent) | `[01/01/2021, 07:52:45] Joel: Hello!` |
+| iOS (legacy) | `[01/01/2021 07:52:45] Joel: Hello!` |
+| iOS (US, 12h) | `[1/1/21, 7:52:45 AM] Joel: Hello!` |
+| Android (most) | `01/01/2021, 07:52 - Joel: Hello!` |
+| Android (DE) | `01.01.21, 07:52 - Joel: Hallo!` |
 
 
 ### Links
