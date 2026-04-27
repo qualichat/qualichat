@@ -1,0 +1,59 @@
+# https://citation-file-format.github.io/
+cff-version: 1.2.0
+message: >-
+  If you use Qualichat in academic work, please cite *both* the software
+  (this entry) and the foundational paper that describes its methodology
+  (the `preferred-citation` block below).
+
+title: Qualichat
+abstract: >-
+  Open-source linguistic ethnography tool for framing public opinion in
+  mediatised groups. Operationalises the quanti-qualitative methodology
+  proposed by Cavalcante & Hanke (2020) for the analysis of WhatsApp
+  group exports, with anchorage-aware metrics, anonymisation and
+  Goffman-derived frame analysis.
+
+type: software
+license: MIT
+url: "https://github.com/qualichat/qualichat"
+repository-code: "https://github.com/qualichat/qualichat"
+keywords:
+  - whatsapp
+  - linguistic-ethnography
+  - frame-analysis
+  - public-opinion
+  - digital-humanities
+  - quanti-qualitative
+  - python
+
+authors:
+  - family-names: Nobre Cavalcante
+    given-names: Fernando Luiz
+    alias: Kochav Koren Nobre
+    affiliation: Duquesne University
+
+  - family-names: Buzato
+    given-names: Marcelo El Khouri
+    affiliation: Universidade Estadual de Campinas (UNICAMP)
+
+  - family-names: Hanke
+    given-names: Michael Manfred
+    affiliation: Universidade Federal do Rio Grande do Norte (UFRN)
+
+preferred-citation:
+  type: article
+  title: "Ancoragens de interação em grupos midiatizados: proposta quantiqualitativa"
+  authors:
+    - family-names: Nobre Cavalcante
+      given-names: Fernando Luiz
+    - family-names: Hanke
+      given-names: Michael Manfred
+  journal: Comunicação Mídia e Consumo
+  volume: 17
+  issue: "50"
+  year: 2020
+  start: 536
+  end: 558
+  doi: 10.18568/cmc.v17i49.2227
+  url: "https://revistacmc.espm.br/revistacmc/article/view/2227"
+  issn: "1983-7070"
