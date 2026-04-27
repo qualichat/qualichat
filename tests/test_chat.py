@@ -139,3 +139,34 @@ def test_message_features_computed():
     assert msg_with_link is not None
     assert "https://example.com/foo" in msg_with_link["Qty_char_links"]
     assert msg_with_link["Qty_char_total"] == len(msg_with_link.content)
+
+
+def test_system_events_captured():
+    """Group lifecycle events must populate `chat.system_messages`."""
+    import datetime as dt
+    from qualichat.chat import Chat
+
+    chat = Chat(FIXTURES / "with_system_events.txt")
+
+    # User messages: 5 lines with `Author: body`
+    assert len(chat.messages) >= 5
+
+    # System events: created, +3 added, left, changed description = 6
+    assert len(chat.system_messages) >= 5
+
+    bodies = [sm.content for sm in chat.system_messages]
+    assert any("created this group" in b for b in bodies)
+    assert any("added Mary" in b for b in bodies)
+    assert any("Mary left" in b for b in bodies)
+
+    # Each system message has a real datetime
+    assert all(isinstance(sm.created_at, dt.datetime) for sm in chat.system_messages)
+
+
+def test_system_events_empty_when_no_events():
+    """A chat without lifecycle events keeps `chat.system_messages` empty."""
+    from qualichat.chat import Chat
+
+    chat = Chat(FIXTURES / "ios_new_pt.txt")
+    assert isinstance(chat.system_messages, list)
+    assert len(chat.system_messages) == 0

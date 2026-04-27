@@ -1,0 +1,12 @@
+[01/01/2021, 07:50:00] Bob created this group "Estudo"
+[01/01/2021, 07:50:01] Bob added Mary
+[01/01/2021, 07:50:02] Bob added Olivia
+[01/01/2021, 07:50:03] Bob added Joel
+[01/01/2021, 07:52:45] Joel: Olá pessoal!
+[01/01/2021, 07:52:47] Mary: Oi!
+[01/01/2021, 07:52:49] Joel: Como vão vocês?
+[01/01/2021, 07:52:55] Olivia: Tudo ótimo!
+[01/01/2021, 08:00:00] Mary left
+[01/01/2021, 08:00:30] Joel: Mary saiu, e agora?
+[01/01/2021, 08:01:00] Olivia changed the group description
+[01/01/2021, 08:05:00] Olivia: Bom, vamos seguir.

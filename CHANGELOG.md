@@ -25,14 +25,13 @@ parsed; everything else silently produced an empty chat.
   (string is still accepted for backwards compatibility).
 - **Version aligned**: `__version__` and `version_info` were out of sync
   (`1.4.3` vs `1.4.2`). Both are now `1.5.0`.
-
-### Breaking change
-
-- **`chat.system_messages` is always an empty list.** `chat-miner` discards
-  system events ("X joined", "media omitted", etc.) during parsing. Only the
-  `messages_per_actors_per_weekday` chart's "System Messages" option is
-  affected — it now plots zeros. A follow-up release will reintroduce system
-  events via a second pass.
+- **System events recovered.** Group lifecycle messages ("Bob added you",
+  "Jimbo left", "Loris created group X", end-to-end notice, …) are
+  reintroduced via a thin `WhatsAppParser` subclass that captures what the
+  upstream parser drops. They now populate `chat.system_messages` again, so
+  the `messages_per_actors_per_weekday` chart's "System Messages" option
+  works as before. Self-destroying messages (`Author:.`) remain skipped —
+  they carry no useful body.
 
 ### Removed
 
