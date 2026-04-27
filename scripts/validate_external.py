@@ -88,24 +88,25 @@ def main() -> int:
         try:
             chat = Chat(local)
             n_msgs = len(chat.messages)
+            n_sys = len(chat.system_messages)
             n_actors = len(chat.actors)
             status = "OK" if n_msgs > 0 else "EMPTY"
             if n_msgs == 0:
                 failures += 1
-            rows.append((status, n_msgs, n_actors, lic, label, ""))
+            rows.append((status, n_msgs, n_sys, n_actors, lic, label, ""))
         except Exception as exc:
-            rows.append(("FAIL", "-", "-", lic, label, f"{type(exc).__name__}: {exc}"))
+            rows.append(("FAIL", "-", "-", "-", lic, label, f"{type(exc).__name__}: {exc}"))
             failures += 1
 
     # silence the noisy chat-miner logging in the report block
     print()
-    print(f"{'STATUS':<8}{'#MSGS':>6}{'#ACTORS':>9}  {'LICENSE':<11}  FIXTURE")
-    print("-" * 100)
-    for status, n_msgs, n_actors, lic, label, err in rows:
-        print(f"{status:<8}{str(n_msgs):>6}{str(n_actors):>9}  {lic:<11}  {label}")
+    print(f"{'STATUS':<8}{'#MSGS':>6}{'#SYS':>6}{'#ACTORS':>9}  {'LICENSE':<11}  FIXTURE")
+    print("-" * 110)
+    for status, n_msgs, n_sys, n_actors, lic, label, err in rows:
+        print(f"{status:<8}{str(n_msgs):>6}{str(n_sys):>6}{str(n_actors):>9}  {lic:<11}  {label}")
         if err:
-            print(f"{'':<35}↳ {err}")
-    print("-" * 100)
+            print(f"{'':<41}↳ {err}")
+    print("-" * 110)
     print(f"Total: {len(SOURCES)} fixtures, {failures} failures")
 
     return 0 if failures == 0 else 1
