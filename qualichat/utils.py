@@ -89,9 +89,23 @@ def _get_all_names() -> List[str]:
         return f.read().split('\n')
 
 
+_exhaustion_counter = 0
+
+
 def get_random_name() -> str:
+    """Pick a unique anonymising display name for an actor.
+
+    Names are drawn (and removed) from the bundled ``books.txt`` pool. If the
+    pool is exhausted — chats with > 767 distinct actors — fall back to
+    sequential ``"Actor #N"`` placeholders so we never raise ``IndexError``
+    mid-load. Uniqueness is preserved.
+    """
+    global _exhaustion_counter
+    if not names:
+        _exhaustion_counter += 1
+        return f'Actor #{_exhaustion_counter}'
     name = random.choice(names)
-    # Remove the book from the list so there is no risk that two 
+    # Remove the book from the list so there is no risk that two
     # actors have the same display name.
     names.remove(name)
     return name.strip()

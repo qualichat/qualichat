@@ -52,7 +52,7 @@ class CheckVisualStudioCommand(Command):
 
 setup(
     name='qualichat',
-    author='Erneist Manhein',
+    author='Ernest Manheim',
     project_urls={
         'Documentation': 'https://qualichat.readthedocs.io/en/latest/',
         'Issue tracker': 'https://github.com/qualichat/qualichat/issues',
