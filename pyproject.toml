@@ -1,0 +1,201 @@
+# PEP 621 project metadata. See setup.py for the legacy entry point that
+# defers to setuptools — kept around for older pip installations.
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "qualichat"
+description = "Open-source linguistic ethnography tool for framing public opinion in mediatized groups."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Ernest Manheim" }]
+requires-python = ">=3.9"
+dynamic = ["version"]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Natural Language :: Portuguese (Brazilian)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Utilities",
+]
+
+dependencies = [
+    "chat-miner>=0.6,<1",
+    "spacy>=3.7,<4",
+    "plotly>=5,<7",
+    "emojis>=0.7,<1",
+    "pandas>=2,<3",
+    "wordcloud>=1.9,<2",
+    "matplotlib>=3.7,<4",
+    "tldextract>=5,<6",
+    "questionary>=2,<3",
+    "rich>=13,<15",
+    "qualichat-qualitube",
+    "deep-translator>=1.11,<2",
+    "spacytextblob>=4,<5",
+]
+
+[project.optional-dependencies]
+# Just enough to run `pytest tests` — keeps CI fast by not pulling spaCy/plotly.
+test = [
+    "pytest>=8,<10",
+    "pytest-cov>=5,<7",
+    "chat-miner>=0.6,<1",
+    "emojis>=0.7,<1",
+    "tldextract>=5,<6",
+    "pandas>=2,<3",
+]
+# Local development: linter, formatter, type checker, build/publish.
+dev = [
+    "qualichat[test]",
+    "ruff>=0.6,<1",
+    "mypy>=1.10,<2",
+    "pre-commit>=3.7,<5",
+    "build>=1.2,<2",
+    "twine>=5,<7",
+]
+# Building Sphinx documentation.
+docs = [
+    "sphinx>=7,<9",
+    "sphinx-rtd-theme>=2,<4",
+]
+
+[project.urls]
+Homepage = "https://github.com/qualichat/qualichat"
+Documentation = "https://qualichat.readthedocs.io"
+Repository = "https://github.com/qualichat/qualichat"
+"Issue tracker" = "https://github.com/qualichat/qualichat/issues"
+Changelog = "https://github.com/qualichat/qualichat/blob/main/CHANGELOG.md"
+
+
+[tool.setuptools]
+packages = ["qualichat"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+qualichat = [
+    "books.txt",
+    "connector.csv",
+    "fonts/*.ttf",
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "qualichat.__version__" }
+
+
+# -- ruff: linter + formatter --------------------------------------------------
+# https://docs.astral.sh/ruff/
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+extend-exclude = [
+    "docs/_build",
+    "build",
+    "dist",
+    ".venv",
+    "tests/fixtures",
+]
+
+[tool.ruff.lint]
+# Conservative rule set for an inherited codebase. Tighten later.
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "W",    # pycodestyle warnings
+    "I",    # isort (import order)
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade (modernise syntax)
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "E501",  # line too long — handled by formatter, not lint
+    "B008",  # function call in default argument — used pervasively for partials
+    "B028",  # warn without stacklevel — minor
+    "SIM105", # contextlib.suppress vs try/except/pass — try/except is clearer
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]  # asserts are fine in tests
+
+[tool.ruff.format]
+quote-style = "single"  # match the project's existing style
+indent-style = "space"
+docstring-code-format = true
+
+
+# -- mypy: type checker --------------------------------------------------------
+# https://mypy.readthedocs.io/
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true   # heavy ML deps lack stubs
+warn_unused_ignores = true
+check_untyped_defs = true
+no_implicit_optional = true
+exclude = [
+    "build/",
+    "dist/",
+    "docs/",
+    "tests/fixtures/",
+]
+
+# Existing modules we'd like to type-check strictly. Tighten module by module.
+[[tool.mypy.overrides]]
+module = ["qualichat.regex", "qualichat.enums", "qualichat.abc"]
+disallow_untyped_defs = true
+
+
+# -- pytest --------------------------------------------------------------------
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:dateutil.*",
+]
+
+
+# -- coverage ------------------------------------------------------------------
+
+[tool.coverage.run]
+branch = true
+source = ["qualichat"]
+omit = [
+    "qualichat/__main__.py",  # interactive REPL — exercised manually
+    "qualichat/_partials.py", # questionary/rich wrappers — UI layer
+]
+
+[tool.coverage.report]
+precision = 1
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@(abc\\.)?abstractmethod",
+]

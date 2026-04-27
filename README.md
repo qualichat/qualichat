@@ -1,8 +1,12 @@
 # <img alt="Qualichat" src="branding/logo/qualichat-logo.png" height="150">
+
 <!-- badges -->
+[![Test](https://github.com/qualichat/qualichat/actions/workflows/test.yml/badge.svg)](https://github.com/qualichat/qualichat/actions/workflows/test.yml)
+[![PyPI version](https://img.shields.io/pypi/v/qualichat.svg)](https://pypi.org/project/qualichat/)
+[![Python versions](https://img.shields.io/pypi/pyversions/qualichat.svg)](https://pypi.org/project/qualichat/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Downloads](https://pepy.tech/badge/qualichat)](https://pepy.tech/project/qualichat)
-<img src="https://img.shields.io/github/stars/qualichat/qualichat" />
-<img src="https://img.shields.io/pypi/pyversions/qualichat.svg" >
+[![GitHub stars](https://img.shields.io/github/stars/qualichat/qualichat.svg?style=social)](https://github.com/qualichat/qualichat/stargazers)
 
 Open-source linguistic ethnography tool for framing public opinion in mediatized groups.
 

@@ -11,7 +11,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -19,11 +20,52 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
 
+      # Install only what the tests need (parser + helpers).
+      # Skip the heavy analytical deps (spacy, plotly, wordcloud, …) — they
+      # are not exercised by the test suite, which targets parsing.
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install chat-miner pytest emojis tldextract pandas
+          pip install pytest pytest-cov chat-miner emojis tldextract pandas
 
-      - name: Run tests
-        run: pytest tests -v
+      # Make `import qualichat` work in tests without dragging the heavy
+      # dependency tree into CI.
+      - name: Install package (no deps)
+        run: pip install --no-deps -e .
+
+      - name: Run tests with coverage
+        run: pytest --cov=qualichat --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage artifact
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          retention-days: 7
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ruff
+        run: pip install ruff
+
+      # Soft lint: report issues but don't fail the job. The codebase is
+      # being incrementally tightened — see CONTRIBUTING.md.
+      - name: Ruff check
+        run: ruff check . --output-format=github
+        continue-on-error: true
+
+      - name: Ruff format check
+        run: ruff format --check .
+        continue-on-error: true
