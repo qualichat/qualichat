@@ -26,3 +26,16 @@ These pages go into great detail about everything the API can do.
    :maxdepth: 1
 
    api
+
+
+Methodology and project context
+-------------------------------
+
+For maintainers, contributors and researchers who want to understand
+*why* the tool computes what it does:
+
+.. toctree::
+   :maxdepth: 1
+
+   methodology
+   divergences
