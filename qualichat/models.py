@@ -19,7 +19,7 @@ SOFTWARE.
 """
 
 import datetime
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Union
 from types import MappingProxyType
 
 import emojis # type: ignore
@@ -34,7 +34,6 @@ __all__ = ('Actor', 'Message', 'SystemMessage')
 
 TIME_FORMAT = r'%d/%m/%Y %H:%M:%S'
 
-import datetime
 
 def parse_time(string: str) -> datetime.datetime:
     """Converts the message creation time string to a
@@ -175,10 +174,19 @@ class Message(BaseMessage):
 
     __slots__ = ('actor', 'content', 'created_at', '_data')
 
-    def __init__(self, actor: Actor, content: str, created_at: str) -> None:
+    def __init__(
+        self,
+        actor: Actor,
+        content: str,
+        created_at: Union[str, datetime.datetime],
+    ) -> None:
         self.actor: Actor = actor
         self.content: str = content
-        self.created_at: datetime.datetime = parse_time(created_at)
+        self.created_at: datetime.datetime = (
+            created_at
+            if isinstance(created_at, datetime.datetime)
+            else parse_time(created_at)
+        )
 
         data: Dict[str, Any] = {}
         data['Qty_char_total'] = len(self.content)
@@ -256,9 +264,17 @@ class SystemMessage(BaseMessage):
 
     __slots__ = ('content', 'created_at')
 
-    def __init__(self, content: str, created_at: str) -> None:
+    def __init__(
+        self,
+        content: str,
+        created_at: Union[str, datetime.datetime],
+    ) -> None:
         self.content: str = content
-        self.created_at: datetime.datetime = parse_time(created_at)
+        self.created_at: datetime.datetime = (
+            created_at
+            if isinstance(created_at, datetime.datetime)
+            else parse_time(created_at)
+        )
 
     def __repr__(self) -> str:
         return f'<SystemMessage created_at={self.created_at!r}>'

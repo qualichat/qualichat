@@ -22,8 +22,6 @@ import re
 
 
 __all__ = (
-    'CHAT_FORMAT_RE',
-    'USER_MESSAGE_RE',
     'URL_RE',
     'EMAIL_RE',
     'QUESTION_MARK_RE',
@@ -35,21 +33,6 @@ __all__ = (
     'YOUTUBE_LINK_RE',
     'EMOTICONS_RE',
 )
-
-CHAT_FORMAT_RE = re.compile(r'''
-    ^\[
-        (?P<datetime>\d{1,2}/\d{1,2}(?:/\d{2,4})?\s\d{2}:\d{2}:\d{2})
-    \]\s
-    (?P<rest>[\S\s]+?)
-    (?=\n\[.+\]|\Z)
-''', re.M | re.X)
-
-
-USER_MESSAGE_RE = re.compile(r'''
-    (?P<actor>.*?)
-    :\s+
-    (?P<message>[\s\S]+)
-''', re.X)
 
 URL_RE = re.compile(r'''
     http[s]?://
