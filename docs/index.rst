@@ -14,7 +14,9 @@ Getting started
 
 If it is your first time using this library, these resources might help.
 
-- :doc:`intro`
+- :doc:`intro` — installation and basic concepts.
+- :doc:`usage` — full walkthrough of the interactive CLI: every frame,
+  every chart, persistent state and an end-to-end example.
 
 
 Manuals
@@ -25,4 +27,6 @@ These pages go into great detail about everything the API can do.
 .. toctree::
    :maxdepth: 1
 
+   intro
+   usage
    api
