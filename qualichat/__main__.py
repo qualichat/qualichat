@@ -113,7 +113,9 @@ def setup(parser: ArgumentParser, args: Namespace) -> None:
 
     with progress_bar(transient=True) as progress:
         progress.add_task('[green]Downloading spaCy models[/]', start=False)
-        download('pt_core_news_md', False, False, '-q')
+        # Must match the model name spacy.load() uses in qualichat.frames
+        # (`_spacy_pt` calls `spacy.load('pt_core_news_sm')`).
+        download('pt_core_news_sm', False, False, '-q')
         download('en_core_web_sm', False, False, '-q')
 
     print('\n[green]✔ You can now use Qualichat.[/green]')

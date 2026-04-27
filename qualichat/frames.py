@@ -81,18 +81,32 @@ def _normalize_row(row: List[int], actor: str, chat: Chat) -> List[int]:
     return [int(i / len(chat.actors)) for i in row]
 
 
+@lru_cache(maxsize=1)
+def _spacy_pt():
+    return spacy.load('pt_core_news_sm')
+
+
 @lru_cache(maxsize=1000)
-def _parse_nlp(word: str, *, pos: str):
-    nlp = spacy.load('pt_core_news_sm')
+def _parse_nlp(word: str, *, pos: str) -> Tuple[str, ...]:
+    """Tokenise ``word`` with the PT spaCy model and return tokens of POS ``pos``.
+
+    Returns a ``tuple`` (not a generator) so the ``lru_cache`` actually caches
+    the values — caching a generator object yields an exhausted iterator on
+    every subsequent hit.
+    """
+    nlp = _spacy_pt()
     doc = nlp(word)
     endings = ('ar', 'er', 'ir')
 
+    tokens: List[str] = []
     for token in doc:
-        if token.pos_ == pos:
-            if pos == 'VERB' and not token.text.endswith(endings):
-                continue
+        if token.pos_ != pos:
+            continue
+        if pos == 'VERB' and not token.text.endswith(endings):
+            continue
+        tokens.append(token.text)
 
-            yield token.text
+    return tuple(tokens)
 
 
 def _parse_nlp_messages(messages: List[Message]):
@@ -664,7 +678,7 @@ class ParticipationStatusFrame(BaseFrame):
         msg = 'Choose you action'
         result = select(msg, choices).ask()
 
-        if result == 'Machinations per Actors':
+        if result == 'Fabrications per Actors':
             return _fabrications_per_actors(chats, title)
         else:
             return _average_fabrications(chats, title)
