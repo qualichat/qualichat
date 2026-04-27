@@ -32,6 +32,18 @@ parsed; everything else silently produced an empty chat.
   the `messages_per_actors_per_weekday` chart's "System Messages" option
   works as before. Self-destroying messages (`Author:.`) remain skipped —
   they carry no useful body.
+- **`MessageType` detection is now multi-locale.** `enums.get_message_type`
+  used to recognise eight hard-coded pt-BR strings; all other locales fell
+  back to `MessageType.default`, so non-pt-BR exports flagged every media
+  line as a regular text message and skewed every chart that filtered on
+  type. Now recognises pt-BR, en, es, de, it and fr tokens (case-insensitive,
+  whitespace-tolerant) plus the Android `<Media omitted>` / `<Mídia oculta>`
+  generic. iOS document lines are still detected by suffix match.
+- **`get_random_name()` no longer raises `IndexError`** when the bundled
+  `books.txt` pool of 767 names is exhausted. Falls back to sequential
+  `Actor #N` placeholders so chats with > 767 distinct actors load cleanly.
+- **`setup.py` author typo fixed**: `Erneist Manhein` → `Ernest Manheim`
+  (matches `__author__` in `qualichat/__init__.py`).
 
 ### Removed
 

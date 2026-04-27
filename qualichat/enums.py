@@ -20,6 +20,7 @@ SOFTWARE.
 
 import datetime
 from enum import Enum, IntEnum
+from typing import Dict, Tuple
 
 
 __all__ = ('Period', 'SubPeriod', 'MessageType')
@@ -105,24 +106,117 @@ def get_sub_period(created_at: datetime.datetime) -> SubPeriod:
     return sub_period
 
 
-def get_message_type(content: str) -> MessageType:
-    if content == 'imagem ocultada':
-        message_type = MessageType.image_omitted
-    elif content == 'GIF omitido':
-        message_type = MessageType.gif_omitted
-    elif content == 'vídeo omitido':
-        message_type = MessageType.video_omitted
-    elif content == 'áudio ocultado':
-        message_type = MessageType.audio_omitted
-    elif content == 'figurinha omitida':
-        message_type = MessageType.sticker_omitted
-    elif content.endswith('documento omitido'):
-        message_type = MessageType.document_omitted
-    elif content == 'Cartão do contato omitido':
-        message_type = MessageType.contact_card_omitted
-    elif content == 'Mensagem apagada':
-        message_type = MessageType.deleted_message
-    else:
-        message_type = MessageType.default
+# Per-MessageType detection tokens.
+#
+# The exact strings WhatsApp emits depend on platform (iOS / Android) and
+# locale. These tables cover the most common locales we have evidence for in
+# real exports: pt-BR, en, es, de, it, fr. Add to the relevant tuple if you
+# encounter a new locale — please prefer the literal string the app emits
+# (case-insensitive comparison is applied by ``get_message_type``).
+#
+# Note: most tokens are matched exactly against the trimmed message body;
+# document tokens are also matched as a *suffix* because iOS prefixes them
+# with the filename (e.g. ``"report.pdf • 2 pages documento omitido"``).
+# The Android generic ``<media omitted>`` / ``<Mídia oculta>`` lines are
+# treated as ``image_omitted`` for back-compat with previous releases.
+_OMITTED_TOKENS: Dict[MessageType, Tuple[str, ...]] = {
+    MessageType.image_omitted: (
+        'imagem ocultada', 'imagem oculta',           # pt-BR
+        'image omitted',                               # en
+        'imagen omitida',                              # es
+        'Bild weggelassen',                            # de
+        'immagine omessa',                             # it
+        'image omise',                                 # fr
+        '<Media omitted>',                             # Android (en, generic)
+        '<Mídia oculta>',                              # Android (pt-BR)
+    ),
+    MessageType.gif_omitted: (
+        'GIF omitido',                                 # pt-BR
+        'GIF omitted',                                 # en
+        'GIF omitida', 'GIF omitida.',                 # es
+        'GIF ausgeschlossen',                          # de
+        'GIF omessa',                                  # it
+        'GIF omise',                                   # fr
+    ),
+    MessageType.video_omitted: (
+        'vídeo omitido',                               # pt-BR
+        'video omitted',                               # en
+        'video omitido',                               # es
+        'Video weggelassen',                           # de
+        'video omesso',                                # it
+        'vidéo omise',                                 # fr
+    ),
+    MessageType.audio_omitted: (
+        'áudio ocultado', 'áudio oculto',              # pt-BR
+        'audio omitted',                               # en
+        'audio omitido',                               # es
+        'Audio weggelassen',                           # de
+        'audio omesso',                                # it
+        'audio omis',                                  # fr
+    ),
+    MessageType.sticker_omitted: (
+        'figurinha omitida',                           # pt-BR
+        'sticker omitted',                             # en
+        'pegatina omitida', 'sticker omitido',         # es
+        'Sticker weggelassen',                         # de
+        'adesivo omesso',                              # it
+        'autocollant omis',                            # fr
+    ),
+    MessageType.document_omitted: (
+        'documento omitido',                           # pt-BR / es / it
+        'document omitted',                            # en
+        'Dokument weggelassen',                        # de
+        'document omis',                               # fr
+    ),
+    MessageType.contact_card_omitted: (
+        'Cartão do contato omitido',                   # pt-BR
+        'Contact card omitted',                        # en
+        'Tarjeta de contacto omitida',                 # es
+        'Kontaktkarte weggelassen',                    # de
+        'biglietto da visita omesso',                  # it
+        'Carte de contact omise',                      # fr
+    ),
+    MessageType.deleted_message: (
+        'Mensagem apagada',                            # pt-BR
+        'This message was deleted',                    # en
+        'Mensaje eliminado',                           # es
+        'Diese Nachricht wurde gelöscht',              # de
+        'Questo messaggio è stato eliminato',          # it
+        'Ce message a été supprimé',                   # fr
+    ),
+}
 
-    return message_type
+# Build a lower-cased lookup once at import time so detection is cheap.
+_OMITTED_LOOKUP: Dict[str, MessageType] = {
+    token.casefold(): msg_type
+    for msg_type, tokens in _OMITTED_TOKENS.items()
+    for token in tokens
+}
+
+
+def get_message_type(content: str) -> MessageType:
+    """Classify a message body as a media/system token or as a regular message.
+
+    Recognises platform-/locale-specific strings WhatsApp uses for omitted
+    media, deleted messages and the like. Falls back to
+    :attr:`MessageType.default` for anything else (i.e. real text content).
+
+    Detection is case-insensitive and tolerates leading/trailing whitespace.
+    Document tokens additionally match as a *suffix* because iOS prefixes
+    them with the filename.
+    """
+    if not content:
+        return MessageType.default
+
+    normalized = content.strip().casefold()
+
+    # Exact-match against the lookup table (covers most cases).
+    if (msg_type := _OMITTED_LOOKUP.get(normalized)) is not None:
+        return msg_type
+
+    # iOS document lines are "<filename> ... documento omitido" → suffix match.
+    for token in _OMITTED_TOKENS[MessageType.document_omitted]:
+        if normalized.endswith(token.casefold()):
+            return MessageType.document_omitted
+
+    return MessageType.default
