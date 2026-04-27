@@ -44,6 +44,33 @@ parsed; everything else silently produced an empty chat.
   `Actor #N` placeholders so chats with > 767 distinct actors load cleanly.
 - **`setup.py` author typo fixed**: `Erneist Manhein` → `Ernest Manheim`
   (matches `__author__` in `qualichat/__init__.py`).
+- **Modern packaging**. Project metadata, dependencies and tool
+  configuration moved to `pyproject.toml` (PEP 621). The legacy
+  `setup.py` is now a one-line stub kept only for older `pip` versions.
+  Dynamic version reading from `qualichat/__init__.py` eliminates the
+  duplicate-version-string class of bug.
+- **Tooling configuration**: `pyproject.toml` carries `ruff` (linter
+  and formatter, conservative ruleset), `mypy` (per-module strictness
+  ramping up), `pytest` config, and `coverage` config. Local
+  development uses `pip install -e ".[dev]"`; documentation builds use
+  `pip install -e ".[docs]"`.
+- **Pre-commit hooks** (`.pre-commit-config.yaml`) — trailing
+  whitespace, end-of-file-fixer, large-file guard, ruff lint and ruff
+  format on every commit.
+- **Dependabot** (`.github/dependabot.yml`) — weekly pip dependency
+  updates and monthly GitHub Actions updates, with conventional commit
+  prefixes and automatic labelling.
+- **CI overhaul**. The `Test` workflow now adds a third Python version
+  (3.12), uses `pip install -e .` to exercise the package install,
+  emits coverage reports (`pytest-cov` + `coverage.xml` artifact) and
+  adds a separate non-blocking `lint` job (`ruff check`,
+  `ruff format --check`). The `Publish to PyPI` workflow uses
+  `python -m build` (PEP 517) plus `twine check` for distribution
+  verification before upload.
+- **Repository hygiene**: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`
+  (Contributor Covenant 2.1, with a research-specific addendum on
+  privacy and ongoing-research respect) and CI/PyPI/license/Python
+  badges in the README.
 
 ### Removed
 
