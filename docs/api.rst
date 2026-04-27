@@ -47,29 +47,52 @@ Chat Analyzers
 
 
 Frames
---------
+------
 
-.. autofunction:: qualichat.frames.generate_chart
+A *Frame* groups together a set of charts that can be rendered for the loaded
+chats. Three frames ship with Qualichat:
+
+- :class:`~qualichat.frames.KeysFrame` — keyword and lexical-feature charts
+  (laminations, links, calls, e-mails, textual symbols, video ratings).
+- :class:`~qualichat.frames.ParticipationStatusFrame` — per-actor activity,
+  message statistics, media repertoire, fabrications/laminations, bot
+  detection.
+- :class:`~qualichat.frames.PublicOpinionFrame` — sentiment matrix and
+  thematic linkage based on the bundled ``connector.csv`` vocabulary.
 
 .. autoclass:: qualichat.frames.BaseFrame
     :members:
 
-.. autoclass:: qualichat.frames.MessagesFrame
+.. autoclass:: qualichat.frames.KeysFrame
     :members:
 
-.. autoclass:: qualichat.frames.ActorsFrame
+.. autoclass:: qualichat.frames.ParticipationStatusFrame
     :members:
 
-.. autoclass:: qualichat.frames.TimeFrame
+.. autoclass:: qualichat.frames.PublicOpinionFrame
     :members:
 
-.. autoclass:: qualichat.frames.NounsFrame
-    :members:
 
-.. autoclass:: qualichat.frames.VerbsFrame
-    :members:
+Sorters & Chart Generators
+--------------------------
 
-.. autoclass:: qualichat.frames.EmojisFrame
+The :mod:`qualichat.sorters` module hosts decorators that drive the sorting
+choices presented in the interactive CLI, plus the low-level chart, table,
+treemap and wordcloud renderers built on top of Plotly.
+
+.. autofunction:: qualichat.sorters.keys
+
+.. autofunction:: qualichat.sorters.participation_status
+
+.. autofunction:: qualichat.sorters.group_users
+
+.. autofunction:: qualichat.sorters.generate_chart
+
+.. autofunction:: qualichat.sorters.generate_table
+
+.. autofunction:: qualichat.sorters.generate_treemap
+
+.. autofunction:: qualichat.sorters.generate_wordcloud
 
 
 Abstract Base Classes
@@ -185,7 +208,7 @@ format.
 Models
 ------
 
-Models are classes created by the library to represent an element of the chat. 
+Models are classes created by the library to represent an element of the chat.
 They are not intended to be instantiated by the user of the library.
 
 .. warning::
@@ -204,7 +227,7 @@ Actors
 
 Messages
 ~~~~~~~~
-    
+
 .. autoclass:: qualichat.models.Message()
     :members:
     :inherited-members:
