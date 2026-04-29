@@ -1,0 +1,19 @@
+# Streamlit configuration for the qualichat web UI.
+#
+# Theme is forced to LIGHT regardless of the user's browser preference
+# because the design system (pergaminho/ocre/musgo/toga palette) only
+# makes sense against a warm cream background. If we let Streamlit
+# auto-detect dark mode, all our custom CSS tokens would clash.
+
+[theme]
+base = "light"
+primaryColor = "#1F3A5F"            # toga-academica  — accent (links, active states)
+backgroundColor = "#F4EFE6"         # pergaminho       — canvas
+secondaryBackgroundColor = "#FAF7F1" # pergaminho-claro — cards, inputs (inset)
+textColor = "#1A1814"               # tinta-impressao  — primary text
+
+[server]
+maxUploadSize = 200                  # MB; matches Streamlit's default
+
+[browser]
+gatherUsageStats = false             # local-first ethos (matches our privacy story)

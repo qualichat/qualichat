@@ -74,6 +74,10 @@ docs = [
     "sphinx>=7,<9",
     "sphinx-rtd-theme>=2,<4",
 ]
+# Web UI (Streamlit). Activated by `qualichat ui`.
+ui = [
+    "streamlit>=1.36,<2",
+]
 
 [project.urls]
 Homepage = "https://github.com/qualichat/qualichat"
@@ -84,7 +88,7 @@ Changelog = "https://github.com/qualichat/qualichat/blob/main/CHANGELOG.md"
 
 
 [tool.setuptools]
-packages = ["qualichat"]
+packages = ["qualichat", "qualichat.ui", "qualichat.ui.components", "qualichat.ui.pages"]
 include-package-data = true
 
 [tool.setuptools.package-data]

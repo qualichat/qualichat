@@ -1,3 +1,14 @@
+# Streamlit Community Cloud reads this at the repo root and runs
+# `pip install -r requirements.txt`. It bundles every dependency
+# qualichat needs at runtime, including the web UI (streamlit) and
+# the two spaCy language models (downloaded from the spacy-models
+# GitHub releases, since Streamlit Cloud cannot run setup scripts).
+#
+# For local development prefer `pip install -e ".[dev]"` driven by
+# pyproject.toml; this file exists primarily so Streamlit Cloud can
+# build the web UI deploy.
+
+# Core parsing + analytics
 chat-miner>=0.6,<1
 spacy>=3.7,<4
 plotly>=5,<7
@@ -6,8 +17,23 @@ pandas>=2,<3
 wordcloud>=1.9,<2
 matplotlib>=3.7,<4
 tldextract>=5,<6
+
+# CLI fallbacks (used by qualichat.frames internals even when driven
+# from the web UI through qualichat.ui.runtime).
 questionary>=2,<3
 rich>=13,<15
+
+# YouTube metadata for KeysFrame.ratings
 qualichat-qualitube
+
+# Public Opinion: translation + polarity
 deep-translator>=1.11,<2
 spacytextblob>=4,<5
+
+# Web UI
+streamlit>=1.36,<2
+
+# spaCy language models (preloaded so charts that need NLP work
+# without running a separate `spacy download` step at first launch)
+pt_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_sm-3.7.0/pt_core_news_sm-3.7.0-py3-none-any.whl
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl

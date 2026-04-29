@@ -84,6 +84,26 @@ Supported timestamp formats include (non-exhaustive):
 | Android (DE) | `01.01.21, 07:52 - Joel: Hallo!` |
 
 
+### Web UI (preview)
+
+A web interface is shipping incrementally on the `feat/web-ui` branch.
+Install the optional dependency and launch:
+
+```sh
+pip install "qualichat[ui]"
+python -m qualichat ui
+```
+
+This opens a Streamlit app at `http://localhost:8501`. Sprint 1 covers
+upload, anonymisation, and an aggregated *Resumo* page (definition list
++ message-type stack-bar + weekday × period heatmap derived from the
+foundational thesis report). Sprints 2–5 will add the chart pages
+(Keys, Participação, Opinião Pública), the *Marginália* field-notebook
+feature, and BibTeX-citable export. See
+[`docs/wireframes/`](docs/wireframes/) for the wireframe and design
+intent.
+
+
 ### Links
 
 - **Website:** http://qualichat.com

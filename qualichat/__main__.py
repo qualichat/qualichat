@@ -140,6 +140,34 @@ def add_setup_args(subparser: Action) -> None:
     parser.set_defaults(func=setup) # type: ignore
 
 
+def ui(parser: ArgumentParser, args: Namespace) -> None:
+    """Launch the Streamlit-based web interface."""
+    try:
+        from qualichat.ui import launch
+    except ImportError as exc:
+        print(
+            '[red]Streamlit is not installed.[/red] Install with:\n'
+            '  pip install "qualichat[ui]"\n'
+            f'(import error: {exc})'
+        )
+        sys.exit(1)
+    sys.exit(launch(port=args.port, headless=args.headless))
+
+
+def add_ui_args(subparser: Action) -> None:
+    parser_help = 'launch the Streamlit web interface'
+    p = subparser.add_parser('ui', help=parser_help) # type: ignore
+    p.set_defaults(func=ui) # type: ignore
+    p.add_argument( # type: ignore
+        '--port', type=int, default=8501,
+        help='port to bind streamlit (default: 8501)',
+    )
+    p.add_argument( # type: ignore
+        '--headless', action='store_true',
+        help="run streamlit in headless mode (don't open browser)",
+    )
+
+
 def parse_args() -> Tuple[ArgumentParser, Namespace]:
     desc = 'Tools for using Qualichat.'
     parser = ArgumentParser(prog='qualichat', description=desc)
@@ -151,6 +179,7 @@ def parse_args() -> Tuple[ArgumentParser, Namespace]:
     subparser = parser.add_subparsers(dest='subcommand', title='subcommands')
     add_loadchat_args(subparser)
     add_setup_args(subparser)
+    add_ui_args(subparser)
 
     return (parser, parser.parse_args())
 

@@ -1,5 +1,58 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Web UI** — first iteration. Streamlit-based interface launched via
+  `qualichat ui` (port 8501 by default). Sprint 1 ships:
+  - Foundation: design tokens (pergaminho/ocre/musgo/toga palette,
+    EB Garamond + Source Sans 3 + JetBrains Mono typography), session
+    state, cached parse pipeline.
+  - Pages: **Setup** (one-shot install of spaCy models + Google API
+    key), **Início** (upload `.txt` or `.zip`), **Resumo** (lede,
+    structural definition list, message-type stack-bar, weekday × period
+    heatmap derived from the YLAI_V2 thesis report).
+  - Placeholders for Sprints 2–5: Keys, Participação, Opinião Pública,
+    Exportar — with the same chrome/sidebar so navigation feels complete.
+  - Runtime helpers (`qualichat.ui.runtime`) that monkey-patch the
+    questionary prompts and `fig.show()` so existing CLI charts can be
+    driven from Streamlit widgets in subsequent sprints.
+  - Optional install: `pip install "qualichat[ui]"`.
+- **Wireframe** for the web UI in `docs/wireframes/index.html`
+  (self-contained, navigates 8 screens) plus a `README.md` mapping each
+  element to 🟢 *real* / 🟡 *derived* / 🔴 *invented*.
+
+### Fixed
+
+- **Parser**: `U+202F NARROW NO-BREAK SPACE` between the time and `AM/PM`
+  in iOS US 12-hour timestamps was missing from the impurity table.
+  Without it, modern English-locale iOS exports silently failed to
+  parse (chat-miner's date inference would not detect the format).
+- **Parser**: a single forwarded message containing a date-like prefix
+  (e.g. `16.09.2024 12:55` from a news article paste) was
+  misclassified as a new message by chat-miner's permissive regex, then
+  raised `ValueError` inside its `_parse_message`, breaking the entire
+  chat. The qualichat-side `_CapturingWhatsAppParser` now tolerates the
+  exception and skips the offending raw message.
+
+### Documentation
+
+- `docs/YLAI_V2-analysis.md` — analysis of the user's thesis report
+  (Power BI dashboard, Sep 2018 → Apr 2019). Maps every `QTD_X` metric
+  to its `Qty_char_X` counterpart in `models.py`, the Sub Período labels
+  to `enums.py:SubPeriod`, and lists 5 dimensions present in the thesis
+  but not yet implemented in code (Utilidade, Idioma, Categoria pivot,
+  cross-correlation chart, mean/SD/median trio).
+- `docs/chat-test-corpus-analysis.md` — privacy-safe analysis of an
+  11-chat real-world test corpus (38.031 messages, 671 actors, 11/11
+  parsed). Documents the two parser bugs above with traceback evidence,
+  and proposes three "shapes" of group (broadcast / conversational /
+  distributed) detectable from `top_1_share_pct`.
+- `docs/chats/` added to `.gitignore` to ensure the test corpus (real
+  exports with personal data) is never committed.
+
+
 ## 1.5.0
 
 ### Highlights
