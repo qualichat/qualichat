@@ -97,17 +97,36 @@ def main() -> None:
 
     from qualichat.utils import config
 
-    current = config['google_api_key'] if 'google_api_key' in config else ''
-    new_key = st.text_input(
-        'API key',
-        value=current or '',
-        type='password',
-        placeholder='AIzaSy...',
-    )
-    if st.button('Salvar API key'):
-        config['google_api_key'] = new_key
-        config.save()
-        st.success('Salva em ~/.qualichat/config.json.')
+    # Detect whether the key came from Streamlit Cloud Secrets (set via
+    # the dashboard's Settings → Secrets panel). chrome.bootstrap()
+    # already mirrored it into config in memory.
+    secrets_key = ''
+    try:
+        secrets_key = (st.secrets.get('google_api_key', '') or '').strip()
+    except Exception:
+        secrets_key = ''
+
+    if secrets_key:
+        st.markdown(
+            '<div class="qc-notice qc-notice-info">'
+            '<div class="qc-notice-title">✓ Configurada via Streamlit Cloud Secrets</div>'
+            '<p>A chave está criptografada em repouso e foi carregada para esta sessão. '
+            'Não há nada para configurar aqui.</p>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        current = config['google_api_key'] if 'google_api_key' in config else ''
+        new_key = st.text_input(
+            'API key',
+            value=current or '',
+            type='password',
+            placeholder='AIzaSy...',
+        )
+        if st.button('Salvar API key'):
+            config['google_api_key'] = new_key
+            config.save()
+            st.success('Salva em ~/.qualichat/config.json.')
 
     # ─── Step 03: Data folder ────────────────────────────────────────
     st.markdown('### 03 · Pasta de dados local')

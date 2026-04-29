@@ -20,6 +20,29 @@ from ..state import get_chat_filename, has_chat
 from ..styling import inject_css
 
 
+def _populate_secrets_into_config() -> None:
+    """Mirror keys from ``st.secrets`` into the in-memory ``Config``.
+
+    Streamlit Cloud encrypts ``[secrets]`` at rest and exposes them at
+    runtime via ``st.secrets``. We copy known keys into qualichat's
+    ``Config`` so charts that read ``config['google_api_key']`` work
+    transparently — without writing the secret to ``~/.qualichat/config.json``
+    on the (ephemeral) container disk.
+    """
+    try:
+        secrets = dict(st.secrets)
+    except Exception:
+        # No secrets.toml locally and no Cloud Secrets: legitimate case.
+        return
+    if not secrets:
+        return
+    api_key = secrets.get('google_api_key', '').strip()
+    if api_key:
+        from qualichat.utils import config
+        config['google_api_key'] = api_key
+        # No `config.save()` — keep it in memory only.
+
+
 __all__ = ('bootstrap', 'sidebar', 'header')
 
 
@@ -182,6 +205,7 @@ def bootstrap(*, page_title: str, breadcrumb: str, active_slug: str) -> None:
         layout='wide',
         initial_sidebar_state='expanded',
     )
+    _populate_secrets_into_config()
     inject_css()
     sidebar(active_slug)
     header(breadcrumb)
