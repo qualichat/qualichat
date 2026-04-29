@@ -1,0 +1,2113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>qualichat — wireframe v1.5.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --pergaminho: #F4EFE6;
+    --pergaminho-claro: #FAF7F1;
+    --tinta-impressao: #1A1814;
+    --sepia-fieldnote: #7A6B5A;
+    --ocre-encadernacao: #B8860B;
+    --musgo-biblioteca: #3B5249;
+    --marginalia-vermelha: #922B21;
+    --toga-academica: #1F3A5F;
+
+    --borda-padrao: rgba(26, 24, 20, 0.08);
+    --borda-emphasis: rgba(26, 24, 20, 0.18);
+    --borda-focus: rgba(26, 24, 20, 0.32);
+
+    --serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
+    --sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'Source Code Pro', Consolas, monospace;
+
+    --s1: 8px;
+    --s2: 16px;
+    --s3: 24px;
+    --s4: 32px;
+    --s5: 48px;
+    --s6: 64px;
+
+    --r-card: 0;
+    --r-input: 2px;
+    --r-badge: 2px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--pergaminho);
+    color: var(--tinta-impressao);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Chrome */
+  .chrome-header {
+    border-bottom: 1px solid var(--borda-padrao);
+    padding: var(--s3) var(--s5);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    background: var(--pergaminho);
+  }
+  .brand {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .brand-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--sepia-fieldnote);
+    margin-left: var(--s2);
+    font-size: 16px;
+  }
+  .chrome-meta {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--sepia-fieldnote);
+    display: flex;
+    gap: var(--s3);
+    align-items: center;
+  }
+  .chrome-meta .pill {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 2px 8px;
+    border: 1px solid var(--borda-padrao);
+    border-radius: var(--r-badge);
+    color: var(--tinta-impressao);
+  }
+
+  .tabbar {
+    display: flex;
+    gap: 0;
+    padding: 0 var(--s5);
+    border-bottom: 1px solid var(--borda-padrao);
+    background: var(--pergaminho);
+    overflow-x: auto;
+  }
+  .tabbar a {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sepia-fieldnote);
+    padding: var(--s2) var(--s3);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+  .tabbar a:hover { color: var(--tinta-impressao); }
+  .tabbar a.active {
+    color: var(--toga-academica);
+    border-bottom-color: var(--toga-academica);
+  }
+
+  .chrome-footer {
+    border-top: 1px solid var(--borda-padrao);
+    padding: var(--s2) var(--s5);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sepia-fieldnote);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Layout */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr 300px;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: calc(100vh - 130px);
+  }
+  .layout.no-marginalia { grid-template-columns: 240px 1fr; }
+  .layout.full-width { grid-template-columns: 1fr; max-width: 760px; }
+
+  .sidebar {
+    border-right: 1px solid var(--borda-padrao);
+    padding: var(--s4) var(--s3);
+  }
+  .main { padding: var(--s4) var(--s5); }
+  .marginalia {
+    border-left: 1px solid var(--borda-padrao);
+    padding: var(--s4) var(--s3);
+    background: var(--pergaminho);
+  }
+
+  /* Sidebar — fluxograma-inspired tree nav */
+  .nav-title {
+    font-family: var(--serif);
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sepia-fieldnote);
+    margin: 0 0 var(--s3) 0;
+    padding-bottom: var(--s1);
+    border-bottom: 1px solid var(--borda-padrao);
+  }
+
+  .flow {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--sans);
+    font-size: 13px;
+  }
+  .flow > li {
+    position: relative;
+    padding: 5px 0 5px 22px;
+  }
+  .flow > li::before {
+    content: '◇';
+    position: absolute;
+    left: 4px;
+    top: 6px;
+    color: var(--sepia-fieldnote);
+    font-size: 10px;
+  }
+  .flow > li.section {
+    padding-top: 12px;
+    color: var(--tinta-impressao);
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .flow > li.section.active::before {
+    content: '◆';
+    color: var(--toga-academica);
+  }
+  .flow > li.section.active { color: var(--toga-academica); }
+  .flow > li.section + .branch { margin-top: 4px; }
+  .flow > li.branch {
+    padding-left: 32px;
+    color: var(--sepia-fieldnote);
+    font-size: 13px;
+  }
+  .flow > li.branch::before {
+    content: '└';
+    left: 16px;
+    top: 3px;
+    font-size: 12px;
+    color: var(--borda-emphasis);
+  }
+  .flow > li.branch.active {
+    color: var(--toga-academica);
+    font-weight: 500;
+  }
+  .flow > li.branch.active::before {
+    content: '├';
+    color: var(--toga-academica);
+  }
+  .flow > li.branch.muted {
+    color: rgba(122, 107, 90, 0.55);
+  }
+  .flow > li.branch .api {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--ocre-encadernacao);
+    margin-left: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    vertical-align: 1px;
+  }
+  .flow a { color: inherit; text-decoration: none; }
+  .flow a:hover { color: var(--tinta-impressao); }
+
+  .sidebar-section { margin-top: var(--s5); }
+  .sidebar-section h4 {
+    font-family: var(--serif);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sepia-fieldnote);
+    margin: 0 0 var(--s2) 0;
+  }
+  .sidebar-link {
+    display: block;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--toga-academica);
+    text-decoration: none;
+    padding: 4px 0;
+  }
+  .sidebar-link::before { content: '↓ '; color: var(--sepia-fieldnote); }
+  .sidebar-meta-block {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--tinta-impressao);
+  }
+  .sidebar-meta-block + .sidebar-meta-block-sub {
+    font-family: var(--serif);
+    font-size: 13px;
+    font-style: italic;
+    color: var(--sepia-fieldnote);
+    margin-top: 4px;
+  }
+
+  /* Main typographic blocks */
+  .main h1 {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: 0 0 var(--s1) 0;
+    line-height: 1.2;
+  }
+  .main h2 {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    margin: var(--s5) 0 var(--s2) 0;
+  }
+  .main h3 {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--sepia-fieldnote);
+    margin: var(--s4) 0 var(--s2) 0;
+  }
+  .breadcrumb {
+    font-family: var(--sans);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sepia-fieldnote);
+    margin-bottom: var(--s2);
+  }
+  .lede {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-style: italic;
+    color: var(--sepia-fieldnote);
+    line-height: 1.5;
+    max-width: 60ch;
+    margin: var(--s3) 0 var(--s5) 0;
+    padding-left: var(--s3);
+    border-left: 2px solid var(--borda-emphasis);
+  }
+  .body-prose {
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.7;
+    max-width: 64ch;
+  }
+  .body-prose p { margin: 0 0 var(--s3) 0; }
+  .body-prose em { font-style: italic; color: var(--musgo-biblioteca); }
+
+  /* Cards */
+  .card {
+    background: var(--pergaminho-claro);
+    border: 1px solid var(--borda-padrao);
+    padding: var(--s4);
+  }
+  .card + .card { margin-top: var(--s3); }
+  .card-tight { padding: var(--s3); }
+  .card-rule {
+    border: 0;
+    border-top: 1px solid var(--borda-padrao);
+    margin: var(--s3) 0;
+  }
+
+  /* Forms */
+  .uploader {
+    border: 1px dashed var(--borda-emphasis);
+    border-radius: var(--r-input);
+    padding: var(--s5) var(--s4);
+    text-align: center;
+    background: var(--pergaminho);
+    transition: border-color 120ms ease, background 120ms ease;
+    cursor: pointer;
+  }
+  .uploader:hover {
+    border-color: var(--borda-focus);
+    background: var(--pergaminho-claro);
+  }
+  .uploader-glyph {
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--sepia-fieldnote);
+    margin-bottom: var(--s1);
+  }
+  .uploader-prompt {
+    font-family: var(--serif);
+    font-size: 18px;
+    color: var(--tinta-impressao);
+  }
+  .uploader-hint {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--sepia-fieldnote);
+    margin-top: var(--s1);
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--s3); }
+  .field-label {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sepia-fieldnote);
+  }
+  .field-help {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--sepia-fieldnote);
+    line-height: 1.4;
+  }
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s2);
+    font-family: var(--sans);
+    font-size: 14px;
+  }
+  .check-row input[type="checkbox"], .check-row input[type="radio"] {
+    margin-top: 4px;
+    accent-color: var(--toga-academica);
+  }
+  .radio-group, .check-group {
+    display: flex;
+    gap: var(--s3);
+    font-family: var(--sans);
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+  .radio-group label, .check-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  input[type="text"], input[type="number"], input[type="password"] {
+    font-family: var(--mono);
+    padding: 8px 12px;
+    border: 1px solid var(--borda-emphasis);
+    border-radius: var(--r-input);
+    background: var(--pergaminho);
+    font-size: 14px;
+    color: var(--tinta-impressao);
+  }
+  input:focus { outline: none; border-color: var(--borda-focus); }
+
+  .btn {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 10px var(--s3);
+    border-radius: var(--r-input);
+    border: 1px solid var(--toga-academica);
+    background: var(--toga-academica);
+    color: var(--pergaminho-claro);
+    cursor: pointer;
+    transition: all 120ms ease;
+  }
+  .btn:hover { background: var(--tinta-impressao); border-color: var(--tinta-impressao); }
+  .btn.btn-secondary { background: transparent; color: var(--toga-academica); }
+  .btn.btn-secondary:hover { background: var(--toga-academica); color: var(--pergaminho-claro); }
+  .btn.btn-ghost {
+    background: transparent;
+    border-color: var(--borda-emphasis);
+    color: var(--tinta-impressao);
+  }
+  .btn.btn-ghost:hover { border-color: var(--borda-focus); }
+  .btn-row { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s3); }
+
+  /* Formula ribbon */
+  .formula {
+    background: var(--pergaminho-claro);
+    border: 1px solid var(--borda-padrao);
+    border-left: 3px solid var(--ocre-encadernacao);
+    padding: var(--s2) var(--s3);
+    margin: var(--s3) 0;
+    font-family: var(--serif);
+    font-size: 19px;
+    font-style: italic;
+    color: var(--tinta-impressao);
+    line-height: 1.6;
+  }
+  .formula .var { font-weight: 500; color: var(--toga-academica); font-style: normal; }
+  .formula .op { color: var(--sepia-fieldnote); font-style: normal; padding: 0 4px; }
+  .formula-foot {
+    display: block;
+    font-family: var(--sans);
+    font-style: normal;
+    font-size: 11px;
+    color: var(--sepia-fieldnote);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 6px;
+  }
+
+  /* Charts */
+  .chart-frame {
+    background: var(--pergaminho-claro);
+    border: 1px solid var(--borda-padrao);
+    padding: var(--s3);
+    margin: var(--s3) 0;
+  }
+  .chart-caption {
+    font-family: var(--serif);
+    font-size: 14px;
+    font-style: italic;
+    color: var(--sepia-fieldnote);
+    margin-top: var(--s2);
+    text-align: center;
+  }
+  .chart-mock {
+    height: 320px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 6px;
+    padding: var(--s3) var(--s2);
+    border-bottom: 1px solid var(--borda-padrao);
+    position: relative;
+  }
+  .chart-mock .bar { width: 28px; background: var(--ocre-encadernacao); opacity: 0.85; }
+  .chart-mock .bar.alt { background: var(--musgo-biblioteca); opacity: 0.9; }
+  .chart-mock .bar.alt2 { background: var(--toga-academica); opacity: 0.7; }
+  .chart-mock .bar.alt3 { background: var(--sepia-fieldnote); opacity: 0.7; }
+  .chart-line {
+    position: absolute;
+    left: 8%; right: 8%; top: 30%;
+    height: 1px;
+    border-top: 1.5px dashed var(--marginalia-vermelha);
+    opacity: 0.7;
+  }
+  .chart-x {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sepia-fieldnote);
+  }
+  .chart-legend {
+    display: flex;
+    gap: var(--s3);
+    justify-content: center;
+    margin-top: var(--s2);
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--sepia-fieldnote);
+    flex-wrap: wrap;
+  }
+  .chart-legend .swatch {
+    display: inline-block;
+    width: 10px; height: 10px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* Stacked horizontal bar — for skewed distributions like message types */
+  .stack-bar {
+    display: flex;
+    height: 38px;
+    border: 1px solid var(--borda-padrao);
+    background: var(--pergaminho-claro);
+    overflow: hidden;
+    margin: var(--s2) 0;
+  }
+  .stack-bar .seg {
+    background: var(--ocre-encadernacao);
+    color: var(--pergaminho-claro);
+    font-family: var(--mono);
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid rgba(255,255,255,0.4);
+  }
+  .stack-bar .seg:last-child { border-right: 0; }
+  .stack-bar .seg.s2 { background: var(--musgo-biblioteca); }
+  .stack-bar .seg.s3 { background: var(--toga-academica); }
+  .stack-bar .seg.s4 { background: var(--sepia-fieldnote); }
+  .stack-bar .seg.s5 { background: var(--marginalia-vermelha); opacity: 0.7; }
+  .stack-bar .seg.s6 { background: var(--ocre-encadernacao); opacity: 0.5; }
+  .stack-legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 6px var(--s3);
+    margin-top: var(--s1);
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--sepia-fieldnote);
+  }
+  .stack-legend .swatch {
+    display: inline-block;
+    width: 10px; height: 10px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* Heatmap — Dia × Período (signature view from thesis) */
+  .heatmap {
+    display: grid;
+    grid-template-columns: 90px repeat(4, 1fr);
+    gap: 1px;
+    background: var(--borda-padrao);
+    border: 1px solid var(--borda-padrao);
+    margin: var(--s3) 0;
+  }
+  .heatmap .cell {
+    background: var(--pergaminho-claro);
+    padding: var(--s2) var(--s1);
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--tinta-impressao);
+  }
+  .heatmap .cell.head {
+    background: var(--pergaminho);
+    font-family: var(--sans);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--sepia-fieldnote);
+  }
+  .heatmap .cell.row {
+    background: var(--pergaminho);
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--sepia-fieldnote);
+    text-align: left;
+    padding-left: var(--s2);
+  }
+  .heatmap .cell.h0 { background: rgba(184, 134, 11, 0.06); }
+  .heatmap .cell.h1 { background: rgba(184, 134, 11, 0.20); }
+  .heatmap .cell.h2 { background: rgba(184, 134, 11, 0.40); }
+  .heatmap .cell.h3 { background: rgba(184, 134, 11, 0.65); color: var(--pergaminho-claro); }
+  .heatmap .cell.h4 { background: rgba(184, 134, 11, 0.85); color: var(--pergaminho-claro); }
+
+  /* Scatter mock for public opinion */
+  .scatter {
+    height: 280px;
+    background: var(--pergaminho);
+    background-image:
+      linear-gradient(var(--borda-padrao) 1px, transparent 1px),
+      linear-gradient(90deg, var(--borda-padrao) 1px, transparent 1px);
+    background-size: 40px 40px;
+    position: relative;
+  }
+  .scatter .dot {
+    position: absolute;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--ocre-encadernacao);
+  }
+
+  /* Wordcloud mock */
+  .wordcloud {
+    height: 280px;
+    background: var(--pergaminho);
+    border: 1px solid var(--borda-padrao);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding: var(--s4);
+    font-family: var(--serif);
+  }
+  .wordcloud span { color: var(--toga-academica); }
+  .wordcloud span.l { color: var(--musgo-biblioteca); }
+  .wordcloud span.m { color: var(--ocre-encadernacao); }
+
+  /* Standardized warning notice (used for divergence + external service + utility tip) */
+  .notice {
+    border-left: 3px solid var(--marginalia-vermelha);
+    padding: var(--s2) var(--s3);
+    margin: var(--s4) 0;
+    background: rgba(146, 43, 33, 0.03);
+  }
+  .notice-title {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--marginalia-vermelha);
+    margin-bottom: 6px;
+  }
+  .notice p {
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.55;
+    margin: 0;
+    color: var(--tinta-impressao);
+  }
+  .notice.notice-info { border-left-color: var(--ocre-encadernacao); background: rgba(184, 134, 11, 0.04); }
+  .notice.notice-info .notice-title { color: var(--ocre-encadernacao); }
+
+  /* Marginália panel */
+  .marginalia h4 {
+    font-family: var(--serif);
+    font-size: 14px;
+    font-weight: 500;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--sepia-fieldnote);
+    margin: 0 0 var(--s2) 0;
+    padding-bottom: var(--s1);
+    border-bottom: 1px dashed var(--borda-padrao);
+  }
+  .marginalia textarea {
+    width: 100%;
+    background: var(--pergaminho-claro);
+    border: 1px solid var(--borda-padrao);
+    border-radius: var(--r-input);
+    padding: var(--s2);
+    font-family: var(--serif);
+    font-size: 15px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--tinta-impressao);
+    resize: vertical;
+    min-height: 100px;
+  }
+  .marginalia textarea::placeholder { color: var(--sepia-fieldnote); font-style: italic; }
+  .marginalia textarea:focus { outline: none; border-color: var(--borda-focus); }
+  .note-list { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--borda-padrao); }
+  .note-list-title {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--sepia-fieldnote);
+    margin-bottom: var(--s2);
+  }
+  .note { margin-bottom: var(--s3); padding-bottom: var(--s2); border-bottom: 1px dashed var(--borda-padrao); }
+  .note:last-child { border-bottom: 0; }
+  .note-date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ocre-encadernacao);
+    margin-bottom: 4px;
+  }
+  .note-body {
+    font-family: var(--serif);
+    font-size: 14px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--tinta-impressao);
+  }
+  .note-loc {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--sepia-fieldnote);
+    margin-top: 4px;
+  }
+
+  /* Inline marginalia preview block (used on Home) */
+  .marginalia-preview {
+    background: var(--pergaminho-claro);
+    border: 1px solid var(--borda-padrao);
+    border-right: 4px solid var(--ocre-encadernacao);
+    padding: var(--s3);
+    margin: var(--s4) 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s4);
+  }
+  .marginalia-preview .left h3 { margin-top: 0; }
+  .marginalia-preview .right {
+    border-left: 1px dashed var(--borda-padrao);
+    padding-left: var(--s3);
+  }
+  .marginalia-preview .right .note {
+    margin-bottom: var(--s2);
+    padding-bottom: var(--s1);
+  }
+
+  /* Definition list */
+  dl.def {
+    margin: var(--s3) 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--s2) var(--s4);
+  }
+  dl.def dt {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sepia-fieldnote);
+    align-self: baseline;
+  }
+  dl.def dd {
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--tinta-impressao);
+    margin: 0;
+  }
+  dl.def dd em {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--sepia-fieldnote);
+    margin-left: 8px;
+  }
+
+  /* Setup checklist */
+  .checklist {
+    list-style: none;
+    margin: var(--s3) 0;
+    padding: 0;
+  }
+  .checklist > li {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: var(--s2);
+    padding: var(--s2) 0;
+    border-bottom: 1px dashed var(--borda-padrao);
+  }
+  .checklist > li:last-child { border-bottom: 0; }
+  .checklist .step-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ocre-encadernacao);
+    padding-top: 4px;
+  }
+  .checklist .step-title {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .checklist .step-desc {
+    font-family: var(--serif);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--sepia-fieldnote);
+    margin-bottom: var(--s2);
+  }
+  .checklist .step-desc code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--pergaminho);
+    padding: 1px 4px;
+    color: var(--tinta-impressao);
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: var(--s6) var(--s4);
+    color: var(--sepia-fieldnote);
+  }
+  .empty-state .glyph {
+    font-family: var(--serif);
+    font-size: 64px;
+    color: var(--borda-emphasis);
+    margin-bottom: var(--s2);
+  }
+  .empty-state h2 {
+    font-family: var(--serif);
+    font-size: 24px;
+    color: var(--tinta-impressao);
+    margin: 0 0 var(--s2) 0;
+  }
+  .empty-state p {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-style: italic;
+    max-width: 50ch;
+    margin: 0 auto var(--s4) auto;
+    line-height: 1.5;
+  }
+
+  /* Export — chart contact sheet */
+  .contact-sheet {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--s3);
+  }
+  .contact { background: var(--pergaminho-claro); border: 1px solid var(--borda-padrao); padding: var(--s2); }
+  .contact-thumb {
+    height: 120px;
+    background: var(--pergaminho);
+    border: 1px solid var(--borda-padrao);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px;
+  }
+  .contact-thumb .b { width: 12px; background: var(--ocre-encadernacao); opacity: 0.7; }
+  .contact-meta { margin-top: 8px; }
+  .contact-meta strong { font-family: var(--serif); font-size: 14px; font-weight: 500; display: block; }
+  .contact-meta span { font-family: var(--mono); font-size: 11px; color: var(--sepia-fieldnote); }
+
+  pre.bibtex {
+    background: var(--pergaminho-claro);
+    border: 1px solid var(--borda-padrao);
+    border-left: 3px solid var(--toga-academica);
+    padding: var(--s3);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-x: auto;
+    color: var(--tinta-impressao);
+    margin: var(--s2) 0;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .wireframe-note {
+    background: rgba(184, 134, 11, 0.06);
+    border-left: 3px solid var(--ocre-encadernacao);
+    padding: var(--s2) var(--s3);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-style: italic;
+    color: var(--sepia-fieldnote);
+    margin: var(--s3) 0;
+  }
+
+  /* Sub-screen toggle (used inside Keys tab) */
+  .subnav {
+    display: flex;
+    gap: var(--s2);
+    margin: var(--s2) 0 var(--s3) 0;
+    padding-bottom: var(--s2);
+    border-bottom: 1px dashed var(--borda-padrao);
+  }
+  .subnav a {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--sepia-fieldnote);
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid var(--borda-padrao);
+    border-radius: var(--r-input);
+    background: var(--pergaminho-claro);
+  }
+  .subnav a.active {
+    color: var(--pergaminho-claro);
+    background: var(--toga-academica);
+    border-color: var(--toga-academica);
+  }
+</style>
+</head>
+<body>
+
+<header class="chrome-header">
+  <div>
+    <span class="brand">qualichat</span>
+    <span class="brand-sub">após Cavalcante &amp; Hanke (2020)</span>
+  </div>
+  <div class="chrome-meta" id="chrome-meta">
+    <span class="pill">v1.5.0</span>
+    <span>tudo local · sua máquina</span>
+  </div>
+</header>
+
+<nav class="tabbar">
+  <a href="#" data-screen="setup">Setup</a>
+  <a href="#" class="active" data-screen="home">Início</a>
+  <a href="#" data-screen="resumo">Resumo</a>
+  <a href="#" data-screen="resumo-empty">Resumo (vazio)</a>
+  <a href="#" data-screen="keys">Frame: Keys</a>
+  <a href="#" data-screen="keyword">Keys: Keyword</a>
+  <a href="#" data-screen="opiniao">Opinião pública</a>
+  <a href="#" data-screen="export">Exportar</a>
+</nav>
+
+<!-- Reusable sidebar markup is duplicated per screen so each can mark its own
+     active node. The branch list mirrors qualichat/frames.py exactly:
+       KeysFrame: laminations, links, calls, emails, textual_symbols, messages, keyword, ratings
+       ParticipationStatusFrame: messages_per_actors, messages_per_actors_per_weekday, bots,
+                                 media_repertoire, message_statistics,
+                                 laminations_per_actors, fabrications_per_actors
+       PublicOpinionFrame: matrix_polarity, linkage
+-->
+
+
+<!-- ============== SCREEN: SETUP (first-time install) ============== -->
+<section class="screen" id="screen-setup">
+  <div class="layout full-width">
+    <main class="main">
+      <div class="breadcrumb">Setup · primeira execução</div>
+      <h1>Configurar o qualichat</h1>
+      <p class="lede">
+        Antes da primeira análise, três passos rápidos. Equivalente a
+        <em>qualichat setup</em> no terminal — preferível só rodar uma vez.
+      </p>
+
+      <ol class="checklist">
+        <li>
+          <span class="step-num">01</span>
+          <div>
+            <div class="step-title">Modelos de linguagem do spaCy</div>
+            <div class="step-desc">
+              Baixa <code>pt_core_news_sm</code> (português, 12 MB) e
+              <code>en_core_web_sm</code> (inglês, 12 MB) para análise
+              morfológica em <em>Keys → Keyword</em> e <em>Public Opinion</em>.
+            </div>
+            <button class="btn btn-secondary">Baixar modelos</button>
+            <span style="font-family: var(--mono); font-size: 11px; color: var(--sepia-fieldnote); margin-left: var(--s2);">~24 MB · 30 segundos</span>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">02</span>
+          <div>
+            <div class="step-title">Google API key <span style="font-family: var(--sans); font-size: 11px; color: var(--sepia-fieldnote); text-transform: uppercase; letter-spacing: 0.08em;">opcional</span></div>
+            <div class="step-desc">
+              Necessária apenas para <em>Keys → Ratings</em> (busca metadata
+              de vídeos do YouTube via API). Se não usar esse chart, deixe
+              em branco. Pode adicionar depois nas Configurações.
+            </div>
+            <input type="password" placeholder="AIzaSy..." style="width: 320px;" />
+            <button class="btn btn-ghost" style="margin-left: var(--s2);">Salvar</button>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">03</span>
+          <div>
+            <div class="step-title">Pasta de dados local</div>
+            <div class="step-desc">
+              Configurações e marginálias serão salvas em
+              <code>~/.qualichat/</code>. Pode mudar mais tarde nas
+              Configurações.
+            </div>
+            <input type="text" value="~/.qualichat/" readonly style="width: 320px; color: var(--sepia-fieldnote);" />
+          </div>
+        </li>
+      </ol>
+
+      <div class="notice notice-info">
+        <div class="notice-title">Privacidade</div>
+        <p>
+          Os modelos do spaCy são baixados uma vez e ficam locais. A API key,
+          se preenchida, é gravada em <em>~/.qualichat/config.json</em> e nunca
+          deixa sua máquina, exceto nas chamadas explícitas ao Google quando
+          você usar o chart Ratings.
+        </p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn">Concluir setup →</button>
+        <button class="btn btn-ghost">Pular por enquanto</button>
+      </div>
+
+      <div class="wireframe-note">
+        wireframe — esta tela aparece apenas na primeira execução
+        (<em>~/.qualichat/</em> ainda não existe), ou via menu
+        Configurações depois.
+      </div>
+    </main>
+  </div>
+</section>
+
+
+<!-- ============== SCREEN: HOME / UPLOAD ============== -->
+<section class="screen active" id="screen-home">
+  <div class="layout no-marginalia">
+    <aside class="sidebar">
+      <h3 class="nav-title">Menu Keys</h3>
+      <ul class="flow">
+        <li class="section active">Início</li>
+        <li class="section">Resumo</li>
+        <li class="section">Frame: Keys</li>
+        <li class="branch muted">Lamination</li>
+        <li class="branch muted">Links</li>
+        <li class="branch muted">Calls</li>
+        <li class="branch muted">Emails</li>
+        <li class="branch muted">Textual symbols</li>
+        <li class="branch muted">Messages</li>
+        <li class="branch muted">Keyword</li>
+        <li class="branch muted">Ratings <span class="api">api</span></li>
+        <li class="section">Participação</li>
+        <li class="branch muted">Mensagens por ator</li>
+        <li class="branch muted">Mensagens por semana</li>
+        <li class="branch muted">Bots</li>
+        <li class="branch muted">Repertório de mídia</li>
+        <li class="branch muted">Estatísticas</li>
+        <li class="branch muted">Lam. por atores</li>
+        <li class="branch muted">Fab. por atores</li>
+        <li class="section">Opinião pública</li>
+        <li class="branch muted">Matriz de polaridade</li>
+        <li class="branch muted">Linkage temático</li>
+        <li class="section">Exportar</li>
+      </ul>
+
+      <div class="sidebar-section">
+        <h4>Citar este trabalho</h4>
+        <a href="#" class="sidebar-link">BibTeX</a>
+        <a href="#" class="sidebar-link">CITATION.cff</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="breadcrumb">Início</div>
+      <h1>Carregar uma exportação</h1>
+      <p class="lede">
+        Aceita arquivos <em>.txt</em> ou <em>.zip</em> exportados do WhatsApp,
+        para qualquer plataforma e localidade suportada por <em>chat-miner</em>.
+      </p>
+
+      <div class="card">
+        <div class="uploader">
+          <div class="uploader-glyph">⌃</div>
+          <div class="uploader-prompt">Arraste o arquivo aqui ou clique para selecionar</div>
+          <div class="uploader-hint">iOS antigo · iOS novo · Android · pt-BR · en · es · de · it · fr · auto-detectado</div>
+        </div>
+
+        <hr class="card-rule" />
+
+        <div class="field">
+          <label class="field-label">Anonimização</label>
+          <div class="check-row">
+            <input type="checkbox" checked />
+            <div>
+              Substituir nomes reais por nomes de personagens
+              <div class="field-help">
+                A primeira aparição de cada ator recebe um nome do pool
+                bundled (767 personagens de Tolstói e Machado de Assis). Se o
+                pool esgotar, fallback para <em>Actor #N</em>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom: 0;">
+          <label class="field-label">Múltiplos chats</label>
+          <div class="check-row">
+            <input type="checkbox" />
+            <div>
+              Carregar mais de um arquivo (compara grupos lado a lado)
+              <div class="field-help">
+                Charts ganham dropdown nativo do Plotly para alternar entre
+                chats; uma curva agregada <em>"All Chats"</em> também é
+                gerada.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn">Carregar exportação</button>
+          <button class="btn btn-ghost">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="marginalia-preview">
+        <div class="left">
+          <h3>Caderno de campo</h3>
+          <p style="font-family: var(--serif); font-size: 16px; line-height: 1.55; margin: 0; color: var(--tinta-impressao);">
+            Cada gráfico tem ao lado um espaço para você anotar
+            observações enquanto analisa — datadas, salvas localmente em
+            <em>~/.qualichat/notes/</em> como Markdown editável.
+          </p>
+          <p style="font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--sepia-fieldnote); margin-top: var(--s2);">
+            Pesquisa qualitativa exige paciência. As anotações são o
+            trabalho; os gráficos são insumos.
+          </p>
+        </div>
+        <div class="right">
+          <div class="note-list-title" style="margin-bottom: var(--s1);">Exemplo</div>
+          <div class="note">
+            <div class="note-date">2026-04-26  10:14</div>
+            <div class="note-body">
+              "Pico de laminação em set/22 puxado por links — bate com a
+              série eleitoral. Cruzar com Linkage > Política."
+            </div>
+          </div>
+          <div class="note">
+            <div class="note-date">2026-04-23  09:12</div>
+            <div class="note-body">
+              "47 atores parece muito — verificar se há jornalistas
+              adicionais no rol."
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>Sobre o que é isto</h2>
+      <div class="body-prose">
+        <p>
+          <em>Qualichat</em> é uma ferramenta open-source de etnografia
+          linguística para análise de exports do WhatsApp, baseada na
+          proposta quantiqualitativa de Cavalcante &amp; Hanke (2020) sobre
+          ancoragens em grupos midiatizados. Não é um analisador genérico;
+          é instrumento de pesquisa.
+        </p>
+        <p>
+          Os dados ficam na sua máquina. O parser, a anonimização, a geração
+          de gráficos e as anotações são todos locais. O único serviço
+          externo opcional é o Google Translate, e apenas no frame de
+          <em>Opinião Pública</em> com tradução automática opt-in.
+        </p>
+      </div>
+
+      <div class="wireframe-note">
+        wireframe — primeira tela após o setup. Sem chats carregados, a
+        marginália não aparece como painel à direita. O bloco
+        <em>"Caderno de campo"</em> acima é apenas um preview do
+        diferencial.
+      </div>
+    </main>
+  </div>
+</section>
+
+
+<!-- ============== SCREEN: RESUMO (chat carregado) ============== -->
+<section class="screen" id="screen-resumo">
+  <div class="layout">
+    <aside class="sidebar">
+      <h3 class="nav-title">Menu Keys</h3>
+      <ul class="flow">
+        <li class="section">Início</li>
+        <li class="section active">Resumo</li>
+        <li class="section">Frame: Keys</li>
+        <li class="branch">Lamination</li>
+        <li class="branch">Links</li>
+        <li class="branch">Calls</li>
+        <li class="branch">Emails</li>
+        <li class="branch">Textual symbols</li>
+        <li class="branch">Messages</li>
+        <li class="branch">Keyword</li>
+        <li class="branch">Ratings <span class="api">api</span></li>
+        <li class="section">Participação</li>
+        <li class="branch">Mensagens por ator</li>
+        <li class="branch">Mensagens por semana</li>
+        <li class="branch">Bots</li>
+        <li class="branch">Repertório de mídia</li>
+        <li class="branch">Estatísticas</li>
+        <li class="branch">Lam. por atores</li>
+        <li class="branch">Fab. por atores</li>
+        <li class="section">Opinião pública</li>
+        <li class="branch">Matriz de polaridade</li>
+        <li class="branch">Linkage temático</li>
+        <li class="section">Exportar</li>
+      </ul>
+
+      <div class="sidebar-section">
+        <h4>Chat carregado</h4>
+        <div class="sidebar-meta-block">grupo_pesquisa.zip</div>
+        <div class="sidebar-meta-block-sub">Carregado às 14:27</div>
+      </div>
+
+      <div class="sidebar-section">
+        <h4>Citar este trabalho</h4>
+        <a href="#" class="sidebar-link">BibTeX</a>
+        <a href="#" class="sidebar-link">CITATION.cff</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="breadcrumb">Resumo</div>
+      <h1>grupo_pesquisa.zip</h1>
+      <p class="lede">
+        Foram lidas <em>12.453</em> mensagens de <em>47</em> atores entre
+        <em>março de 2022</em> e <em>outubro de 2023</em>, anonimizadas por
+        padrão. <em>312</em> eventos de sistema (entrada, saída, criação)
+        foram preservados.
+      </p>
+
+      <h3>Estrutura do export</h3>
+      <dl class="def">
+        <dt>Formato detectado</dt>
+        <dd>iOS novo · pt-BR · UTF-8 <em>(detecção automática via chat-miner)</em></dd>
+        <dt>Período</dt>
+        <dd>2022-03-14 → 2023-10-08 <em>(20 meses · 608 dias)</em></dd>
+        <dt>Mensagens</dt>
+        <dd>12.453 <em>(620 mídia omitida · 11.833 texto)</em></dd>
+        <dt>System events</dt>
+        <dd>312 <em>(entradas, saídas, mudanças de título)</em></dd>
+        <dt>Atores</dt>
+        <dd>47 <em>(anonimizados — Lévin, Bezukhov, Capitu, Bentinho…)</em></dd>
+        <dt>Densidade</dt>
+        <dd>20,5 msgs/dia <em>(média móvel)</em></dd>
+        <dt>Sub-período de pico</dt>
+        <dd>Trabalho (Tarde) <em>15h-18h, 28% do tráfego total</em></dd>
+      </dl>
+
+      <h3>Distribuição por tipo de mensagem</h3>
+      <div class="stack-bar">
+        <div class="seg" style="flex: 92;">texto · 11.833 (95%)</div>
+        <div class="seg s2" style="flex: 22;">img · 410</div>
+        <div class="seg s3" style="flex: 14;">vid · 124</div>
+        <div class="seg s4" style="flex: 8;">áudio · 56</div>
+        <div class="seg s5" style="flex: 5;">doc · 21</div>
+        <div class="seg s6" style="flex: 3;">stk · 9</div>
+      </div>
+      <div class="stack-legend">
+        <span><span class="swatch" style="background: var(--ocre-encadernacao);"></span>Texto / texto puro</span>
+        <span><span class="swatch" style="background: var(--musgo-biblioteca);"></span>Imagem omitida</span>
+        <span><span class="swatch" style="background: var(--toga-academica);"></span>Vídeo omitido</span>
+        <span><span class="swatch" style="background: var(--sepia-fieldnote);"></span>Áudio omitido</span>
+        <span><span class="swatch" style="background: var(--marginalia-vermelha); opacity: 0.7;"></span>Documento omitido</span>
+        <span><span class="swatch" style="background: var(--ocre-encadernacao); opacity: 0.5;"></span>Sticker omitido</span>
+      </div>
+
+      <h3>Atividade por dia da semana × período <span style="font-family: var(--serif); font-style: italic; text-transform: none; letter-spacing: 0; color: var(--sepia-fieldnote);">(QTD_Liquidos médio)</span></h3>
+      <div class="heatmap">
+        <div class="cell head"></div>
+        <div class="cell head">Madrugada</div>
+        <div class="cell head">Manhã</div>
+        <div class="cell head">Tarde</div>
+        <div class="cell head">Noite</div>
+
+        <div class="cell row">Domingo</div>
+        <div class="cell h0">8</div>
+        <div class="cell h1">22</div>
+        <div class="cell h2">41</div>
+        <div class="cell h2">38</div>
+
+        <div class="cell row">Segunda</div>
+        <div class="cell h0">5</div>
+        <div class="cell h2">44</div>
+        <div class="cell h4">68</div>
+        <div class="cell h2">35</div>
+
+        <div class="cell row">Terça</div>
+        <div class="cell h0">4</div>
+        <div class="cell h2">40</div>
+        <div class="cell h3">58</div>
+        <div class="cell h1">28</div>
+
+        <div class="cell row">Quarta</div>
+        <div class="cell h0">3</div>
+        <div class="cell h1">30</div>
+        <div class="cell h3">51</div>
+        <div class="cell h1">26</div>
+
+        <div class="cell row">Quinta</div>
+        <div class="cell h0">5</div>
+        <div class="cell h2">42</div>
+        <div class="cell h3">53</div>
+        <div class="cell h2">31</div>
+
+        <div class="cell row">Sexta</div>
+        <div class="cell h0">6</div>
+        <div class="cell h2">36</div>
+        <div class="cell h3">49</div>
+        <div class="cell h3">52</div>
+
+        <div class="cell row">Sábado</div>
+        <div class="cell h0">10</div>
+        <div class="cell h1">28</div>
+        <div class="cell h2">43</div>
+        <div class="cell h3">54</div>
+      </div>
+      <div class="chart-caption" style="text-align: left; margin-top: 0;">
+        Visualização canônica derivada do relatório de tese
+        (YLAI_V2.pdf, página 6) — sub-períodos definidos em
+        <em>enums.py:SubPeriod</em>.
+      </div>
+
+      <h2>Próximo passo</h2>
+      <div class="body-prose">
+        <p>
+          A análise propriamente começa em <em>Frame: Keys</em>, onde os
+          conteúdos são examinados pela ótica das três grandezas
+          discursivas — laminação, fabricação e texto puro — segundo a
+          fórmula central da metodologia.
+        </p>
+      </div>
+
+      <div class="formula">
+        <span class="var">Qtd_liq_car</span>
+        <span class="op">=</span>
+        <span class="var">Qtd_char_total</span>
+        <span class="op">−</span>
+        <span>(<span class="var">chamadas</span><span class="op">+</span><span class="var">links</span><span class="op">+</span><span class="var">emails</span><span class="op">+</span><span class="var">emojis</span>)</span>
+        <span class="formula-foot">Cavalcante &amp; Hanke (2020) · operacionalização em <em>models.py:Message['Qty_char_net']</em></span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn">Ir para Frame: Keys →</button>
+        <button class="btn btn-ghost">Carregar outro chat</button>
+      </div>
+    </main>
+
+    <aside class="marginalia">
+      <h4>Marginália</h4>
+      <textarea placeholder="Anote uma observação sobre este chat…&#10;&#10;Será salva em ~/.qualichat/notes/grupo_pesquisa/_resumo.md"></textarea>
+      <div class="note-list">
+        <div class="note-list-title">Notas anteriores</div>
+        <div class="note">
+          <div class="note-date">2026-04-25  14:31</div>
+          <div class="note-body">
+            "Período coincide com o ciclo eleitoral brasileiro. Verificar
+            se há descontinuidade clara em out/2022."
+          </div>
+          <div class="note-loc">_resumo.md</div>
+        </div>
+        <div class="note">
+          <div class="note-date">2026-04-23  09:12</div>
+          <div class="note-body">
+            "Concentração no Trabalho(Tarde) confirma hipótese de
+            grupo profissional, não social. Revisitar entrevistas."
+          </div>
+          <div class="note-loc">_resumo.md</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+
+<!-- ============== SCREEN: RESUMO (empty state) ============== -->
+<section class="screen" id="screen-resumo-empty">
+  <div class="layout no-marginalia">
+    <aside class="sidebar">
+      <h3 class="nav-title">Menu Keys</h3>
+      <ul class="flow">
+        <li class="section">Início</li>
+        <li class="section active">Resumo</li>
+        <li class="section">Frame: Keys</li>
+        <li class="branch muted">Lamination</li>
+        <li class="branch muted">Links</li>
+        <li class="branch muted">Calls</li>
+        <li class="branch muted">Emails</li>
+        <li class="branch muted">Textual symbols</li>
+        <li class="branch muted">Messages</li>
+        <li class="branch muted">Keyword</li>
+        <li class="branch muted">Ratings <span class="api">api</span></li>
+        <li class="section">Participação</li>
+        <li class="branch muted">Mensagens por ator</li>
+        <li class="branch muted">Mensagens por semana</li>
+        <li class="branch muted">Bots</li>
+        <li class="branch muted">Repertório de mídia</li>
+        <li class="branch muted">Estatísticas</li>
+        <li class="branch muted">Lam. por atores</li>
+        <li class="branch muted">Fab. por atores</li>
+        <li class="section">Opinião pública</li>
+        <li class="branch muted">Matriz de polaridade</li>
+        <li class="branch muted">Linkage temático</li>
+        <li class="section">Exportar</li>
+      </ul>
+    </aside>
+
+    <main class="main">
+      <div class="empty-state">
+        <div class="glyph">◇</div>
+        <h2>Nenhum chat carregado</h2>
+        <p>
+          O Resumo aparece após você subir uma exportação do WhatsApp.
+          Volte ao <em>Início</em>, escolha o arquivo, e os indicadores
+          serão calculados aqui.
+        </p>
+        <button class="btn">Ir para Início</button>
+      </div>
+
+      <div class="wireframe-note">
+        wireframe — empty state. O Resumo (e qualquer outra tela que
+        precise de dados) redireciona o usuário para o Início se nenhum
+        chat foi carregado ainda na sessão.
+      </div>
+    </main>
+  </div>
+</section>
+
+
+<!-- ============== SCREEN: KEYS / LAMINATION ============== -->
+<section class="screen" id="screen-keys">
+  <div class="layout">
+    <aside class="sidebar">
+      <h3 class="nav-title">Menu Keys</h3>
+      <ul class="flow">
+        <li class="section">Início</li>
+        <li class="section">Resumo</li>
+        <li class="section active">Frame: Keys</li>
+        <li class="branch active">Lamination</li>
+        <li class="branch">Links</li>
+        <li class="branch">Calls</li>
+        <li class="branch">Emails</li>
+        <li class="branch">Textual symbols</li>
+        <li class="branch">Messages</li>
+        <li class="branch">Keyword</li>
+        <li class="branch">Ratings <span class="api">api</span></li>
+        <li class="section">Participação</li>
+        <li class="branch">Mensagens por ator</li>
+        <li class="branch">Mensagens por semana</li>
+        <li class="branch">Bots</li>
+        <li class="branch">Repertório de mídia</li>
+        <li class="branch">Estatísticas</li>
+        <li class="branch">Lam. por atores</li>
+        <li class="branch">Fab. por atores</li>
+        <li class="section">Opinião pública</li>
+        <li class="branch">Matriz de polaridade</li>
+        <li class="branch">Linkage temático</li>
+        <li class="section">Exportar</li>
+      </ul>
+
+      <div class="sidebar-section">
+        <h4>Chat carregado</h4>
+        <div class="sidebar-meta-block">grupo_pesquisa.zip</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="breadcrumb">Frame: Keys → Lamination</div>
+      <h1>Lamination</h1>
+      <p class="lede">
+        Camadas de sentido que se acoplam à mensagem-base — links, emails,
+        chamadas e emojis — agregadas por época ou por ator.
+      </p>
+
+      <div class="formula">
+        <span class="var">Lamination</span>
+        <span class="op">=</span>
+        <span class="var">links</span><span class="op">+</span>
+        <span class="var">emails</span><span class="op">+</span>
+        <span class="var">chamadas</span><span class="op">+</span>
+        <span class="var">emojis/símbolos</span>
+        <span class="formula-foot">cf. Goffman (1974) · op. cit. Cavalcante &amp; Hanke (2020)</span>
+      </div>
+
+      <h3>Filtros</h3>
+      <div class="card card-tight">
+        <div class="field">
+          <label class="field-label">Sorter <span style="font-family: var(--mono); font-size: 10px; text-transform: none; letter-spacing: 0;">@sorters.keys</span></label>
+          <div class="radio-group">
+            <label><input type="radio" name="sort" checked /> Por época</label>
+            <label><input type="radio" name="sort" /> Por ator</label>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom: 0;">
+          <label class="field-label">Período</label>
+          <div class="radio-group">
+            <label><input type="radio" name="per" checked /> todos os meses</label>
+            <label><input type="radio" name="per" /> escolher meses específicos</label>
+          </div>
+          <div class="field-help">
+            Ao escolher meses específicos, abre um multi-select com os 20
+            meses do período (mar/22 a out/23).
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-frame">
+        <div class="chart-mock">
+          <div class="chart-line"></div>
+          <div class="bar" style="height: 35%;"></div>
+          <div class="bar alt" style="height: 22%;"></div>
+          <div class="bar alt2" style="height: 14%;"></div>
+          <div class="bar alt3" style="height: 8%;"></div>
+          <div class="bar" style="height: 52%;"></div>
+          <div class="bar alt" style="height: 31%;"></div>
+          <div class="bar alt2" style="height: 18%;"></div>
+          <div class="bar alt3" style="height: 11%;"></div>
+          <div class="bar" style="height: 78%;"></div>
+          <div class="bar alt" style="height: 45%;"></div>
+          <div class="bar alt2" style="height: 27%;"></div>
+          <div class="bar alt3" style="height: 14%;"></div>
+          <div class="bar" style="height: 64%;"></div>
+          <div class="bar alt" style="height: 38%;"></div>
+          <div class="bar alt2" style="height: 22%;"></div>
+          <div class="bar alt3" style="height: 12%;"></div>
+        </div>
+        <div class="chart-x">
+          <span>mar/22</span><span>jul/22</span><span>nov/22</span><span>mar/23</span><span>jul/23</span>
+        </div>
+        <div class="chart-legend">
+          <span><span class="swatch" style="background: var(--ocre-encadernacao);"></span>links</span>
+          <span><span class="swatch" style="background: var(--musgo-biblioteca);"></span>emojis</span>
+          <span><span class="swatch" style="background: var(--toga-academica);"></span>chamadas</span>
+          <span><span class="swatch" style="background: var(--sepia-fieldnote);"></span>emails</span>
+          <span><span class="swatch" style="background: var(--marginalia-vermelha); opacity: 0.7;"></span>Qtd_messages (linha)</span>
+        </div>
+        <div class="chart-caption">Lamination por época · grupo_pesquisa.zip · 20 meses agregados.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary">Baixar PNG</button>
+        <button class="btn btn-secondary">Baixar HTML interativo</button>
+        <button class="btn btn-ghost">Copiar BibTeX da figura</button>
+      </div>
+
+      <h2>Como ler isto</h2>
+      <div class="body-prose">
+        <p>
+          <em>Lamination</em>, na conceituação de Goffman (1974) empregada
+          por Cavalcante &amp; Hanke (2020), refere-se às camadas de
+          sentido que se acoplam à mensagem-base. Em um chat de WhatsApp,
+          materializa-se nos elementos externos ao texto puro: links que
+          ancoram em fontes, emails que apontam para correspondência
+          formal, chamadas (<em>@menções</em>) que invocam atores
+          específicos, e emojis que carregam afeto e ironia.
+        </p>
+        <p>
+          As barras agregam essas camadas por época (ou por ator,
+          conforme o sorter). A linha indica a frequência de mensagens no
+          mesmo período — útil para distinguir picos de laminação
+          decorrentes de aumento de atividade dos picos de
+          <em>densidade laminadora</em> em períodos de baixa atividade.
+        </p>
+      </div>
+
+      <div class="notice">
+        <div class="notice-title">⚠ Nota de divergência D1</div>
+        <p>
+          No fluxograma original (Cavalcante 2021, Medium), este chart
+          plotaria <em>Qtd_liq_car</em> como residue (texto puro
+          remanescente). A implementação atual plota os componentes
+          laminadores. A divergência foi mantida por retrocompatibilidade
+          com pesquisas anteriores. Ver <em>docs/divergences.rst</em>.
+        </p>
+      </div>
+    </main>
+
+    <aside class="marginalia">
+      <h4>Marginália</h4>
+      <textarea placeholder="Anote uma observação sobre este gráfico…&#10;&#10;Salvo em ~/.qualichat/notes/grupo_pesquisa/keys_lamination.md"></textarea>
+      <div class="note-list">
+        <div class="note-list-title">Notas anteriores</div>
+        <div class="note">
+          <div class="note-date">2026-04-26  10:14</div>
+          <div class="note-body">
+            "Pico de laminação em set/22 puxado por links — bate com a
+            série eleitoral. Cruzar com Linkage > Política."
+          </div>
+          <div class="note-loc">keys_lamination.md</div>
+        </div>
+        <div class="note">
+          <div class="note-date">2026-04-26  10:09</div>
+          <div class="note-body">
+            "Emails baixíssimos no fim do período. Confirmar: grupo migrou
+            para listas externas? Perguntar ao informante."
+          </div>
+          <div class="note-loc">keys_lamination.md</div>
+        </div>
+        <div class="note">
+          <div class="note-date">2026-04-24  16:42</div>
+          <div class="note-body">
+            "Voltar quando tiver os dados do grupo de controle, comparar
+            curva de chamadas (@) — pode ser variável de coesão social."
+          </div>
+          <div class="note-loc">keys_lamination.md</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+
+<!-- ============== SCREEN: KEYS / KEYWORD (chart com prompts) ============== -->
+<section class="screen" id="screen-keyword">
+  <div class="layout">
+    <aside class="sidebar">
+      <h3 class="nav-title">Menu Keys</h3>
+      <ul class="flow">
+        <li class="section">Início</li>
+        <li class="section">Resumo</li>
+        <li class="section active">Frame: Keys</li>
+        <li class="branch">Lamination</li>
+        <li class="branch">Links</li>
+        <li class="branch">Calls</li>
+        <li class="branch">Emails</li>
+        <li class="branch">Textual symbols</li>
+        <li class="branch">Messages</li>
+        <li class="branch active">Keyword</li>
+        <li class="branch">Ratings <span class="api">api</span></li>
+        <li class="section">Participação</li>
+        <li class="branch">Mensagens por ator</li>
+        <li class="branch">Mensagens por semana</li>
+        <li class="branch">Bots</li>
+        <li class="branch">Repertório de mídia</li>
+        <li class="branch">Estatísticas</li>
+        <li class="branch">Lam. por atores</li>
+        <li class="branch">Fab. por atores</li>
+        <li class="section">Opinião pública</li>
+        <li class="branch">Matriz de polaridade</li>
+        <li class="branch">Linkage temático</li>
+        <li class="section">Exportar</li>
+      </ul>
+
+      <div class="sidebar-section">
+        <h4>Chat carregado</h4>
+        <div class="sidebar-meta-block">grupo_pesquisa.zip</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="breadcrumb">Frame: Keys → Keyword</div>
+      <h1>Wordcloud filtrada</h1>
+      <p class="lede">
+        Mensagens contendo a palavra-chave informada são tokenizadas pelo
+        spaCy; o wordcloud mostra apenas tokens da classe morfológica
+        escolhida.
+      </p>
+
+      <h3>Parâmetros do chart</h3>
+      <div class="card card-tight">
+        <div class="field">
+          <label class="field-label">Palavra-chave a buscar</label>
+          <input type="text" placeholder="ex: eleição" value="eleição" style="width: 100%; max-width: 320px;" />
+          <div class="field-help">
+            Match case-insensitive em <em>message.content</em>. Apenas
+            mensagens que contêm o termo são processadas.
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Classe morfológica <span style="font-family: var(--mono); font-size: 10px; text-transform: none; letter-spacing: 0;">spaCy POS</span></label>
+          <div class="radio-group">
+            <label><input type="radio" name="pos" /> Verbos <span style="font-family: var(--mono); font-size: 10px; color: var(--sepia-fieldnote);">VERB · ar/er/ir</span></label>
+            <label><input type="radio" name="pos" checked /> Substantivos <span style="font-family: var(--mono); font-size: 10px; color: var(--sepia-fieldnote);">NOUN</span></label>
+            <label><input type="radio" name="pos" /> Adjetivos <span style="font-family: var(--mono); font-size: 10px; color: var(--sepia-fieldnote);">ADJ</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Sorter</label>
+          <div class="radio-group">
+            <label><input type="radio" name="ksort" checked /> Por época</label>
+            <label><input type="radio" name="ksort" /> Por ator</label>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom: 0;">
+          <label class="field-label">Período</label>
+          <div class="radio-group">
+            <label><input type="radio" name="kper" checked /> todos os meses</label>
+            <label><input type="radio" name="kper" /> escolher meses específicos</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn">Gerar wordcloud</button>
+      </div>
+
+      <div class="chart-frame">
+        <div class="wordcloud">
+          <span style="font-size: 38px; font-weight: 600;">voto</span>
+          <span class="l" style="font-size: 32px;">candidato</span>
+          <span style="font-size: 28px;">urna</span>
+          <span class="m" style="font-size: 26px;">campanha</span>
+          <span style="font-size: 24px;">debate</span>
+          <span class="l" style="font-size: 22px;">partido</span>
+          <span style="font-size: 20px;">presidente</span>
+          <span class="m" style="font-size: 19px;">resultado</span>
+          <span style="font-size: 17px;">turno</span>
+          <span class="l" style="font-size: 16px;">senador</span>
+          <span style="font-size: 15px;">câmara</span>
+          <span class="m" style="font-size: 14px;">bancada</span>
+          <span style="font-size: 13px;">posse</span>
+          <span style="font-size: 12px;">pesquisa</span>
+          <span style="font-size: 11px;">aliança</span>
+          <span style="font-size: 11px;">coligação</span>
+          <span style="font-size: 11px;">frente</span>
+          <span style="font-size: 11px;">eleitor</span>
+        </div>
+        <div class="chart-caption">
+          Substantivos em mensagens contendo "eleição" · grupo_pesquisa.zip
+          · 437 mensagens correspondentes · 1.847 tokens NOUN extraídos.
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary">Baixar PNG</button>
+        <button class="btn btn-secondary">Baixar HTML interativo</button>
+        <button class="btn btn-ghost">Exportar tokens (CSV)</button>
+      </div>
+
+      <h2>Como ler isto</h2>
+      <div class="body-prose">
+        <p>
+          Este chart filtra primeiro pelo termo livre, depois pela classe
+          morfológica. Útil para responder perguntas como: <em>"quando
+          falam de eleição, falam de quem (substantivos) ou do quê
+          (verbos)?"</em>. Substantivos tendem a destacar atores e
+          objetos do discurso; verbos, ações; adjetivos, qualificações.
+        </p>
+        <p>
+          O tamanho de cada palavra na nuvem é proporcional à frequência
+          relativa após lematização básica do spaCy (<em>pt_core_news_sm</em>).
+        </p>
+      </div>
+    </main>
+
+    <aside class="marginalia">
+      <h4>Marginália</h4>
+      <textarea placeholder="Anote uma observação sobre esta busca…"></textarea>
+      <div class="note-list">
+        <div class="note-list-title">Notas anteriores</div>
+        <div class="note">
+          <div class="note-date">2026-04-27  11:08</div>
+          <div class="note-body">
+            "Substantivos centrados em processo institucional (urna,
+            candidato, partido) e não em afetos. Cruzar com adjetivos
+            para mapear valência."
+          </div>
+          <div class="note-loc">keys_keyword_eleicao.md</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+
+<!-- ============== SCREEN: PUBLIC OPINION / POLARIDADE ============== -->
+<section class="screen" id="screen-opiniao">
+  <div class="layout">
+    <aside class="sidebar">
+      <h3 class="nav-title">Menu Keys</h3>
+      <ul class="flow">
+        <li class="section">Início</li>
+        <li class="section">Resumo</li>
+        <li class="section">Frame: Keys</li>
+        <li class="branch">Lamination</li>
+        <li class="branch">Links</li>
+        <li class="branch">Calls</li>
+        <li class="branch">Emails</li>
+        <li class="branch">Textual symbols</li>
+        <li class="branch">Messages</li>
+        <li class="branch">Keyword</li>
+        <li class="branch">Ratings <span class="api">api</span></li>
+        <li class="section">Participação</li>
+        <li class="branch">Mensagens por ator</li>
+        <li class="branch">Mensagens por semana</li>
+        <li class="branch">Bots</li>
+        <li class="branch">Repertório de mídia</li>
+        <li class="branch">Estatísticas</li>
+        <li class="branch">Lam. por atores</li>
+        <li class="branch">Fab. por atores</li>
+        <li class="section active">Opinião pública</li>
+        <li class="branch active">Matriz de polaridade</li>
+        <li class="branch">Linkage temático</li>
+        <li class="section">Exportar</li>
+      </ul>
+
+      <div class="sidebar-section">
+        <h4>Chat carregado</h4>
+        <div class="sidebar-meta-block">grupo_pesquisa.zip</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="breadcrumb">Opinião pública → Matriz de polaridade</div>
+      <h1>Matriz de polaridade</h1>
+      <p class="lede">
+        Polaridade média estimada por ator, sobre amostra das mensagens
+        traduzidas do português ao inglês via <em>spaCyTextBlob</em>.
+      </p>
+
+      <div class="notice">
+        <div class="notice-title">⚠ Serviço externo · Google Translate</div>
+        <p>
+          Esta análise envia trechos de mensagens ao <em>Google
+          Translate</em> para tradução automática ao inglês (limitação do
+          TextBlob). Considere se isso é aceitável para o seu protocolo
+          de pesquisa antes de prosseguir.
+        </p>
+      </div>
+
+      <h3>Parâmetros</h3>
+      <div class="card card-tight">
+        <div class="field">
+          <label class="field-label">Filtro de atores</label>
+          <div class="radio-group">
+            <label><input type="radio" name="ax" checked /> apenas atores acima da média de mensagens</label>
+            <label><input type="radio" name="ax" /> todos os atores</label>
+          </div>
+          <div class="field-help">
+            Comportamento atual do código: filtra atores com
+            <em>len(actor.messages) &gt; média</em>.
+          </div>
+        </div>
+        <div class="field" style="margin-bottom: 0;">
+          <label class="field-label">Limite de mensagens por ator</label>
+          <input type="number" value="5" style="width: 80px;" />
+          <div class="field-help">
+            Hoje no código é <em>5</em> hard-coded. Tornar configurável é
+            extensão UI — reduzir minimiza chamadas ao Google.
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn">Gerar matriz</button>
+      </div>
+
+      <div class="chart-frame">
+        <div class="scatter">
+          <div class="dot" style="left: 8%; top: 60%;"></div>
+          <div class="dot" style="left: 14%; top: 30%; background: var(--musgo-biblioteca);"></div>
+          <div class="dot" style="left: 22%; top: 70%; background: var(--marginalia-vermelha);"></div>
+          <div class="dot" style="left: 30%; top: 45%;"></div>
+          <div class="dot" style="left: 38%; top: 18%; background: var(--musgo-biblioteca);"></div>
+          <div class="dot" style="left: 48%; top: 55%;"></div>
+          <div class="dot" style="left: 58%; top: 80%; background: var(--marginalia-vermelha);"></div>
+          <div class="dot" style="left: 66%; top: 35%; background: var(--musgo-biblioteca);"></div>
+          <div class="dot" style="left: 76%; top: 50%;"></div>
+          <div class="dot" style="left: 84%; top: 22%; background: var(--musgo-biblioteca);"></div>
+        </div>
+        <div class="chart-x">
+          <span>Lévin</span><span>Bezukhov</span><span>Capitu</span><span>Bentinho</span><span>Mariâ</span>
+        </div>
+        <div class="chart-caption">Polaridade média por ator (escala −1 a +1) · 47 atores filtrados a 12 acima da média.</div>
+      </div>
+
+      <h2>Como ler isto</h2>
+      <div class="body-prose">
+        <p>
+          A polaridade é estimada via análise de sentimento de Pattern/TextBlob
+          sobre tradução automática para o inglês. <em>Não é um instrumento
+          calibrado para o português brasileiro</em> — o sinal aqui é
+          comparativo (qual ator é mais polarizado em relação aos outros do
+          mesmo grupo), não absoluto.
+        </p>
+        <p>
+          Recomenda-se cruzar este chart com leitura qualitativa direta
+          das mensagens dos atores nas extremidades.
+        </p>
+      </div>
+    </main>
+
+    <aside class="marginalia">
+      <h4>Marginália</h4>
+      <textarea placeholder="Anote uma observação…"></textarea>
+      <div class="note-list">
+        <div class="note-list-title">Notas anteriores</div>
+        <div class="note">
+          <div class="note-date">2026-04-27  09:48</div>
+          <div class="note-body">
+            "Capitu na ponta negativa — pode ser ironia mal calibrada
+            pelo TextBlob. Ler 10 mensagens dela manualmente."
+          </div>
+          <div class="note-loc">opiniao_polaridade.md</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+
+<!-- ============== SCREEN: EXPORT ============== -->
+<section class="screen" id="screen-export">
+  <div class="layout">
+    <aside class="sidebar">
+      <h3 class="nav-title">Menu Keys</h3>
+      <ul class="flow">
+        <li class="section">Início</li>
+        <li class="section">Resumo</li>
+        <li class="section">Frame: Keys</li>
+        <li class="branch">Lamination</li>
+        <li class="branch">Links</li>
+        <li class="branch">Calls</li>
+        <li class="branch">Emails</li>
+        <li class="branch">Textual symbols</li>
+        <li class="branch">Messages</li>
+        <li class="branch">Keyword</li>
+        <li class="branch">Ratings <span class="api">api</span></li>
+        <li class="section">Participação</li>
+        <li class="branch">Mensagens por ator</li>
+        <li class="branch">Mensagens por semana</li>
+        <li class="branch">Bots</li>
+        <li class="branch">Repertório de mídia</li>
+        <li class="branch">Estatísticas</li>
+        <li class="branch">Lam. por atores</li>
+        <li class="branch">Fab. por atores</li>
+        <li class="section">Opinião pública</li>
+        <li class="branch">Matriz de polaridade</li>
+        <li class="branch">Linkage temático</li>
+        <li class="section active">Exportar</li>
+      </ul>
+
+      <div class="sidebar-section">
+        <h4>Chat carregado</h4>
+        <div class="sidebar-meta-block">grupo_pesquisa.zip</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="breadcrumb">Exportar</div>
+      <h1>Material para o paper</h1>
+      <p class="lede">
+        Cada gráfico gerado nesta sessão; cada anotação de campo;
+        a citação canônica do <em>qualichat</em> e do paper-mãe.
+      </p>
+
+      <h3>Figuras geradas nesta sessão</h3>
+      <div class="contact-sheet">
+        <div class="contact">
+          <div class="contact-thumb">
+            <div class="b" style="height: 40%;"></div><div class="b" style="height: 70%; background: var(--musgo-biblioteca);"></div>
+            <div class="b" style="height: 55%;"></div><div class="b" style="height: 80%; background: var(--musgo-biblioteca);"></div>
+            <div class="b" style="height: 30%;"></div><div class="b" style="height: 65%; background: var(--musgo-biblioteca);"></div>
+          </div>
+          <div class="contact-meta">
+            <strong>Lamination · por época</strong>
+            <span>fig01_keys_lamination.html · 14:32</span>
+          </div>
+        </div>
+        <div class="contact">
+          <div class="contact-thumb">
+            <div class="b" style="height: 80%;"></div><div class="b" style="height: 45%;"></div>
+            <div class="b" style="height: 60%;"></div><div class="b" style="height: 30%;"></div>
+            <div class="b" style="height: 75%;"></div><div class="b" style="height: 50%;"></div>
+          </div>
+          <div class="contact-meta">
+            <strong>Mensagens por ator</strong>
+            <span>fig02_part_actors.html · 14:48</span>
+          </div>
+        </div>
+        <div class="contact">
+          <div class="contact-thumb" style="align-items: center; justify-content: center;">
+            <span style="font-family: var(--serif); font-style: italic; color: var(--sepia-fieldnote); font-size: 13px;">wordcloud</span>
+          </div>
+          <div class="contact-meta">
+            <strong>Keyword · "eleição" / NOUN</strong>
+            <span>fig03_keys_keyword.html · 15:02</span>
+          </div>
+        </div>
+        <div class="contact">
+          <div class="contact-thumb" style="align-items: center; justify-content: center;">
+            <span style="font-family: var(--serif); font-style: italic; color: var(--sepia-fieldnote); font-size: 13px;">scatter</span>
+          </div>
+          <div class="contact-meta">
+            <strong>Polaridade · matriz</strong>
+            <span>fig04_op_polaridade.html · 15:18</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn">Baixar todas (.zip)</button>
+        <button class="btn btn-ghost">Apenas PNG</button>
+        <button class="btn btn-ghost">Apenas HTML interativo</button>
+      </div>
+
+      <h2>Citação canônica</h2>
+      <div class="body-prose">
+        <p>
+          Use a referência abaixo no seu paper. A citação preferida em
+          <em>CITATION.cff</em> é o paper-mãe (Cavalcante &amp; Hanke
+          2020), não o software — ferramentas se atualizam, conceitos
+          permanecem.
+        </p>
+      </div>
+      <pre class="bibtex">@article{cavalcante2020ancoragens,
+  author    = {Cavalcante, Fernando Luiz Nobre and Hanke, Michael Mathias},
+  title     = {Ancoragens de interação em grupos midiatizados:
+               proposta quantiqualitativa},
+  journal   = {Comunicação Mídia e Consumo},
+  volume    = {17},
+  number    = {50},
+  year      = {2020},
+  doi       = {10.18568/cmc.v17i49.2227},
+}
+
+@software{qualichat,
+  author    = {Qualichat Contributors},
+  title     = {Qualichat: linguistic ethnography toolkit
+               for WhatsApp exports},
+  version   = {1.5.0},
+  year      = {2026},
+  url       = {https://github.com/qualichat/qualichat},
+}</pre>
+
+      <h2>Marginália desta sessão</h2>
+      <div class="body-prose">
+        <p>
+          Todas as anotações de campo feitas durante esta sessão. São
+          salvas em <em>~/.qualichat/notes/grupo_pesquisa/</em> e podem
+          ser editadas manualmente como arquivos Markdown.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="note">
+          <div class="note-date">2026-04-26  10:14  ·  keys_lamination.md</div>
+          <div class="note-body">
+            "Pico de laminação em set/22 puxado por links — bate com a
+            série eleitoral. Cruzar com Linkage > Política."
+          </div>
+        </div>
+        <div class="note">
+          <div class="note-date">2026-04-26  10:09  ·  keys_lamination.md</div>
+          <div class="note-body">
+            "Emails baixíssimos no fim do período. Confirmar: grupo migrou
+            para listas externas? Perguntar ao informante."
+          </div>
+        </div>
+        <div class="note">
+          <div class="note-date">2026-04-25  14:31  ·  _resumo.md</div>
+          <div class="note-body">
+            "Período coincide com o ciclo eleitoral brasileiro. Verificar
+            se há descontinuidade clara em out/2022."
+          </div>
+        </div>
+        <div class="note">
+          <div class="note-date">2026-04-27  09:48  ·  opiniao_polaridade.md</div>
+          <div class="note-body">
+            "Capitu na ponta negativa — pode ser ironia mal calibrada
+            pelo TextBlob. Ler 10 mensagens dela manualmente."
+          </div>
+        </div>
+        <div class="note">
+          <div class="note-date">2026-04-27  11:08  ·  keys_keyword_eleicao.md</div>
+          <div class="note-body">
+            "Substantivos centrados em processo institucional (urna,
+            candidato, partido) e não em afetos."
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn">Exportar marginália como Markdown</button>
+        <button class="btn btn-ghost">Como JSON</button>
+      </div>
+    </main>
+  </div>
+</section>
+
+<footer class="chrome-footer">
+  <span>~/.qualichat/  ·  privacidade: tudo local</span>
+  <span>github.com/qualichat/qualichat</span>
+</footer>
+
+<script>
+  document.querySelectorAll('.tabbar a').forEach(function (tab) {
+    tab.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = tab.dataset.screen;
+      document.querySelectorAll('.tabbar a').forEach(function (t) {
+        t.classList.toggle('active', t === tab);
+      });
+      document.querySelectorAll('.screen').forEach(function (s) {
+        s.classList.toggle('active', s.id === 'screen-' + target);
+      });
+      var meta = document.getElementById('chrome-meta');
+      if (target === 'home' || target === 'setup' || target === 'resumo-empty') {
+        meta.innerHTML = '<span class="pill">v1.5.0</span><span>tudo local · sua máquina</span>';
+      } else {
+        meta.innerHTML =
+          '<span class="pill">grupo_pesquisa.zip</span>' +
+          '<span>12.453 msgs · 47 atores · mar/22 — out/23</span>';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
