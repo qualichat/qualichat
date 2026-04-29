@@ -1,6 +1,12 @@
 # Chat file
 _chat.txt
 
+# Test corpus of real chats (privacy — never commit)
+docs/chats/
+
+# Personal thesis report (private research data)
+docs/YLAI_V2.pdf
+
 # Working files
 .venv
 .vscode

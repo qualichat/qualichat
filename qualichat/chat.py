@@ -43,8 +43,9 @@ _IMPURITIES = (
     (' ', ''),    # En space
     ('‬', ''),    # Pop Directional Formatting
     ('‪', ''),    # Left-to-Right Embedding
-    ('\xa0', ' '),     # No-Break Space → space
-    ('‑', '-'),   # Non-breaking hyphen → hyphen
+    ('\xa0', ' '),     # No-Break Space → space (U+00A0)
+    (' ', ' '),   # Narrow No-Break Space → space (U+202F, iOS US 12h)
+    ('‑', '-'),   # Non-breaking hyphen → hyphen (U+2011)
 )
 
 
@@ -113,7 +114,20 @@ class _CapturingWhatsAppParser(WhatsAppParser):
         self.system_events: List[Tuple[_dt.datetime, str]] = []
 
     def _parse_message(self, mess: str):  # type: ignore[override]
-        result = super()._parse_message(mess)
+        try:
+            result = super()._parse_message(mess)
+        except ValueError:
+            # chat-miner's ``_is_new_message`` regex is permissive — any line
+            # starting with a date-like prefix (e.g. ``16.09.2024 12:55`` from
+            # a forwarded news article pasted into the chat) is split off as
+            # its own raw message, even though it lacks the
+            # ``[timestamp] author:`` envelope. ``super()._parse_message``
+            # then raises ``ValueError`` when it tries to split on
+            # ``date_author_sep`` and finds the separator missing. Treat as
+            # not-a-message and move on, so a single forwarded paragraph
+            # does not poison the whole parse.
+            return None
+
         if result is not None:
             return result
 
