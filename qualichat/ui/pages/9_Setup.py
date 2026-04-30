@@ -11,13 +11,30 @@ import streamlit as st
 from qualichat.ui.components.chrome import bootstrap
 
 
-def _spacy_available(model: str) -> bool:
+def _spacy_available(model: str) -> tuple[bool, str]:
+    """Return (available, error_text). Catch any exception so the
+    Setup page never crashes — surface the cause to the user instead.
+    """
     try:
         import importlib
         importlib.import_module(model)
-        return True
-    except (ImportError, OSError):
-        return False
+        return True, ''
+    except Exception as exc:  # noqa: BLE001
+        return False, f'{type(exc).__name__}: {exc}'
+
+
+def _env_info() -> dict:
+    """Read package versions installed in the live environment so the
+    Setup page can show them when something is off."""
+    import sys
+    info: dict = {'python': sys.version.split()[0]}
+    for pkg in ('numpy', 'spacy', 'thinc', 'polars', 'pandas', 'chat_miner'):
+        try:
+            mod = __import__(pkg)
+            info[pkg] = getattr(mod, '__version__', '?')
+        except Exception as exc:  # noqa: BLE001
+            info[pkg] = f'IMPORT FAIL: {type(exc).__name__}: {str(exc)[:80]}'
+    return info
 
 
 def _download_spacy_model(model: str) -> tuple[bool, str]:
@@ -58,31 +75,44 @@ def main() -> None:
 
     col1, col2 = st.columns(2)
     with col1:
-        pt_ok = _spacy_available('pt_core_news_sm')
+        pt_ok, pt_err = _spacy_available('pt_core_news_sm')
         st.markdown(
             f'`pt_core_news_sm`: {"✓ instalado" if pt_ok else "✗ não instalado"}'
         )
-        if not pt_ok and st.button('Baixar pt_core_news_sm'):
-            with st.spinner('Baixando…'):
-                ok, log = _download_spacy_model('pt_core_news_sm')
-            if ok:
-                st.success('Baixado.')
-            else:
-                st.error('Falhou:')
-                st.code(log)
+        if not pt_ok:
+            if pt_err:
+                st.code(pt_err, language='text')
+            if st.button('Baixar pt_core_news_sm'):
+                with st.spinner('Baixando…'):
+                    ok, log = _download_spacy_model('pt_core_news_sm')
+                if ok:
+                    st.success('Baixado.')
+                else:
+                    st.error('Falhou:')
+                    st.code(log)
     with col2:
-        en_ok = _spacy_available('en_core_web_sm')
+        en_ok, en_err = _spacy_available('en_core_web_sm')
         st.markdown(
             f'`en_core_web_sm`: {"✓ instalado" if en_ok else "✗ não instalado"}'
         )
-        if not en_ok and st.button('Baixar en_core_web_sm'):
-            with st.spinner('Baixando…'):
-                ok, log = _download_spacy_model('en_core_web_sm')
-            if ok:
-                st.success('Baixado.')
-            else:
-                st.error('Falhou:')
-                st.code(log)
+        if not en_ok:
+            if en_err:
+                st.code(en_err, language='text')
+            if st.button('Baixar en_core_web_sm'):
+                with st.spinner('Baixando…'):
+                    ok, log = _download_spacy_model('en_core_web_sm')
+                if ok:
+                    st.success('Baixado.')
+                else:
+                    st.error('Falhou:')
+                    st.code(log)
+
+    # ─── Env diagnostic (shown when something is broken) ─────────────
+    if not (pt_ok and en_ok):
+        with st.expander('Ambiente Python detectado'):
+            info = _env_info()
+            for k, v in info.items():
+                st.markdown(f'- **{k}**: `{v}`')
 
     # ─── Step 02: Google API key ─────────────────────────────────────
     st.markdown('### 02 · Google API key (opcional)')
