@@ -7,19 +7,20 @@
 # For local development prefer `pip install -e ".[dev]"` driven by
 # pyproject.toml; this file exists primarily so Streamlit Cloud can
 # build the web UI deploy.
-
-# Pin numpy < 2 because spaCy 3.7.x ships C-extensions (thinc, blis)
-# compiled against the numpy 1.x ABI. With numpy 2.x at runtime, every
-# parse raises:
-#   "numpy.dtype size changed, may indicate binary incompatibility.
-#    Expected 96 from C header, got 88 from PyObject."
-# Upgrading to spaCy 3.8+ would lift this constraint, but that is a
-# wider change. For now pin numpy.
-numpy>=1.26,<2
+#
+# numpy version note
+# ------------------
+# We do NOT pin numpy. Streamlit Cloud's resolver picks numpy 2.x by
+# default and modern wheels for chat-miner/polars/pandas/spaCy 3.8+
+# are compiled against the numpy 2.x ABI. A previous attempt to pin
+# numpy<2 surfaced the inverse error (`Expected 96 from C header, got
+# 88 from PyObject`) because the C extensions were compiled against
+# 2.x but the runtime had 1.x. Spacy 3.8 added official numpy 2.x
+# support, which is why we bump from 3.7→3.8 below.
 
 # Core parsing + analytics
 chat-miner>=0.6,<1
-spacy>=3.7,<4
+spacy>=3.8,<4
 plotly>=5,<7
 emojis>=0.7,<1
 pandas>=2,<3
@@ -42,10 +43,11 @@ spacytextblob>=4,<5
 # Web UI
 streamlit>=1.36,<2
 
-# spaCy language models (preloaded so charts that need NLP work
-# without running a separate `spacy download` step at first launch)
-pt_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_sm-3.7.0/pt_core_news_sm-3.7.0-py3-none-any.whl
-en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+# spaCy language models — version 3.8.0 to match spaCy 3.8 above.
+# Loading a 3.7-built model in spaCy 3.8 prints a compatibility
+# warning and may fail outright.
+pt_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_sm-3.8.0/pt_core_news_sm-3.8.0-py3-none-any.whl
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 
 # Install the qualichat package itself so `from qualichat.ui...`
 # imports resolve. Streamlit Cloud only runs `pip install -r
