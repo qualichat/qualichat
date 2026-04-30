@@ -7,6 +7,11 @@ docs/chats/
 # Personal thesis report (private research data)
 docs/YLAI_V2.pdf
 
+# Logo source assets — the production PNGs live in qualichat/ui/assets/.
+# This folder holds the original .ai/.eps/.pdf + the upstream zip and
+# macOS unzip cruft (__MACOSX/), none of which need to be in git.
+docs/logo/
+
 # Working files
 .venv
 .vscode
