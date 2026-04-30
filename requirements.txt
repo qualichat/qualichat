@@ -37,3 +37,9 @@ streamlit>=1.36,<2
 # without running a separate `spacy download` step at first launch)
 pt_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_sm-3.7.0/pt_core_news_sm-3.7.0-py3-none-any.whl
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+
+# Install the qualichat package itself so `from qualichat.ui...`
+# imports resolve. Streamlit Cloud only runs `pip install -r
+# requirements.txt`; without this line the package isn't on sys.path
+# and `app.py` boots with ModuleNotFoundError.
+-e .
