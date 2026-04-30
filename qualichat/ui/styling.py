@@ -231,6 +231,12 @@ _CSS = """
   input[type="radio"], input[type="checkbox"] { accent-color: var(--toga-academica); }
 
   /* Custom blocks */
+  .qc-brand-icon {
+    width: 36px;
+    height: 36px;
+    display: block;
+    flex-shrink: 0;
+  }
   .qc-brand {
     font-family: var(--serif);
     font-size: 28px;

@@ -10,7 +10,10 @@ typography exactly.
 
 from __future__ import annotations
 
+import base64
+from functools import lru_cache
 from html import escape
+from pathlib import Path
 from typing import Optional, Sequence
 
 import streamlit as st
@@ -18,6 +21,22 @@ import streamlit as st
 import qualichat
 from ..state import get_chat_filename, has_chat
 from ..styling import inject_css
+
+
+_ASSETS_DIR = Path(__file__).resolve().parent.parent / 'assets'
+_LOGO_ICON_PATH = _ASSETS_DIR / 'qualichat-logo-icon.png'
+_LOGO_FULL_PATH = _ASSETS_DIR / 'qualichat-logo-full.png'
+
+
+@lru_cache(maxsize=4)
+def _data_uri(path: Path) -> str:
+    """Return a ``data:image/png;base64,...`` URI for a small PNG.
+
+    Cached so each page rerun does not re-read or re-encode the file.
+    """
+    payload = path.read_bytes()
+    encoded = base64.b64encode(payload).decode('ascii')
+    return f'data:image/png;base64,{encoded}'
 
 
 def _populate_secrets_into_config() -> None:
@@ -92,12 +111,22 @@ def header(breadcrumb: str, *, title: Optional[str] = None) -> None:
         'color: var(--sepia-fieldnote);">tudo local · sua máquina</span>'
     )
 
+    # Logo icon as base64 data URI — embedded once, cached. The wordmark
+    # below stays in EB Garamond for consistency with the typography
+    # system; the icon is purely visual identity.
+    icon_uri = _data_uri(_LOGO_ICON_PATH) if _LOGO_ICON_PATH.exists() else ''
+    icon_html = (
+        f'<img src="{icon_uri}" alt="qualichat" class="qc-brand-icon" />'
+        if icon_uri else ''
+    )
+
     st.markdown(
         f'''
         <div style="display: flex; justify-content: space-between;
-             align-items: baseline; padding: 8px 0 24px 0;
+             align-items: center; padding: 8px 0 24px 0;
              border-bottom: 1px solid var(--borda-padrao); margin-bottom: 24px;">
-          <div>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            {icon_html}
             <span class="qc-brand">qualichat</span>
             <span class="qc-brand-sub">após Cavalcante &amp; Hanke (2020)</span>
           </div>
@@ -199,9 +228,15 @@ def bootstrap(*, page_title: str, breadcrumb: str, active_slug: str) -> None:
     ``st.set_page_config`` if used; this helper calls it for you when
     page_title is provided).
     """
+    # Use the logo icon as the browser tab favicon when bundled, fall
+    # back to the diamond glyph for environments where the asset is
+    # missing (e.g. an editable install with the file not yet copied).
+    icon: object = '◇'
+    if _LOGO_ICON_PATH.exists():
+        icon = str(_LOGO_ICON_PATH)
     st.set_page_config(
         page_title=f'qualichat — {page_title}',
-        page_icon='◇',
+        page_icon=icon,
         layout='wide',
         initial_sidebar_state='expanded',
     )
