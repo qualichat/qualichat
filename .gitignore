@@ -7,6 +7,12 @@ docs/chats/
 # Personal thesis report (private research data)
 docs/YLAI_V2.pdf
 
+# Source PDFs of target charts — same private data as the thesis report
+# (cycled through different cuts). PNGs are derivable; the analysis doc
+# in docs/graficos-analysis.md captures the structural insights without
+# the raw data.
+docs/graficos/
+
 # Logo source assets — the production PNGs live in qualichat/ui/assets/.
 # This folder holds the original .ai/.eps/.pdf + the upstream zip and
 # macOS unzip cruft (__MACOSX/), none of which need to be in git.
