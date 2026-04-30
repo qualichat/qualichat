@@ -8,6 +8,15 @@
 # pyproject.toml; this file exists primarily so Streamlit Cloud can
 # build the web UI deploy.
 
+# Pin numpy < 2 because spaCy 3.7.x ships C-extensions (thinc, blis)
+# compiled against the numpy 1.x ABI. With numpy 2.x at runtime, every
+# parse raises:
+#   "numpy.dtype size changed, may indicate binary incompatibility.
+#    Expected 96 from C header, got 88 from PyObject."
+# Upgrading to spaCy 3.8+ would lift this constraint, but that is a
+# wider change. For now pin numpy.
+numpy>=1.26,<2
+
 # Core parsing + analytics
 chat-miner>=0.6,<1
 spacy>=3.7,<4
