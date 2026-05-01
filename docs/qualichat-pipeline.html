@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>qualichat — Pipeline & Camadas de Dados</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pergaminho: #F4EFE6;
+      --pergaminho-claro: #FAF7F1;
+      --pergaminho-escuro: #E8DFCE;
+      --tinta-negra: #3A2F26;
+      --sepia-fieldnote: #7A6B5A;
+      --sepia-claro: #9C8A74;
+      --ocre-encadernacao: #B8860B;
+      --ocre-claro: rgba(184, 134, 11, 0.18);
+      --musgo-biblioteca: #5B7553;
+      --musgo-claro: rgba(91, 117, 83, 0.15);
+      --toga-academica: #62352B;
+      --marginalia-vermelha: #A23A2D;
+      --borda-padrao: rgba(58, 47, 38, 0.14);
+      --borda-suave: rgba(58, 47, 38, 0.08);
+
+      --serif: 'EB Garamond', Georgia, serif;
+      --sans: 'Source Sans 3', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'Consolas', monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      background: var(--pergaminho);
+      font-family: var(--sans);
+      color: var(--tinta-negra);
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 28px 80px;
+    }
+
+    /* ─── Header ───────────────────────────────────────── */
+    header.brand {
+      border-bottom: 1px solid var(--borda-padrao);
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    header.brand h1 {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 38px;
+      margin: 0 0 6px;
+      letter-spacing: -0.01em;
+    }
+    header.brand .sub {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--sepia-fieldnote);
+      font-size: 17px;
+    }
+    header.brand .meta {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--sepia-fieldnote);
+      font-family: var(--mono);
+    }
+
+    /* ─── Lede ─────────────────────────────────────────── */
+    .lede {
+      border-left: 3px solid var(--ocre-encadernacao);
+      padding: 4px 0 4px 18px;
+      margin: 24px 0 32px;
+      font-family: var(--serif);
+      font-size: 19px;
+      font-style: italic;
+      color: var(--toga-academica);
+      line-height: 1.5;
+    }
+
+    /* ─── Tabs nav ─────────────────────────────────────── */
+    nav.tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--borda-padrao);
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+    nav.tabs button {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sepia-fieldnote);
+      padding: 12px 22px 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-bottom: -1px;
+    }
+    nav.tabs button:hover {
+      color: var(--toga-academica);
+    }
+    nav.tabs button.active {
+      color: var(--toga-academica);
+      border-bottom-color: var(--ocre-encadernacao);
+    }
+
+    /* ─── Sections ─────────────────────────────────────── */
+    section.tab-content {
+      display: none;
+      animation: fadein 0.18s ease;
+    }
+    section.tab-content.active {
+      display: block;
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h2.section-title {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 28px;
+      margin: 8px 0 18px;
+    }
+
+    h3.subhead {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 22px;
+      margin: 32px 0 14px;
+      color: var(--toga-academica);
+    }
+
+    p { margin: 12px 0; }
+
+    /* ─── Stage cards (Pipeline) ───────────────────────── */
+    .stage {
+      background: var(--pergaminho-claro);
+      border: 1px solid var(--borda-padrao);
+      border-radius: 6px;
+      padding: 22px 26px;
+      margin: 0 0 18px;
+      position: relative;
+    }
+    .stage::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -19px;
+      width: 0; height: 0;
+      border-left: 9px solid transparent;
+      border-right: 9px solid transparent;
+      border-top: 12px solid var(--ocre-encadernacao);
+      transform: translateX(-50%);
+      opacity: 0.6;
+    }
+    .stage:last-of-type::after { display: none; }
+
+    .stage-header {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .stage-num {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ocre-encadernacao);
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+    .stage-title {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 20px;
+      flex: 1;
+      min-width: 200px;
+    }
+    .stage-codeRef {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--sepia-fieldnote);
+      background: var(--ocre-claro);
+      padding: 3px 8px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .io {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+    .io .arrow {
+      color: var(--ocre-encadernacao);
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .io .box {
+      background: var(--pergaminho-escuro);
+      border: 1px solid var(--borda-padrao);
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--toga-academica);
+    }
+    .io .box .label {
+      display: block;
+      font-family: var(--sans);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--sepia-claro);
+      margin-bottom: 4px;
+    }
+
+    .stage-desc { color: var(--tinta-negra); font-size: 15px; }
+
+    .theory-tag {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--musgo-biblioteca);
+      background: var(--musgo-claro);
+      padding: 3px 9px;
+      border-radius: 3px;
+      margin-right: 6px;
+      font-weight: 600;
+    }
+
+    code, .mono {
+      font-family: var(--mono);
+      font-size: 0.92em;
+      background: var(--ocre-claro);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--toga-academica);
+    }
+
+    pre {
+      background: var(--tinta-negra);
+      color: #E8DFCE;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 14px 18px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+    pre .keyword { color: #C9A24E; }
+    pre .string  { color: #B5C99A; }
+    pre .comment { color: #9C8A74; font-style: italic; }
+    pre .var     { color: #E8B4A2; }
+
+    details.collapsible {
+      margin-top: 12px;
+      border-top: 1px dashed var(--borda-suave);
+      padding-top: 10px;
+    }
+    details.collapsible > summary {
+      font-family: var(--sans);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sepia-fieldnote);
+      cursor: pointer;
+      user-select: none;
+      padding: 4px 0;
+    }
+    details.collapsible[open] > summary { color: var(--toga-academica); }
+    details.collapsible > summary::marker { color: var(--ocre-encadernacao); }
+
+    /* ─── Formula box ──────────────────────────────────── */
+    .formula {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 18px;
+      background: var(--pergaminho-escuro);
+      border-left: 3px solid var(--musgo-biblioteca);
+      padding: 14px 20px;
+      margin: 16px 0;
+      border-radius: 0 4px 4px 0;
+      color: var(--toga-academica);
+    }
+    .formula .var {
+      font-family: var(--mono);
+      font-style: normal;
+      font-size: 14px;
+      color: var(--ocre-encadernacao);
+    }
+    .formula .op { color: var(--marginalia-vermelha); margin: 0 6px; font-weight: 600; }
+    .formula .foot {
+      display: block;
+      margin-top: 8px;
+      font-family: var(--sans);
+      font-style: normal;
+      font-size: 12px;
+      color: var(--sepia-fieldnote);
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── Tables ───────────────────────────────────────── */
+    table.charts {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+    table.charts th {
+      text-align: left;
+      font-family: var(--sans);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--sepia-fieldnote);
+      padding: 8px 10px;
+      border-bottom: 1.5px solid var(--borda-padrao);
+      background: var(--pergaminho-claro);
+      vertical-align: bottom;
+    }
+    table.charts td {
+      padding: 10px;
+      border-bottom: 1px solid var(--borda-suave);
+      vertical-align: top;
+    }
+    table.charts tr.frame-head td {
+      background: var(--toga-academica);
+      color: var(--pergaminho-claro);
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 16px;
+      padding: 10px 14px;
+      border: none;
+    }
+    table.charts tr:hover td:not(.frame-head) {
+      background: var(--ocre-claro);
+    }
+    table.charts .label {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 16px;
+      white-space: nowrap;
+    }
+    table.charts .fields {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--toga-academica);
+    }
+    table.charts .fields span {
+      display: inline-block;
+      background: var(--ocre-claro);
+      padding: 2px 6px;
+      margin: 1px 3px 1px 0;
+      border-radius: 2px;
+    }
+    table.charts .prompts {
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--sepia-fieldnote);
+    }
+    table.charts .prompts em {
+      font-style: normal;
+      color: var(--musgo-biblioteca);
+      font-weight: 500;
+    }
+
+    .hint {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--sepia-fieldnote);
+      font-size: 14px;
+      margin: 8px 0 18px;
+    }
+
+    /* ─── Theory cards ─────────────────────────────────── */
+    .theory-card {
+      border: 1px solid var(--borda-padrao);
+      border-radius: 6px;
+      padding: 22px 26px;
+      margin: 16px 0;
+      background: var(--pergaminho-claro);
+    }
+    .theory-card h4 {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 22px;
+      margin: 0 0 8px;
+      color: var(--toga-academica);
+    }
+    .theory-card .author {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--sepia-fieldnote);
+      margin-bottom: 14px;
+    }
+
+    /* ─── Footer ───────────────────────────────────────── */
+    footer {
+      margin-top: 60px;
+      padding-top: 22px;
+      border-top: 1px solid var(--borda-padrao);
+      font-size: 13px;
+      color: var(--sepia-fieldnote);
+      font-family: var(--mono);
+      line-height: 1.7;
+    }
+    footer a { color: var(--ocre-encadernacao); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ─── Responsive ───────────────────────────────────── */
+    @media (max-width: 760px) {
+      .container { padding: 20px 16px 60px; }
+      header.brand h1 { font-size: 30px; }
+      .io { grid-template-columns: 1fr; }
+      .io .arrow { transform: rotate(90deg); margin: 4px auto; }
+      table.charts { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header class="brand">
+    <h1>qualichat — Pipeline &amp; Camadas de Dados</h1>
+    <div class="sub">como um <em>.txt</em> exportado do WhatsApp vira um chart Plotly</div>
+    <div class="meta">artefato derivado de leitura sistemática de qualichat/<em>*.py</em> · feat/web-ui</div>
+  </header>
+
+  <div class="lede">
+    Este documento mapeia cada transformação que os dados sofrem entre o
+    arquivo bruto e o gráfico que aparece na UI. Use as abas para alternar
+    entre o <strong>fluxo de processamento</strong> (o que acontece com os
+    bytes) e as <strong>camadas expostas ao usuário</strong> (quais campos
+    cada um dos 17 charts efetivamente lê e mostra).
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button class="active" data-target="pipeline">01 · Pipeline</button>
+    <button data-target="modelo">02 · Modelo de dados</button>
+    <button data-target="camadas">03 · Camadas expostas</button>
+    <button data-target="teoria">04 · Teoria aplicada</button>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════
+       TAB 1 — PIPELINE
+       ════════════════════════════════════════════════════ -->
+  <section class="tab-content active" id="pipeline">
+    <h2 class="section-title">Pipeline de processamento</h2>
+    <p class="hint">
+      Nove estágios entre o upload do arquivo e a fila de prompts que cada
+      chart consome. Cada cartão mostra o que entra, o que sai, e a referência
+      no código para a transformação.
+    </p>
+
+    <!-- L0 -->
+    <div class="stage">
+      <div class="stage-header">
+        <span class="stage-num">L0</span>
+        <span class="stage-title">Entrada — caminho de arquivo</span>
+        <span class="stage-codeRef">qualichat/chat.py:158-194</span>
+      </div>
+      <div class="stage-desc">
+        <code>Chat(path)</code> aceita <code>.txt</code> ou <code>.zip</code>.
+        Resolve o caminho absoluto, valida que o arquivo existe e dispara o
+        log <em>“Loading chat …”</em>. Nada é lido ainda — a leitura começa em L1.
+      </div>
+      <div class="io">
+        <div class="box"><span class="label">Entrada</span>str | Path</div>
+        <div class="arrow">→</div>
+        <div class="box"><span class="label">Saída</span>self.path · self.filename</div>
+      </div>
+    </div>
+
+    <!-- L1 -->
+    <div class="stage">
+      <div class="stage-header">
+        <span class="stage-num">L1</span>
+        <span class="stage-title">Extração — desempacotar ZIP se necessário</span>
+        <span class="stage-codeRef">qualichat/chat.py:77-94</span>
+      </div>
+      <div class="stage-desc">
+        Se o arquivo é <code>.zip</code> (export do iOS com mídia anexada),
+        extrai o <code>_chat.txt</code> de dentro do arquivo. Procura pelo
+        nome canônico <em>_chat.txt</em>; se não achar, usa o primeiro
+        <code>.txt</code> que encontrar (Android costuma chamar
+        <em>WhatsApp Chat with X.txt</em>).
+      </div>
+      <div class="io">
+        <div class="box"><span class="label">Entrada</span>Path → .zip</div>
+        <div class="arrow">→</div>
+        <div class="box"><span class="label">Saída</span>Path → .txt extraído</div>
+      </div>
+    </div>
+
+    <!-- L2 -->
+    <div class="stage">
+      <div class="stage-header">
+        <span class="stage-num">L2</span>
+        <span class="stage-title">Limpeza Unicode — remover caracteres invisíveis</span>
+        <span class="stage-codeRef">qualichat/chat.py:38-69</span>
+      </div>
+      <div class="stage-desc">
+        WhatsApp injeta marcas Unicode invisíveis em alguns formatos
+        (especialmente iOS) que confundem as regex do <em>chat-miner</em>.
+        <code>_clean_text</code> percorre uma tabela de impurezas conhecidas
+        e grava uma cópia limpa em <code>tempfile</code>:
+        <pre><span class="comment"># qualichat/chat.py:41-49</span>
+_IMPURITIES = (
+    (<span class="string">'‎'</span>, <span class="string">''</span>),    <span class="comment"># U+200E Left-to-Right Mark</span>
+    (<span class="string">' '</span>, <span class="string">''</span>),    <span class="comment"># U+2002 En space</span>
+    (<span class="string">'‬'</span>, <span class="string">''</span>),    <span class="comment"># U+202C Pop Directional Formatting</span>
+    (<span class="string">'‪'</span>, <span class="string">''</span>),    <span class="comment"># U+202A Left-to-Right Embedding</span>
+    (<span class="string">'\xa0'</span>, <span class="string">' '</span>),    <span class="comment"># U+00A0 No-Break Space → space</span>
+    (<span class="string">' '</span>, <span class="string">' '</span>),   <span class="comment"># U+202F Narrow NBSP → space (iOS US 12h)</span>
+    (<span class="string">'‑'</span>, <span class="string">'-'</span>),   <span class="comment"># U+2011 Non-breaking hyphen → hyphen</span>
+)</pre>
+      </div>
+      <div class="io">
+        <div class="box"><span class="label">Entrada</span>str cru</div>
+        <div class="arrow">→</div>
+        <div class="box"><span class="label">Saída</span>str limpo (em tempfile)</div>
+      </div>
+    </div>
+
+    <!-- L3 -->
+    <div class="stage">
+      <div class="stage-header">
+        <span class="stage-num">L3</span>
+        <span class="stage-title">Parsing — chat-miner detecta formato e extrai mensagens</span>
+        <span class="stage-codeRef">qualichat/chat.py:97-156, 236-276</span>
+      </div>
+      <div class="stage-desc">
+        <code>_CapturingWhatsAppParser</code> (subclasse de
+        <code>chatminer.WhatsAppParser</code>) infere automaticamente:
+        plataforma (iOS/Android), locale, formato de data (dd/mm vs mm/dd),
+        e separadores. Produz um DataFrame com três colunas:
+        <code>timestamp</code>, <code>author</code>, <code>message</code>.
+        <br><br>
+        A subclasse adiciona uma habilidade que o chat-miner upstream não tem:
+        <strong>recuperar eventos de sistema</strong> (entradas, saídas,
+        mudanças de título, notificações de criptografia). O parser original
+        descarta linhas que não têm o separador <em>autor: corpo</em>; o
+        override re-parseia o que foi descartado e guarda em
+        <code>self.system_events</code>.
+      </div>
+      <div class="io">
+        <div class="box"><span class="label">Entrada</span>str limpo</div>
+        <div class="arrow">→</div>
+        <div class="box"><span class="label">Saída</span>(DataFrame, list[(ts, body)])</div>
+      </div>
+      <details class="collapsible">
+        <summary>Ver schema do DataFrame</summary>
+        <pre><span class="comment"># df schema (chat-miner)</span>
+timestamp   datetime64[ns]   <span class="comment"># quando foi enviada</span>
+author      object           <span class="comment"># nome real do autor (será anonimizado em L4)</span>
+message     object           <span class="comment"># corpo bruto da mensagem</span></pre>
+      </details>
+    </div>
+
+    <!-- L4 -->
+    <div class="stage">
+      <div class="stage-header">
+        <span class="stage-num">L4</span>
+        <span class="stage-title">Anonimização — substituir nomes reais por personagens</span>
+        <span class="stage-codeRef">qualichat/chat.py:208-227 · qualichat/utils.py:84-115</span>
+      </div>
+      <div class="stage-desc">
+        Para cada autor único do chat, sorteia um nome do pool em
+        <code>qualichat/books.txt</code> (767 personagens — Tolstói, Machado
+        de Assis, surrealistas). O mapping <em>autor real → personagem</em>
+        é persistido em <code>~/.qualichat/config.json</code>, indexado por
+        path do chat, para que reabrir o mesmo arquivo gere os mesmos pseudônimos.
+        Se o pool esgotar (mais de 767 atores no chat), gera placeholders
+        sequenciais <code>Actor #N</code>.
+      </div>
+      <div class="io">
+        <div class="box"><span class="label">Entrada</span>nomes reais (df.author)</div>
+        <div class="arrow">→</div>
+        <div class="box"><span class="label">Saída</span>display_name por Actor</div>
+      </div>
+    </div>
+
+    <!-- L5 -->
+    <div class="stage">
+      <div class="stage-header">
+        <span class="stage-num">L5</span>
+        <span class="stage-title">Construção — Message + Actor</span>
+        <span class="stage-codeRef">qualichat/chat.py:213-225 · qualichat/models.py:177-240</span>
+      </div>
+      <div class="stage-desc">
+        <span class="theory-tag">núcleo da operacionalização</span>
+        Para cada linha do DataFrame, instancia um <code>Message(actor, content, timestamp)</code>.
+        O construtor do <code>Message</code> roda <strong>13 análises por
+        regex</strong> em sequência e popula o dicionário interno
+        <code>_data</code>. É aqui que toda a teoria de Cavalcante &amp; Hanke
+        é convertida em números — antes disso, há só um string bruto.
+        Mensagens vão tanto para <code>chat.messages</code> (lista global)
+        quanto para <code>actor.messages</code> (lista por ator).
+      </div>
+      <div class="io">
+        <div class="box"><span class="label">Entrada</span>(actor, content, timestamp)</div>
+        <div class="arrow">→</div>
+        <div class="box"><span class="label">Saída</span>Message(_data: 13 chaves)</div>
+      </div>
+      <details class="collapsible">
+        <summary>Ver as 13 análises na ordem em que rodam</summary>
+        <pre><span class="comment"># qualichat/models.py — Message.__init__</span>
+data[<span class="string">'Qty_char_total'</span>]     = len(content)                                <span class="comment"># total de chars</span>
+data[<span class="string">'Qty_char_emoji'</span>]     = list(emojis.iter(content))                   <span class="comment"># lib `emojis`</span>
+data[<span class="string">'Qty_char_links'</span>]     = URL_RE.findall(content)                      <span class="comment"># URLs http(s)://</span>
+data[<span class="string">'Qty_char_emails'</span>]    = EMAIL_RE.findall(content)
+<span class="comment"># Remove URLs do content antes das próximas regex (evita ambiguidade)</span>
+content_sem_urls = remove_all_incidences(content, *links)
+data[<span class="string">'Qty_char_?'</span>]         = QUESTION_MARK_RE.findall(content_sem_urls)   <span class="comment"># /\?+/</span>
+data[<span class="string">'Qty_char_!'</span>]         = EXCLAMATION_MARK_RE.findall(content_sem_urls) <span class="comment"># /!+/</span>
+data[<span class="string">'Qty_char_calls'</span>]     = MENTION_RE.findall(content_sem_urls)         <span class="comment"># /@\d{8,}/</span>
+data[<span class="string">'Qty_char_numbers'</span>]   = NUMBERS_RE.findall(content_sem_urls)         <span class="comment"># /\d+/</span>
+data[<span class="string">'Qty_char_laughs'</span>]    = LAUGHS_RE.findall(content_sem_urls)          <span class="comment"># hahaha, kkk, rsrs, jeje</span>
+data[<span class="string">'Qty_char_emoticons'</span>] = EMOTICONS_RE.findall(content_sem_urls)       <span class="comment"># :) :( :D</span>
+data[<span class="string">'Qty_char_marks'</span>]     = emoji + emoticons                            <span class="comment"># união semiótica</span>
+<span class="comment"># Cálculo dos resíduos (composição da fórmula central):</span>
+net  = remove_all_incidences(content, calls, links, emails, emoji)
+text = remove_all_incidences(net, laughs, marks, numbers)
+data[<span class="string">'Qty_char_net'</span>]       = net    <span class="comment"># líquido = total - laminação</span>
+data[<span class="string">'Qty_char_text'</span>]      = text   <span class="comment"># texto puro = líquido - fabricação</span></pre>
+      </details>
+    </div>
+
+    <!-- L6 -->
+    <div class="stage">
+      <div class="stage-header">
+        <span class="stage-num">L6</span>
+        <span class="stage-title">Classificação temporal — Period &amp; SubPeriod</span>
+        <span class="stage-codeRef">qualichat/enums.py:77-106</span>
+      </div>
+      <div class="stage-desc">
+        Cada Message recebe <code>Day_period</code> (4 faixas de 6h) e
+        <code>Day_sub_period</code> (7 sub-faixas de 3h, alinhadas a momentos
+        do cotidiano). Calculadas só a partir de <code>created_at.hour</code>.
+        <pre><span class="comment"># Period (4 faixas)</span>
+00-05 → Madrugada     06-11 → Manhã
+12-17 → Tarde         18-23 → Noite
+
+<span class="comment"># SubPeriod (7 sub-faixas — granularidade do cotidiano)</span>
+00-05 → Descanso (Resting)
+06-08 → Acordar/Transporte (Transport_morning)
+09-11 → Trabalho/Manhã  (Work_morning)
+12-14 → Almoço          (Lunch)
+15-17 → Trabalho/Tarde  (Work_evening)
+18-20 → Transporte      (Transport_evening)
+21-23 → Segundo Expediente (Second_office_hour)</pre>
+      </div>
+      <div class="io">
+        <div class="box"><span class="label">Entrada</span>datetime.datetime</div>
+        <div class="arrow">→</div>
+        <div class="box"><span class="label">Saída</span>(Period, SubPeriod) enums</div>
+      </div>
+    </div>
+
+    <!-- L7 -->
+    <div class="stage">
+      <div class="stage-header">
+        <span class="stage-num">L7</span>
+        <span class="stage-title">Classificação tipológica — MessageType</span>
+        <span class="stage-codeRef">qualichat/enums.py:122-222</span>
+      </div>
+      <div class="stage-desc">
+        Detecta se a mensagem é texto real (<code>default</code>) ou um
+        token sintético deixado pelo WhatsApp em vez de mídia
+        (<em>imagem ocultada</em>, <em>vídeo omitido</em>, <em>Mensagem apagada</em>,
+        <em>Cartão do contato omitido</em>, etc.). Cobre 9 tipos × 6 locales
+        (pt-BR, en, es, de, it, fr) com <em>case-fold</em> para tolerar
+        variações de capitalização. Documentos de iOS são reconhecidos por
+        sufixo (a linha começa com o nome do arquivo).
+      </div>
+      <div class="io">
+        <div class="box"><span class="label">Entrada</span>str (content)</div>
+        <div class="arrow">→</div>
+        <div class="box"><span class="label">Saída</span>MessageType (IntEnum)</div>
+      </div>
+      <details class="collapsible">
+        <summary>Ver os 9 tipos detectados</summary>
+        <pre>default               <span class="comment"># texto real (única classe que entra nos charts de NLP)</span>
+gif_omitted
+image_omitted
+video_omitted
+audio_omitted
+sticker_omitted
+document_omitted      <span class="comment"># suffix-match (iOS prepende filename)</span>
+contact_card_omitted
+deleted_message       <span class="comment"># "Mensagem apagada" / "This message was deleted"</span></pre>
+      </details>
+    </div>
+
+    <!-- L8 -->
+    <div class="stage">
+      <div class="stage-header">
+        <span class="stage-num">L8</span>
+        <span class="stage-title">Orquestração — Qualichat instancia 3 Frames</span>
+        <span class="stage-codeRef">qualichat/core.py:38-66 · qualichat/frames.py:128-165</span>
+      </div>
+      <div class="stage-desc">
+        <span class="theory-tag">Goffman 1974</span>
+        <code>Qualichat(chats)</code> cria os três <strong>frames de
+        análise</strong> definidos por Goffman e reinterpretados por
+        Cavalcante &amp; Hanke: <code>KeysFrame</code>,
+        <code>ParticipationStatusFrame</code>, <code>PublicOpinionFrame</code>.
+        <br><br>
+        A classe-base <code>BaseFrame</code> usa
+        <code>inspect.getmembers</code> para descobrir todos os métodos
+        públicos da subclasse e os registra automaticamente em
+        <code>self.charts: Dict[str, FunctionType]</code>, com chave
+        title-cased (<em>laminations</em> → <em>Laminations</em>). É por isso
+        que adicionar um chart é só escrever um método novo no Frame —
+        nenhuma configuração extra.
+      </div>
+      <div class="io">
+        <div class="box"><span class="label">Entrada</span>List[Chat]</div>
+        <div class="arrow">→</div>
+        <div class="box"><span class="label">Saída</span>3 Frames × N charts cada</div>
+      </div>
+    </div>
+
+    <!-- L9 -->
+    <div class="stage">
+      <div class="stage-header">
+        <span class="stage-num">L9</span>
+        <span class="stage-title">Renderização — chart agrega + Plotly Figure</span>
+        <span class="stage-codeRef">qualichat/frames.py · qualichat/sorters.py</span>
+      </div>
+      <div class="stage-desc">
+        Cada chart é uma função decorada por <strong>sorters</strong>
+        (decorators que perguntam <em>“By Time / By Actor / Treemap”</em>) e
+        que internamente:
+        <ol>
+          <li>Itera sobre <code>chat.messages</code>, lê os campos
+              <code>Qty_char_*</code> que precisa.</li>
+          <li>Constrói um <code>pandas.DataFrame</code> índice = ator ou
+              época, colunas = <em>bars</em> + <em>lines</em>.</li>
+          <li>Chama <code>generate_chart</code> /
+              <code>generate_treemap</code> /
+              <code>generate_table</code> /
+              <code>generate_wordcloud</code> de
+              <em>sorters.py</em>, que monta a <em>Plotly Figure</em>.</li>
+          <li>Chama <code>fig.show()</code> — que na CLI abre browser; na
+              UI Streamlit é monkey-patched (<em>ui/runtime.py</em>) para
+              capturar a figura em uma lista, que aí é passada a
+              <code>st.plotly_chart()</code>.</li>
+        </ol>
+      </div>
+      <div class="io">
+        <div class="box"><span class="label">Entrada</span>List[Message] · prompts</div>
+        <div class="arrow">→</div>
+        <div class="box"><span class="label">Saída</span>plotly.graph_objs.Figure</div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ════════════════════════════════════════════════════
+       TAB 2 — MODELO DE DADOS
+       ════════════════════════════════════════════════════ -->
+  <section class="tab-content" id="modelo">
+    <h2 class="section-title">Modelo de dados</h2>
+    <p class="hint">
+      O dicionário <code>Message._data</code> é a peça central do sistema —
+      <strong>todos os charts leem dele</strong>. Cada um dos 13 campos é o
+      resultado de uma análise por regex na string original. Os campos derivados
+      (<code>net</code>, <code>text</code>) são as fórmulas de Cavalcante &amp; Hanke
+      operacionalizadas em Python.
+    </p>
+
+    <h3 class="subhead">Os 13 campos de Message._data</h3>
+    <table class="charts">
+      <thead>
+        <tr>
+          <th style="width: 22%;">Campo</th>
+          <th style="width: 12%;">Tipo</th>
+          <th>O que captura</th>
+          <th style="width: 22%;">Regex / fonte</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="label">Qty_char_total</td><td class="fields">int</td><td>Comprimento total da string</td><td class="fields">len(content)</td></tr>
+        <tr><td class="label">Qty_char_emoji</td><td class="fields">List[str]</td><td>Emojis Unicode (TR51 properties)</td><td class="fields">lib <em>emojis</em>.iter()</td></tr>
+        <tr><td class="label">Qty_char_links</td><td class="fields">List[str]</td><td>URLs http(s):// completas</td><td class="fields">URL_RE</td></tr>
+        <tr><td class="label">Qty_char_emails</td><td class="fields">List[str]</td><td>Endereços de e-mail</td><td class="fields">EMAIL_RE</td></tr>
+        <tr><td class="label">Qty_char_?</td><td class="fields">List[str]</td><td>Sequências de “?+”</td><td class="fields">QUESTION_MARK_RE</td></tr>
+        <tr><td class="label">Qty_char_!</td><td class="fields">List[str]</td><td>Sequências de “!+”</td><td class="fields">EXCLAMATION_MARK_RE</td></tr>
+        <tr><td class="label">Qty_char_calls</td><td class="fields">List[str]</td><td>Menções @ seguido de 8+ dígitos (ID WhatsApp)</td><td class="fields">MENTION_RE</td></tr>
+        <tr><td class="label">Qty_char_numbers</td><td class="fields">List[str]</td><td>Sequências de dígitos (\d+)</td><td class="fields">NUMBERS_RE</td></tr>
+        <tr><td class="label">Qty_char_laughs</td><td class="fields">List[str]</td><td>Risos (hahaha, kkk, rsrs, jeje, hehe)</td><td class="fields">LAUGHS_RE</td></tr>
+        <tr><td class="label">Qty_char_emoticons</td><td class="fields">List[str]</td><td>Emoticons textuais :) :( :D</td><td class="fields">EMOTICONS_RE</td></tr>
+        <tr><td class="label">Qty_char_marks</td><td class="fields">List[str]</td><td>União emoji ∪ emoticons (símbolos textuais)</td><td class="fields">— derivado</td></tr>
+        <tr><td class="label">Qty_char_net</td><td class="fields">str</td><td>Líquido — content menos laminação</td><td class="fields">— derivado</td></tr>
+        <tr><td class="label">Qty_char_text</td><td class="fields">str</td><td>Texto puro — net menos fabricação</td><td class="fields">— derivado</td></tr>
+        <tr style="background: var(--musgo-claro);"><td class="label">Type</td><td class="fields">MessageType</td><td>Classificação tipológica (texto/mídia/apagada)</td><td class="fields">enums.get_message_type</td></tr>
+        <tr style="background: var(--musgo-claro);"><td class="label">Day_period</td><td class="fields">Period</td><td>4 faixas de 6h</td><td class="fields">enums.get_period</td></tr>
+        <tr style="background: var(--musgo-claro);"><td class="label">Day_sub_period</td><td class="fields">SubPeriod</td><td>7 sub-faixas de 3h</td><td class="fields">enums.get_sub_period</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="subhead">As três fórmulas centrais</h3>
+
+    <p>
+      A operacionalização da etnografia linguística de Cavalcante &amp; Hanke
+      acontece em três decomposições aninhadas. Toda mensagem se quebra em
+      duas grandezas semióticas — <em>laminação</em> e <em>fabricação</em> —
+      e o que sobra é o <em>texto puro</em>, o léxico-base que carrega a
+      proposição denotativa.
+    </p>
+
+    <div class="formula">
+      <span class="var">Lamination</span><span class="op">=</span>
+      <span class="var">links</span><span class="op">+</span>
+      <span class="var">emails</span><span class="op">+</span>
+      <span class="var">chamadas</span><span class="op">+</span>
+      <span class="var">emojis</span>
+      <span class="foot">camadas que se acoplam à mensagem-base — endereçamento, referenciação, expressão emocional</span>
+    </div>
+
+    <div class="formula">
+      <span class="var">Fabrication</span><span class="op">=</span>
+      <span class="var">risos</span><span class="op">+</span>
+      <span class="var">marcas</span><span class="op">+</span>
+      <span class="var">números</span>
+      <span class="foot">resíduos textuais que dão textura — sinais de afeto, ênfase e quantificação</span>
+    </div>
+
+    <div class="formula">
+      <span class="var">Qty_char_text</span><span class="op">=</span>
+      <span class="var">Qty_char_total</span><span class="op">−</span>
+      <span>(<span class="var">Lamination</span><span class="op">+</span><span class="var">Fabrication</span>)</span>
+      <span class="foot">texto puro = mensagem total menos as duas decomposições — léxico residual</span>
+    </div>
+
+    <p style="margin-top: 18px;">
+      Note que <strong>todos os campos derivados são strings</strong>
+      (<code>Qty_char_net</code>, <code>Qty_char_text</code>), não
+      contagens — a contagem é feita pelos charts via
+      <code>len(message['Qty_char_net'])</code> ou
+      <code>len(message['Qty_char_net'].split())</code>. Algumas funções
+      contam caracteres, outras palavras — convém verificar caso a caso.
+    </p>
+
+    <h3 class="subhead">Cuidado: regex específicas e seus limites</h3>
+
+    <ul>
+      <li><strong>MENTION_RE</strong> — <code>/@\d{8,}/</code> só captura
+          IDs de telefone do WhatsApp (<em>@5511999999999</em>). Não detecta
+          menções por nome (<em>@Stella</em>) que podem aparecer em alguns
+          formatos.</li>
+      <li><strong>LAUGHS_RE</strong> — exige <em>whitespace</em> antes do
+          riso e padrões pré-definidos (he/ha/hi/hu/hh/ja/je/ka/rs/k, todos
+          repetidos pelo menos 2 vezes). “lol” e “rofl” não são detectados.</li>
+      <li><strong>EMOTICONS_RE</strong> — só captura
+          <em>:)</em> <em>:(</em> <em>:D</em> com variantes hyphenated.
+          <em>;)</em>, <em>:P</em>, <em>:'(</em> não estão no padrão atual.</li>
+      <li><strong>URL_RE</strong> — só captura URLs com esquema
+          (<em>http://</em>, <em>https://</em>). Links sem esquema
+          (<em>www.example.com</em>) não são contabilizados como link.</li>
+    </ul>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════
+       TAB 3 — CAMADAS EXPOSTAS
+       ════════════════════════════════════════════════════ -->
+  <section class="tab-content" id="camadas">
+    <h2 class="section-title">Camadas expostas ao usuário</h2>
+    <p class="hint">
+      Tabela completa dos <strong>17 charts</strong> distribuídos em três
+      Frames. Cada linha mostra quais campos do <code>Message._data</code> o
+      chart consome, quais prompts ele pede ao usuário e que tipo de saída
+      produz.
+    </p>
+
+    <table class="charts">
+      <thead>
+        <tr>
+          <th style="width: 18%;">Chart</th>
+          <th style="width: 26%;">Campos consumidos</th>
+          <th style="width: 30%;">Prompts</th>
+          <th>Saída · agregação</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr class="frame-head"><td colspan="4">Frame: Keys — chaves discursivas (8 charts) <span style="font-family: var(--mono); font-size: 11px; color: var(--ocre-claro);">qualichat/frames.py:167-481</span></td></tr>
+
+        <tr>
+          <td class="label">Lamination</td>
+          <td class="fields">
+            <span>Qty_char_links</span><span>Qty_char_emails</span><span>Qty_char_calls</span><span>Qty_char_emoji</span>
+          </td>
+          <td class="prompts"><em>By Time / By Actor</em> + <em>All / specific</em> mês/ator</td>
+          <td>Bar chart: 4 séries de laminação por época/ator + line de Qty_messages</td>
+        </tr>
+        <tr>
+          <td class="label">Links</td>
+          <td class="fields"><span>Qty_char_links</span></td>
+          <td class="prompts"><em>By Time / By Actor</em></td>
+          <td>Bar chart: links por época/ator + line de Qty_messages</td>
+        </tr>
+        <tr>
+          <td class="label">Calls</td>
+          <td class="fields"><span>Qty_char_calls</span></td>
+          <td class="prompts"><em>By Time / By Actor</em></td>
+          <td>Bar chart: chamadas por época/ator + line de Qty_messages</td>
+        </tr>
+        <tr>
+          <td class="label">Emails</td>
+          <td class="fields"><span>Qty_char_emails</span></td>
+          <td class="prompts"><em>By Time / By Actor</em></td>
+          <td>Bar chart: emails por época/ator + line de Qty_messages</td>
+        </tr>
+        <tr>
+          <td class="label">Textual symbols</td>
+          <td class="fields"><span>Qty_char_marks</span><span>Qty_char_emoji</span></td>
+          <td class="prompts"><em>By Time / By Actor</em></td>
+          <td>Bar chart: marks ∪ emojis por época/ator + line de Qty_messages</td>
+        </tr>
+        <tr>
+          <td class="label">Messages</td>
+          <td class="fields"><span>Qty_char_text</span><span>Type=default</span></td>
+          <td class="prompts"><em>By Time / By Actor</em> + <em>Verbs / Nouns / Adjectives</em></td>
+          <td>Wordcloud: tokens da classe morfológica selecionada (spaCy pt_core_news_sm)</td>
+        </tr>
+        <tr>
+          <td class="label">Keyword</td>
+          <td class="fields"><span>Qty_char_text</span><span>Type=default</span><span>content</span></td>
+          <td class="prompts"><em>By Time / By Actor</em> + <em>palavra-chave</em> + <em>Verbs / Nouns / Adj</em></td>
+          <td>Wordcloud restrita a mensagens que contêm a palavra-chave</td>
+        </tr>
+        <tr>
+          <td class="label">Ratings</td>
+          <td class="fields"><span>Qty_char_links</span><span>created_at</span><span>actor</span></td>
+          <td class="prompts"><em>By Time / By Actor</em> · requer <code>google_api_key</code></td>
+          <td>Tabela: vídeos do YouTube linkados, com views/likes/comments/title (YouTube Data API)</td>
+        </tr>
+
+        <tr class="frame-head"><td colspan="4">Frame: Participation Status — status de participação (7 charts) <span style="font-family: var(--mono); font-size: 11px; color: var(--ocre-claro);">qualichat/frames.py:483-671</span></td></tr>
+
+        <tr>
+          <td class="label">Mensagens por ator</td>
+          <td class="fields"><span>Qty_char_text</span><span>Qty_char_net</span><span>content</span><span>Type=default</span></td>
+          <td class="prompts"><em>By Time / Treemap</em></td>
+          <td>Bar chart: 3 séries (text/net/total chars em palavras) por ator + line de Qty_messages</td>
+        </tr>
+        <tr>
+          <td class="label">Mensagens por dia da semana</td>
+          <td class="fields"><span>created_at.weekday</span></td>
+          <td class="prompts"><em>User Messages / System Messages</em></td>
+          <td>Bar chart: contagem de mensagens nos 7 dias da semana</td>
+        </tr>
+        <tr>
+          <td class="label">Bots</td>
+          <td class="fields"><span>Type</span><span>Qty_char_net</span></td>
+          <td class="prompts"><em>Index / Components</em></td>
+          <td>
+            Bar chart: score heurístico (chars × 1) + (videos × 2) + (stickers × 3) por ator. Modo Index agrega; Components decompõe.
+          </td>
+        </tr>
+        <tr>
+          <td class="label">Repertório de mídia</td>
+          <td class="fields"><span>Qty_char_links</span><span>parse_domain(url)</span></td>
+          <td class="prompts"><em>Choose Media / Average Media / Treemap</em> · se Choose: <em>checkbox de domínios</em></td>
+          <td>Bar chart ou treemap: distribuição de domínios por ator</td>
+        </tr>
+        <tr>
+          <td class="label">Estatísticas</td>
+          <td class="fields"><span>Qty_char_net</span><span>Qty_char_text</span></td>
+          <td class="prompts"><em>By Time / Treemap</em></td>
+          <td>Bar chart: média + desvio padrão (chars net e text) por ator + line de Qty_messages</td>
+        </tr>
+        <tr>
+          <td class="label">Lam. por atores</td>
+          <td class="fields"><span>Qty_char_calls</span><span>Qty_char_links</span><span>Qty_char_emails</span><span>Qty_char_emoji</span><span>Qty_char_net</span></td>
+          <td class="prompts"><em>By Time / Treemap</em> + <em>Laminations / Average</em></td>
+          <td>Bar chart: 4 componentes da laminação por ator (modo total) ou avg+sd (modo Average)</td>
+        </tr>
+        <tr>
+          <td class="label">Fab. por atores</td>
+          <td class="fields"><span>Qty_char_laughs</span><span>Qty_char_marks</span><span>Qty_char_numbers</span><span>Qty_char_text</span></td>
+          <td class="prompts"><em>By Time / Treemap</em> + <em>Fabrications / Average</em></td>
+          <td>Bar chart: 3 componentes da fabricação por ator (modo total) ou avg+sd (modo Average)</td>
+        </tr>
+
+        <tr class="frame-head"><td colspan="4">Frame: Public Opinion — opinião pública (2 charts) <span style="font-family: var(--mono); font-size: 11px; color: var(--ocre-claro);">qualichat/frames.py:963-1085</span></td></tr>
+
+        <tr>
+          <td class="label">Matriz de polaridade</td>
+          <td class="fields"><span>Qty_char_text</span><span>Type=default</span><span>actor</span></td>
+          <td class="prompts">— (sem prompts) · requer Google Translate + en_core_web_sm + spacytextblob</td>
+          <td>
+            Scatter plot: polaridade sentimental (-1 a +1) por ator. Apenas atores com mensagens acima da média; primeiras 5 mensagens cada; tradução pt→en via API.
+          </td>
+        </tr>
+        <tr>
+          <td class="label">Linkage temático</td>
+          <td class="fields"><span>Qty_char_net</span><span>Type=default</span></td>
+          <td class="prompts">— (sem prompts) · requer en_core_web_sm + spacytextblob</td>
+          <td>
+            Scatter plot: score temático por grupo (Friends, Political, Religious, Family, Green, Innovation…) baseado em incidências de keywords do <code>connector.csv</code>.
+            Palavras especiais amplificam o score em 3×.
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    <h3 class="subhead">Onde cada chart é exposto na UI</h3>
+
+    <table class="charts">
+      <thead>
+        <tr>
+          <th>Página Streamlit</th>
+          <th>Charts</th>
+          <th>Renderizador</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label">Resumo</td>
+          <td class="prompts">lede + def-list + stack-bar de Type + heatmap Dia × Período</td>
+          <td class="fields">summary.py (Streamlit-native, não usa frames.py)</td>
+        </tr>
+        <tr>
+          <td class="label">Frame: Keys</td>
+          <td class="prompts">8 charts via radio</td>
+          <td class="fields">2_Keys.py + KEYS_CHARTS spec → run_chart</td>
+        </tr>
+        <tr>
+          <td class="label">Participação</td>
+          <td class="prompts">7 charts via radio</td>
+          <td class="fields">3_Participacao.py + PARTICIPATION_CHARTS → run_chart</td>
+        </tr>
+        <tr>
+          <td class="label">Opinião pública</td>
+          <td class="prompts">2 charts via radio</td>
+          <td class="fields">4_Opiniao_Publica.py + OPINION_CHARTS → run_chart</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top: 22px;">
+      Os charts da CLI são todos disparados pelo mesmo mecanismo de
+      <em>prompt-replay</em>: <code>ui/runtime.py</code> faz monkey-patch das
+      funções <em>questionary</em> e captura <code>fig.show()</code>, então
+      cada Streamlit page apenas materializa a fila de respostas via
+      <code>build_answers_*</code> e dispara o chart sem modificar
+      <code>frames.py</code>.
+    </p>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════
+       TAB 4 — TEORIA APLICADA
+       ════════════════════════════════════════════════════ -->
+  <section class="tab-content" id="teoria">
+    <h2 class="section-title">Teoria aplicada</h2>
+    <p class="hint">
+      O <em>qualichat</em> não é um analisador genérico de chat — é um
+      <strong>instrumento de pesquisa</strong> derivado de duas matrizes
+      teóricas. Esta aba mapeia os conceitos teóricos para os componentes
+      concretos do código.
+    </p>
+
+    <div class="theory-card">
+      <h4>Frame Analysis</h4>
+      <div class="author">Erving Goffman, <em>Frame Analysis: an essay on the organization of experience</em>, 1974</div>
+      <p>
+        Goffman propõe que a interação social não acontece em vácuo
+        semântico — ela é <em>enquadrada</em> por uma estrutura de
+        expectativas que diz aos participantes <strong>o que está
+        acontecendo</strong>. Os <em>frames</em> respondem três perguntas
+        fundamentais:
+      </p>
+      <ul>
+        <li><strong>Keys</strong> — o que está sendo dito? Como sinais
+            verbais e não-verbais marcam o tom (sério, jocoso, irônico).
+            No qualichat, traduzido em <em>laminações</em> (links, emails,
+            chamadas, emojis) e <em>fabricações</em> (risos, marcas,
+            números) — as marcas que modulam o texto puro.</li>
+        <li><strong>Participation Status</strong> — quem está participando, e
+            de que modo? Falantes ativos, ouvintes, intrusos, espectadores.
+            No qualichat, traduzido em métricas de produção por ator —
+            quanto cada um fala, com que regularidade, em que registro.</li>
+        <li><strong>Public Opinion</strong> — o que se diz <em>sobre</em> o
+            que se diz? Avaliação coletiva, polarização. No qualichat,
+            polaridade sentimental por ator e linkage temático contra um
+            vocabulário de grupos pré-definidos.</li>
+      </ul>
+      <p>
+        Os três <em>Frames</em> em <code>qualichat/frames.py</code> não são
+        um nome arbitrário — são <strong>literalmente</strong> a tradução
+        computacional dos três frames de Goffman.
+      </p>
+    </div>
+
+    <div class="theory-card">
+      <h4>Etnografia linguística quantiqualitativa</h4>
+      <div class="author">Cavalcante &amp; Hanke (2020), <em>Tem ‘boto’ na pororoca</em>: ancoragens e laminações em grupos de WhatsApp midiatizados</div>
+      <p>
+        Cavalcante &amp; Hanke propõem operacionalizar Goffman num corpus
+        digital — exports de WhatsApp — através de uma <strong>decomposição
+        aritmética</strong> da mensagem em três grandezas semióticas
+        mensuráveis:
+      </p>
+      <p>
+        <strong>Mensagem total</strong> = total de caracteres digitados pelo
+        ator. Inclui texto, símbolos, números, mídia, tudo.
+      </p>
+      <p>
+        <strong>Laminação</strong> = camadas semióticas que se
+        <em>acoplam</em> à mensagem-base. Endereçamento (<em>chamadas</em>),
+        referência (<em>links</em>, <em>emails</em>), expressão emocional
+        codificada (<em>emojis</em>). São camadas porque se removidas a
+        mensagem ainda existe — o que sobra ainda significa.
+      </p>
+      <p>
+        <strong>Fabricação</strong> = resíduos textuais que dão
+        <em>textura</em>. Risos, marcas de pontuação enfática,
+        quantificação numérica. Não são proposicionais — são afetivos,
+        modulam o texto base.
+      </p>
+      <p>
+        <strong>Texto puro</strong> = o que sobra após remover laminação e
+        fabricação. É o léxico denotativo, o substrato proposicional.
+        No código:
+      </p>
+      <div class="formula" style="font-size: 16px;">
+        <span class="var">Qty_char_net</span><span class="op">=</span>
+        <span class="var">content</span><span class="op">−</span>(
+        <span class="var">calls</span><span class="op">+</span>
+        <span class="var">links</span><span class="op">+</span>
+        <span class="var">emails</span><span class="op">+</span>
+        <span class="var">emoji</span>)
+        <span class="foot">
+          a função <code>remove_all_incidences</code> (qualichat/models.py:70-75) remove cada incidência da string
+        </span>
+      </div>
+      <div class="formula" style="font-size: 16px;">
+        <span class="var">Qty_char_text</span><span class="op">=</span>
+        <span class="var">Qty_char_net</span><span class="op">−</span>(
+        <span class="var">laughs</span><span class="op">+</span>
+        <span class="var">marks</span><span class="op">+</span>
+        <span class="var">numbers</span>)
+      </div>
+      <p>
+        Os charts <em>Lam. por atores</em> e <em>Fab. por atores</em> em
+        <code>ParticipationStatusFrame</code> são leituras diretas dessa
+        decomposição — é literalmente a fórmula da etnografia plotada.
+      </p>
+    </div>
+
+    <div class="theory-card">
+      <h4>Sub-períodos do cotidiano</h4>
+      <div class="author">cf. <em>YLAI_V2.pdf</em> (relatório de tese, 2018-2019) · <code>qualichat/enums.py:90-106</code></div>
+      <p>
+        A grade de <em>SubPeriod</em> não é arbitrária — espelha o ritmo
+        urbano de São Paulo / Rio (deslocamento de manhã, almoço entre 12-14h,
+        deslocamento de volta entre 18-20h, segundo expediente para quem
+        leva trabalho pra casa). O objetivo é fazer aparecerem padrões
+        sociotemporais (<em>“o grupo religioso fala mais nas madrugadas”</em>,
+        <em>“o grupo de trabalho silencia entre 12-14h”</em>) que ficariam
+        invisíveis na granularidade só de hora.
+      </p>
+      <p>
+        Heatmap <em>Dia × Período</em> em <code>summary.py</code> e os
+        treemaps <em>Usuário × Sub-Período</em> de <em>YLAI_V2_Usuario.pdf</em>
+        (p7-8) são as visualizações canônicas dessa lente.
+      </p>
+    </div>
+
+    <div class="theory-card">
+      <h4>Linkage temático — connector.csv</h4>
+      <div class="author"><code>qualichat/connector.csv</code> · usado em <code>frames.py:1010-1085</code></div>
+      <p>
+        O <code>connector.csv</code> é uma matriz <em>thesaurus</em>: 17 grupos
+        temáticos × 25 keywords cada (5 keywords × 5 categorias gramaticais —
+        ação, espaço, tempo, objeto, pessoa). Os grupos vão de
+        <em>Friends</em>, <em>Political</em>, <em>Religious</em>, <em>Family</em>,
+        <em>Green</em>, <em>Innovation</em>, <em>Health</em>, <em>Spiritual</em>,
+        <em>Mentoring</em>, <em>Wellness</em>, <em>Media</em>, <em>Brand</em>,
+        <em>National security</em>, <em>Union</em>, <em>Feminist</em>,
+        <em>LGBTQIA+</em>, <em>Ethnic</em>.
+      </p>
+      <p>
+        O chart <em>Linkage</em> percorre cada mensagem, conta quantas
+        keywords de cada grupo aparecem, e plota um score percentual. Uma
+        lista de <em>special_words</em> hardcoded em
+        <em>frames.py:1021-1028</em> amplifica o score em 3×, capturando
+        termos politicamente carregados (<em>“lula”</em>, <em>“bolsonaro”</em>,
+        <em>“fascismo”</em>, <em>“comunismo”</em>) e domínios específicos
+        (<em>“congresso”</em>, <em>“coaching”</em>, <em>“jejuar”</em>).
+      </p>
+      <p style="border-top: 1px dashed var(--borda-suave); padding-top: 12px; margin-top: 14px; color: var(--sepia-fieldnote); font-style: italic;">
+        Nota da auditoria: o relatório-mãe <em>YLAI_V2_Usuario.pdf</em> p4
+        mostra um corte <em>Conj_App_S</em>, <em>PC_Email</em>,
+        <em>PC_WhatsApp</em>, <em>PC_Skype</em> que sugere um
+        <em>connector.csv</em> diferente (vocabulário tecnológico em vez de
+        temático). Esse arquivo não está no repo público — é provavelmente
+        material privado da tese original.
+      </p>
+    </div>
+
+  </section>
+
+  <footer>
+    <div>
+      qualichat · pipeline analysis · gerado a partir de
+      <a href="https://github.com/qualichat/qualichat/tree/feat/web-ui">github.com/qualichat/qualichat@feat/web-ui</a>
+    </div>
+    <div style="margin-top: 6px;">
+      arquivos lidos: <code>chat.py</code>, <code>models.py</code>,
+      <code>regex.py</code>, <code>enums.py</code>, <code>frames.py</code>,
+      <code>sorters.py</code>, <code>core.py</code>, <code>utils.py</code>,
+      <code>abc.py</code>, <code>ui/components/chart_runner.py</code>,
+      <code>ui/runtime.py</code>
+    </div>
+    <div style="margin-top: 6px;">
+      single-file artefato — abra em qualquer browser, nada de servidor.
+    </div>
+  </footer>
+</div>
+
+<script>
+  // Tab switching
+  const buttons = document.querySelectorAll('nav.tabs button');
+  const sections = document.querySelectorAll('section.tab-content');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      buttons.forEach(b => b.classList.toggle('active', b === btn));
+      sections.forEach(s => s.classList.toggle('active', s.id === target));
+      // Scroll to top of section
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // Make all <details> in a tab open when ctrl-clicking summary (small ergonomic win)
+  document.querySelectorAll('details.collapsible summary').forEach(s => {
+    s.addEventListener('click', e => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const detailsInTab = s.closest('section.tab-content').querySelectorAll('details.collapsible');
+        const allOpen = [...detailsInTab].every(d => d.open);
+        detailsInTab.forEach(d => d.open = !allOpen);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
