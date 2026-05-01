@@ -14,6 +14,7 @@ textColor = "#1A1814"               # tinta-impressao  — primary text
 
 [server]
 maxUploadSize = 200                  # MB; matches Streamlit's default
+enableStaticServing = true           # serves files in ./static/ at /app/static/<file>
 
 [browser]
 gatherUsageStats = false             # local-first ethos (matches our privacy story)
