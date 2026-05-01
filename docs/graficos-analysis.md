@@ -148,12 +148,37 @@ Médias) cyclando pelas variáveis `QTD_X`. Equivale a `YLAI_V2.pdf` mas
 | 3 | QTD_! · QTD_? · QTD_Mensagens | médias |
 | 4 | Conj_App_S · Conj_Comunicacao_Direta_S · Conj_Web_S · Conj_Rede_Social_S · Conj_Termos_R_S_S · Conj_Midia_S | PC_Email · PC_Whatsapp · PC_Skype · PC_Site · PC_Internet · PC_Link · PC_Facebook · PC_Instagram · PC_Linkedin · ... |
 | 5 | QTD_Mensagens × Ano/Mês × Usuário (line) | mesma view com bars |
-| 6 | QTD_Liquidos × Usuário × Dia (treemap) + QTD_Mensagens × Dia × Usuário | QTD_Mensagens × Usuário × Dia (treemap) |
-| 7 | QTD_Liquidos × Usuário × Período (treemap) | Contagem × Usuário × Período (treemap) |
-| 8 | QTD_Liquidos × Usuário × Sub-Período (treemap) | Contagem × Usuário × Sub-Período (treemap) |
-| 9 | QTD_Mensagens × Usuário × Categoria (bars) | × Sub-Categoria (bars) |
-| 10 | QTD_Simbolo × Usuário × Período | QTD_Riso × Usuário × Período |
-| 11 | QTD_Simbolo × Usuário × Dia | QTD_Riso × Usuário × Dia |
+| 6 | stream Dia × Usuário (top) | dois treemaps: QTD_Mensagens e QTD_Liquidos, ambos por Usuário × Dia |
+| 7 | stream Período × Usuário (top) | dois treemaps: Contagem-de-Índice e QTD_Liquidos por Usuário × Período |
+| 8 | stream Sub-Período × Usuário (top) | dois treemaps: Contagem-de-Índice e QTD_Liquidos por Usuário × Sub-Período |
+| 9 | bars QTD_Mensagens × Usuário × Categoria | bars QTD_Mensagens × Usuário × Sub-Categoria |
+| 10 | grade 2×2 de treemaps Usuário × Período | métricas: QTD_Simbolo, QTD_Riso, QTD_Liquidos, QTD_Texto |
+| 11 | grade 2×2 de treemaps Usuário × Dia | métricas: QTD_Simbolo, QTD_Riso, QTD_Liquidos, QTD_Texto |
+
+### Observações visuais p6-p11 (validadas em 2026-04-30)
+
+**Padrão dual-treemap (p6-p8).** Cada página tem o mesmo layout:
+- Topo: stream/area chart com `x = dimensão temporal`, cor = Usuário,
+  altura = QTD acumulado.
+- Base: dois treemaps lado a lado, **mesma hierarquia (Usuário → tempo)**,
+  só muda a métrica de valor (esquerda = "Contagem-de-Índice"/QTD_Mensagens,
+  direita = QTD_Liquidos).
+- Labels nos retângulos folha mostram `<período> <valor>` (ex:
+  "Quinta 104", "Tarde 30 Mil") — confirmando rótulos custom no nível
+  folha (decisão pendente nº 4 fica resolvida: **sim, Plotly precisa
+  de `texttemplate` custom** com label do período + valor formatado).
+
+**Grade 2×2 de treemaps (p10-p11).** Page 10 é p7 expandida com 4
+métricas (Simbolo / Riso / Liquidos / Texto) na mesma hierarquia Usuário
+× Período. Page 11 é o mesmo mas com Dia. Implicação:
+**uma única função treemap parametrizável `(metric, time_dim)` resolve
+6 das 11 páginas** (p6 = QTD_Mensagens × Dia + QTD_Liquidos × Dia;
+p7 = idem × Período; p8 = idem × Sub-Período; p10 = 4 métricas × Período;
+p11 = 4 métricas × Dia). Sprint 3 ganha enxugamento brutal.
+
+**Page 9 é exceção** — não é treemap, é bar chart vertical
+QTD_Mensagens stacked-by-Categoria (top) e × Sub-Categoria (bottom).
+Resolve com Plotly `bar` simples + `color=Categoria`.
 
 ### Status na implementação
 
@@ -219,30 +244,28 @@ Médias) cyclando pelas variáveis `QTD_X`. Equivale a `YLAI_V2.pdf` mas
 
 ## Decisões pendentes (perguntas para o usuário)
 
-Antes de implementar qualquer um destes, preciso confirmar:
+Antes de implementar, preciso confirmar:
 
 1. **Faixas dos 6 grupos de Intervalo de Interação** (Super Rápidas, Rápidas,
    Regulares, Demoradas, Curtos, Longos) — que buckets finos pertencem
-   a cada grupo? A inferência acima é dedução visual.
+   a cada grupo? A inferência da seção Tempo.pdf é dedução visual.
 
 2. **Gap calculado entre mensagens consecutivas globais ou consecutivas do mesmo ator?**
    "Tempo de resposta de A para a mensagem anterior de B" é diferente de
    "tempo de A para a mensagem anterior de A".
 
-3. **Composição visual dos treemaps Usuário × Tempo** (Usuario pág 6-8) —
-   o PDF mostra labels de tempo dentro dos retângulos de cada ator.
-   Plotly suporta hierarquia `(actor → period → value)` nativamente, mas
-   os labels específicos (ex: "Trabalho(Tarde) 5 Mil") sugerem rótulos
-   custom no nível folha.
-
-4. **Drill-down de PC_X individual** — `connector.csv` define os mapeamentos
+3. **Drill-down de PC_X individual** — `connector.csv` define os mapeamentos
    `(palavra) → grupo`. Para drill-down precisamos preservar a palavra
    original, não só o grupo. Verificar se o CSV atual já tem essa info
    ou se precisa ser estendido.
 
-5. **Privacidade dos PDFs** — `docs/graficos/*.pdf` deve ser adicionado
-   ao `.gitignore`? Eles citam dados reais (nomes de atores anonimizados
-   sim, mas o conjunto + métricas pode ser identificável).
+### Resolvidas em 2026-04-30
+
+- ✅ **Composição visual dos treemaps Usuário × Tempo** — análise das
+  páginas 6-8 e 10-11 confirma: rótulos custom no nível folha são
+  necessários, `texttemplate` Plotly com `<período> <valor formatado>`.
+- ✅ **Privacidade dos PDFs** — `docs/graficos/` foi adicionado ao
+  `.gitignore` (commit `7b86e6a`).
 
 ---
 
@@ -250,17 +273,25 @@ Antes de implementar qualquer um destes, preciso confirmar:
 
 Em ordem de **impacto analítico vs custo de implementação**:
 
-### Tier 1 (alta valor, baixo custo — Sprint 3)
+### Tier 1 (alta valor, baixo custo — Sprint 3 candidato A)
 
-- [ ] Heatmap Usuário × Sub-Período (variação do que já temos no Resumo)
-- [ ] Ranking global de emojis (chart novo no Keys, derivável)
+Foco em **um componente reutilizável** que cobre 6 das 11 páginas:
+
+- [ ] **Treemap genérico Usuário × Tempo** com selectboxes para
+      `metric ∈ {Mensagens, Líquidos, Texto, Símbolo, Riso, ...}` ×
+      `time_dim ∈ {Dia, Período, Sub-Período}`. Resolve Usuario.pdf p6,
+      p7, p8, p10, p11 simultaneamente.
+- [ ] Cross-tab Categoria × Sub-Categoria × Usuário (Usuario p9 — bars)
+- [ ] Ranking global de emojis (Emojis p1 — chart novo no Keys)
 - [ ] Drill-down PC_X individual (estender `linkage`)
 
-### Tier 2 (alto valor, custo médio — Sprint 4)
+### Tier 2 (alto valor, custo médio — Sprint 3 candidato B / Sprint 4)
 
-- [ ] **Intervalo de Interação** (Tempo.pdf inteiro)
-- [ ] Treemap Usuário × Dia/Período (Usuario pág 6-8)
-- [ ] Cross-tab Categoria × Sub-Categoria
+- [ ] **Frame: Tempo — Intervalo de Interação** (Tempo.pdf inteiro,
+      5 charts derivados). Bloqueado pelas decisões pendentes 1 e 2.
+- [ ] Heatmap Usuário × Sub-Período no Resumo
+- [ ] Cross-tab Usuário × Emoji composição (Emojis p3)
+- [ ] Drill-down emoji selecionado (Emojis p2)
 
 ### Tier 3 (alto custo, depende de decisões — Sprint 5+)
 
