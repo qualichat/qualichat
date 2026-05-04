@@ -97,6 +97,7 @@ qualichat = [
     "connector.csv",
     "fonts/*.ttf",
     "ui/assets/*.png",
+    "ui/static/*.html",
 ]
 
 [tool.setuptools.dynamic]
