@@ -40,3 +40,10 @@ __pycache__
 
 # Docs files
 notes.txt
+
+# Obsidian vault — cerebro local do projeto (notas privadas de pesquisa)
+# Estrutura, scripts e skills (.claude/) sao commitaveis; conteudo do vault nao.
+obsidian_vault/
+!obsidian_vault/README.md
+!obsidian_vault/CLAUDE.md
+.claude/settings.local.json
