@@ -751,7 +751,9 @@ flowchart LR
       mainBkg: '#FAF7F1'
     },
     flowchart: {
-      curve: 'basis',
+      // 'linear' evita o bug "Could not find a suitable point for the given
+      // distance" que o 'basis' dispara em segmentos muito curtos.
+      curve: 'linear',
       htmlLabels: true,
       padding: 12,
       nodeSpacing: 40,
@@ -775,7 +777,9 @@ flowchart LR
       try {
         await mermaid.run({ nodes: [d] });
       } catch (e) {
-        console.error('Mermaid render error:', e);
+        // e pode ser um objeto não-Error; força stringificação útil
+        const msg = (e && (e.message || e.str)) || String(e);
+        console.error('Mermaid render error:', msg, e);
       }
     }
     renderedTabs.add(target);
