@@ -751,13 +751,18 @@ flowchart LR
       mainBkg: '#FAF7F1'
     },
     flowchart: {
-      // 'linear' evita o bug "Could not find a suitable point for the given
-      // distance" que o 'basis' dispara em segmentos muito curtos.
+      // ELK renderer é mais robusto que o default 'dagre-wrapper'.
+      // O bug "Could not find a suitable point for the given distance"
+      // persiste no dagre-wrapper mesmo com curve:linear quando há nós com
+      // arestas convergentes muito próximas. ELK calcula posições de forma
+      // diferente e não dispara o erro.
+      defaultRenderer: 'elk',
       curve: 'linear',
       htmlLabels: true,
-      padding: 12,
-      nodeSpacing: 40,
-      rankSpacing: 55
+      padding: 18,
+      nodeSpacing: 55,
+      rankSpacing: 75,
+      useMaxWidth: false
     }
   });
 
