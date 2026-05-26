@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>qualichat — Fluxograma do código real</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --pergaminho: #F4EFE6;
+      --pergaminho-claro: #FAF7F1;
+      --pergaminho-escuro: #E8DFCE;
+      --tinta-negra: #3A2F26;
+      --sepia-fieldnote: #7A6B5A;
+      --ocre-encadernacao: #B8860B;
+      --ocre-claro: rgba(184, 134, 11, 0.18);
+      --musgo-biblioteca: #5B7553;
+      --toga-academica: #62352B;
+      --marginalia-vermelha: #A23A2D;
+      --borda-padrao: rgba(58, 47, 38, 0.14);
+      --borda-suave: rgba(58, 47, 38, 0.08);
+
+      --serif: 'EB Garamond', Georgia, serif;
+      --sans: 'Source Sans 3', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'Consolas', monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--pergaminho);
+      font-family: var(--sans);
+      color: var(--tinta-negra);
+      line-height: 1.55;
+      font-size: 16px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 32px 28px 80px; }
+
+    header.brand {
+      border-bottom: 1px solid var(--borda-padrao);
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    header.brand h1 {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 38px;
+      margin: 0 0 6px;
+    }
+    header.brand .sub {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--sepia-fieldnote);
+      font-size: 17px;
+    }
+    header.brand .meta {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--sepia-fieldnote);
+      font-family: var(--mono);
+    }
+    .lede {
+      border-left: 3px solid var(--ocre-encadernacao);
+      padding: 4px 0 4px 18px;
+      margin: 24px 0 32px;
+      font-family: var(--serif);
+      font-size: 19px;
+      font-style: italic;
+      color: var(--toga-academica);
+      line-height: 1.5;
+    }
+
+    nav.tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--borda-padrao);
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+    nav.tabs button {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sepia-fieldnote);
+      padding: 12px 22px 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-bottom: -1px;
+    }
+    nav.tabs button:hover { color: var(--toga-academica); }
+    nav.tabs button.active {
+      color: var(--toga-academica);
+      border-bottom-color: var(--ocre-encadernacao);
+    }
+
+    section.tab-content { display: none; animation: fadein 0.18s ease; }
+    section.tab-content.active { display: block; }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h2.section-title {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 28px;
+      margin: 8px 0 18px;
+    }
+    .hint {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--sepia-fieldnote);
+      font-size: 15px;
+      margin: 0 0 28px;
+      line-height: 1.6;
+    }
+
+    .diagram {
+      background: var(--pergaminho-claro);
+      border: 1px solid var(--borda-padrao);
+      border-radius: 6px;
+      padding: 32px;
+      margin: 0 0 24px;
+      overflow-x: auto;
+    }
+    .diagram .mermaid {
+      display: flex;
+      justify-content: center;
+      min-width: 100%;
+    }
+    .diagram .mermaid svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 14px 0 32px;
+      padding: 14px 18px;
+      background: var(--pergaminho-claro);
+      border: 1px solid var(--borda-suave);
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .legend-swatch {
+      width: 16px; height: 16px;
+      border-radius: 3px;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.92em;
+      background: var(--ocre-claro);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--toga-academica);
+    }
+
+    /* Code references panel under each diagram */
+    .code-refs {
+      background: var(--pergaminho-claro);
+      border: 1px solid var(--borda-suave);
+      border-radius: 4px;
+      padding: 18px 22px;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .code-refs h3 {
+      font-family: var(--sans);
+      font-size: 12px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--sepia-fieldnote);
+      margin: 0 0 12px;
+      font-weight: 600;
+    }
+    .code-refs ul { margin: 0; padding-left: 20px; }
+    .code-refs li { margin: 4px 0; line-height: 1.5; }
+    .code-refs strong { color: var(--toga-academica); }
+
+    footer {
+      margin-top: 60px;
+      padding-top: 22px;
+      border-top: 1px solid var(--borda-padrao);
+      font-size: 13px;
+      color: var(--sepia-fieldnote);
+      font-family: var(--mono);
+      line-height: 1.7;
+    }
+    footer a { color: var(--ocre-encadernacao); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    footer .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 760px) {
+      .container { padding: 20px 14px 60px; }
+      header.brand h1 { font-size: 28px; }
+      .diagram { padding: 16px; }
+      nav.tabs button { padding: 10px 14px 12px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header class="brand">
+    <h1>qualichat — Fluxograma do código real</h1>
+    <div class="sub">o que o Python efetivamente faz, linha por linha</div>
+    <div class="meta">derivado de leitura linha-a-linha de qualichat/<em>*.py</em> · feat/web-ui · 2026-05-25</div>
+  </header>
+
+  <div class="lede">
+    Quatro diagramas que mapeiam o código real do qualichat:
+    (1) construção do <code>Chat</code> (do upload ao <code>Message._data</code> populado),
+    (2) execução de um chart (do clique no botão ao <code>plotly.Figure</code>),
+    (3) ancoragens da tese aplicadas aos campos, e
+    (4) consumo de <code>Qty_char_*</code> pelos 17 charts.
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button class="active" data-target="constr">01 · Construção do Chat</button>
+    <button data-target="render">02 · Execução de chart</button>
+    <button data-target="ancoragens">03 · Ancoragens da tese</button>
+    <button data-target="charts">04 · Charts × Campos</button>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════
+       TAB 1 — CONSTRUÇÃO DO CHAT
+       ════════════════════════════════════════════════════ -->
+  <section class="tab-content active" id="constr">
+    <h2 class="section-title">1. Construção do Chat (do upload ao <code>Message._data</code> populado)</h2>
+    <p class="hint">
+      Cada caixa representa uma linha (ou bloco) específico no código.
+      Setas seguem a ordem real de execução.
+      Setas tracejadas indicam dependências externas ou entradas laterais.
+    </p>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch" style="background: #E8D8C4;"></span> Entrada / IO</div>
+      <div class="legend-item"><span class="legend-swatch" style="background: #DCE5D6;"></span> Parsing</div>
+      <div class="legend-item"><span class="legend-swatch" style="background: #F6E9C7;"></span> Análise por mensagem</div>
+      <div class="legend-item"><span class="legend-swatch" style="background: #E8DFCE;"></span> Persistência</div>
+      <div class="legend-item"><span class="legend-swatch" style="background: #D9E1EC;"></span> Biblioteca externa</div>
+    </div>
+
+    <div class="diagram">
+      <div class="mermaid">
+flowchart TD
+    USER["Upload .txt ou .zip"]:::input
+    CHAT["Chat(path)&lt;br/&gt;chat.py linha 187"]:::input
+    VAL["valida Path&lt;br/&gt;+ path.is_file()&lt;br/&gt;linha 188-192"]:::input
+
+    USER --> CHAT
+    CHAT --> VAL
+
+    PARSE["self._parse(self.path)&lt;br/&gt;chat.py linha 200&lt;br/&gt;(@staticmethod linha 236)"]:::parse
+    VAL --> PARSE
+
+    ZIPCHK{".zip?&lt;br/&gt;linha 244"}:::parse
+    PARSE --> ZIPCHK
+
+    EXTR["_extract_txt_from_zip()&lt;br/&gt;chat.py linha 77-94&lt;br/&gt;procura _chat.txt&lt;br/&gt;OU primeiro .txt"]:::parse
+    ZIPCHK -->|sim| EXTR
+    USEDIR["source = path&lt;br/&gt;linha 250"]:::parse
+    ZIPCHK -->|não| USEDIR
+
+    CLN["_cleaned_copy(source)&lt;br/&gt;chat.py linha 58-74&lt;br/&gt;context manager"]:::parse
+    EXTR --> CLN
+    USEDIR --> CLN
+
+    READ["raw = src.read_text(utf-8)&lt;br/&gt;linha 61"]:::parse
+    CLN --> READ
+
+    IMP["_clean_text(raw)&lt;br/&gt;chat.py linha 52-55&lt;br/&gt;loop sobre _IMPURITIES&lt;br/&gt;(U+200E, U+00A0, U+202F...)"]:::parse
+    READ --> IMP
+
+    TMP["mkstemp prefix=qualichat_&lt;br/&gt;linha 64-68&lt;br/&gt;escreve cleaned no tempfile"]:::parse
+    IMP --> TMP
+
+    CAPP["_CapturingWhatsAppParser(tempfile)&lt;br/&gt;chat.py linha 97-156&lt;br/&gt;subclasse WhatsAppParser&lt;br/&gt;+ overrides _parse_message"]:::parse
+    TMP --> CAPP
+
+    CM(["chat-miner&lt;br/&gt;WhatsAppParser&lt;br/&gt;infere fmt iOS Android locale"]):::ext
+    CM -.->|herança| CAPP
+
+    PF["parser.parse_file()&lt;br/&gt;linha 256"]:::parse
+    CAPP --> PF
+
+    GETDF["parser.parsed_messages.get_df(as_pandas=True)&lt;br/&gt;linha 257"]:::parse
+    PF --> GETDF
+    SYS["parser.system_events&lt;br/&gt;linha 267&lt;br/&gt;lista de (ts, body)&lt;br/&gt;recuperada pelo override"]:::parse
+    PF --> SYS
+
+    DFCHK{"df.empty?&lt;br/&gt;linha 269"}:::parse
+    GETDF --> DFCHK
+    ERR["raise ValueError&lt;br/&gt;linha 270-274"]:::parse
+    DFCHK -->|sim| ERR
+
+    RETP["return (df, system_events)&lt;br/&gt;linha 276"]:::parse
+    DFCHK -->|não| RETP
+    SYS --> RETP
+
+    INITLISTS["self.messages = empty&lt;br/&gt;self.system_messages = SystemMessage list&lt;br/&gt;self._actors = empty dict&lt;br/&gt;linha 202-206"]:::store
+    RETP --> INITLISTS
+
+    CFG["config[path_key] = {} se nao existe&lt;br/&gt;group = config[path_key]&lt;br/&gt;linha 208-211"]:::store
+    INITLISTS --> CFG
+
+    CFGFILE[("~/.qualichat/config.json&lt;br/&gt;utils.py Config")]:::ext
+    CFGFILE -.->|load/persist| CFG
+
+    LOOP["for row in df.itertuples():&lt;br/&gt;linha 213"]:::msg
+    CFG --> LOOP
+
+    ACTORCHK{"actor existe?&lt;br/&gt;linha 216"}:::msg
+    LOOP --> ACTORCHK
+
+    GRPCHK{"contato em group?&lt;br/&gt;linha 217"}:::msg
+    ACTORCHK -->|não existe| GRPCHK
+
+    GRN["get_random_name()&lt;br/&gt;utils.py linha 95-111&lt;br/&gt;random.choice(names)&lt;br/&gt;+ names.remove(name)"]:::msg
+    GRPCHK -->|não| GRN
+
+    BOOKS[("books.txt&lt;br/&gt;767 obras de arte&lt;br/&gt;brasileiras")]:::ext
+    BOOKS -.->|carregado em utils.py:114| GRN
+
+    SAVEGRP["group[contato] = nome sorteado&lt;br/&gt;linha 218"]:::msg
+    GRN --> SAVEGRP
+
+    NEWACTOR["Actor(display_name)&lt;br/&gt;models.py linha 78-99&lt;br/&gt;self._actors[contato] = actor&lt;br/&gt;linha 219"]:::msg
+    SAVEGRP --> NEWACTOR
+    GRPCHK -->|sim| NEWACTOR
+
+    GETA["actor = self._actors[contato]&lt;br/&gt;linha 221"]:::msg
+    ACTORCHK -->|existe| GETA
+    NEWACTOR --> GETA
+
+    NEWMSG["Message(actor, content, ts)&lt;br/&gt;chat.py linha 222&lt;br/&gt;models.py linha 177-240"]:::msg
+    GETA --> NEWMSG
+
+    INITM["Message.__init__&lt;br/&gt;13 regex + 3 enums"]:::msg
+    NEWMSG --> INITM
+
+    REGEX(["regex.py&lt;br/&gt;URL_RE EMAIL_RE&lt;br/&gt;MENTION_RE LAUGHS_RE&lt;br/&gt;EMOTICONS_RE NUMBERS_RE..."]):::ext
+    EMOJI(["lib emojis&lt;br/&gt;iter() retorna Unicode"]):::ext
+    REGEX -.->|patterns| INITM
+    EMOJI -.->|iter content| INITM
+
+    QTY["preenche Qty_char_total&lt;br/&gt;+ 10 listas (emoji, links, emails,&lt;br/&gt;?, !, calls, numbers, laughs,&lt;br/&gt;emoticons, marks)&lt;br/&gt;linha 192-212"]:::msg
+    INITM --> QTY
+
+    DER["Qty_char_net = content - calls - links - emails - emoji&lt;br/&gt;Qty_char_text = net - laughs - marks - numbers&lt;br/&gt;linha 214-234"]:::msg
+    QTY --> DER
+
+    ENUMS["Type = get_message_type(content)&lt;br/&gt;Day_period = get_period(created_at)&lt;br/&gt;Day_sub_period = get_sub_period(created_at)&lt;br/&gt;enums.py linha 77-222&lt;br/&gt;linha 236-238"]:::msg
+    DER --> ENUMS
+
+    FREEZE["self._data = MappingProxyType(data)&lt;br/&gt;linha 240&lt;br/&gt;(imutavel)"]:::msg
+    ENUMS --> FREEZE
+
+    APPEND["self.messages.append(message)&lt;br/&gt;actor.messages.append(message)&lt;br/&gt;linha 224-225"]:::msg
+    FREEZE --> APPEND
+
+    LOOPBACK["próxima row"]:::msg
+    APPEND --> LOOPBACK
+    LOOPBACK -->|loop| ACTORCHK
+
+    DONE["config.save()&lt;br/&gt;linha 227&lt;br/&gt;persiste mapping autor → personagem"]:::store
+    APPEND -->|fim do loop| DONE
+    DONE -.->|escreve| CFGFILE
+
+    LOGEND["log Loaded N messages...&lt;br/&gt;linha 229-234"]:::store
+    DONE --> LOGEND
+
+    classDef input fill:#E8D8C4,stroke:#62352B,stroke-width:1.5px,color:#3A2F26
+    classDef parse fill:#DCE5D6,stroke:#5B7553,stroke-width:1.5px,color:#3A2F26
+    classDef msg fill:#F6E9C7,stroke:#B8860B,stroke-width:1.5px,color:#3A2F26
+    classDef store fill:#E8DFCE,stroke:#7A6B5A,stroke-width:1.5px,color:#3A2F26
+    classDef ext fill:#D9E1EC,stroke:#3F5B7E,stroke-width:1px,color:#3A2F26,stroke-dasharray: 4 4
+      </div>
+    </div>
+
+    <div class="code-refs">
+      <h3>Referências de código (linha por linha)</h3>
+      <ul>
+        <li><strong>chat.py:187-234</strong> — <code>Chat.__init__</code>: orquestra todo o fluxo</li>
+        <li><strong>chat.py:236-276</strong> — <code>Chat._parse</code> (staticmethod): extração ZIP + clean + chat-miner</li>
+        <li><strong>chat.py:38-49</strong> — <code>_IMPURITIES</code>: 7 chars Unicode invisíveis removidos</li>
+        <li><strong>chat.py:77-94</strong> — <code>_extract_txt_from_zip</code>: prefere <code>_chat.txt</code></li>
+        <li><strong>chat.py:97-156</strong> — <code>_CapturingWhatsAppParser</code>: subclasse que recupera system events</li>
+        <li><strong>models.py:177-240</strong> — <code>Message.__init__</code>: 13 análises por regex + 3 enums</li>
+        <li><strong>models.py:70-75</strong> — <code>remove_all_incidences</code>: função auxiliar para subtração</li>
+        <li><strong>utils.py:95-111</strong> — <code>get_random_name</code>: sample sem reposição de <code>books.txt</code></li>
+        <li><strong>utils.py:39-81</strong> — <code>Config</code>: persistência em <code>~/.qualichat/config.json</code></li>
+        <li><strong>enums.py:77-106</strong> — <code>get_period</code> / <code>get_sub_period</code></li>
+        <li><strong>enums.py:197-222</strong> — <code>get_message_type</code>: detecção por casefold + locales</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════
+       TAB 2 — EXECUÇÃO DE CHART
+       ════════════════════════════════════════════════════ -->
+  <section class="tab-content" id="render">
+    <h2 class="section-title">2. Execução de um chart (do clique ao <code>plotly.Figure</code>)</h2>
+    <p class="hint">
+      O qualichat tem 2 modos de execução: CLI (questionary prompts no terminal)
+      e Streamlit UI (monkey-patches captura figura inline). Ambos rodam o
+      <strong>mesmo código</strong> em <code>frames.py</code>; só diferem na
+      camada de envoltura.
+    </p>
+
+    <div class="diagram">
+      <div class="mermaid">
+flowchart TD
+    QC["Qualichat(chats)&lt;br/&gt;core.py linha 46-52"]:::core
+    QC --> KF["KeysFrame(chats)&lt;br/&gt;frames.py linha 167"]:::core
+    QC --> PF["ParticipationStatusFrame(chats)&lt;br/&gt;frames.py linha 483"]:::core
+    QC --> OF["PublicOpinionFrame(chats)&lt;br/&gt;frames.py linha 963"]:::core
+
+    BF["BaseFrame.__init__&lt;br/&gt;frames.py linha 147-161&lt;br/&gt;inspect.getmembers + _normalize_frame_name&lt;br/&gt;popula self.charts dict"]:::core
+    KF --> BF
+    PF --> BF
+    OF --> BF
+
+    CHARTS["self.charts = dict&lt;br/&gt;key=title-cased nome&lt;br/&gt;value=bound method&lt;br/&gt;ex Laminations Bots Linkage..."]:::core
+    BF --> CHARTS
+
+    INVOC["qc.frames[frame_name].charts[chart_name](chats)&lt;br/&gt;invocação do chart"]:::core
+    CHARTS --> INVOC
+
+    MODE{"de onde?"}:::core
+    INVOC --> MODE
+
+    CLI_PATH["CLI direto&lt;br/&gt;questionary prompts terminal"]:::cli
+    UI_PATH["Streamlit UI&lt;br/&gt;runtime.run_chart(callable, [chat], answers)&lt;br/&gt;ui/runtime.py linha 231-254"]:::ui
+
+    MODE -->|python ou REPL| CLI_PATH
+    MODE -->|via ui/pages/*.py| UI_PATH
+
+    %% UI path
+    MP1["capture_figures()&lt;br/&gt;ui/runtime.py linha 150-170&lt;br/&gt;monkey-patch BaseFigure.show&lt;br/&gt;= coleta em lista"]:::ui
+    UI_PATH --> MP1
+
+    MP2["silent_progress()&lt;br/&gt;linha 203-223&lt;br/&gt;monkey-patch progress_bar&lt;br/&gt;= _NoopProgress"]:::ui
+    MP1 --> MP2
+
+    MP3["replay(answers)&lt;br/&gt;linha 109-142&lt;br/&gt;monkey-patch select checkbox&lt;br/&gt;input password&lt;br/&gt;nos modulos _partials frames sorters"]:::ui
+    MP2 --> MP3
+
+    CALL["chart_callable(chats)&lt;br/&gt;roda o mesmo codigo CLI"]:::core
+    MP3 --> CALL
+    CLI_PATH --> CALL
+
+    SORTDEC{"tem decorator?"}:::core
+    CALL --> SORTDEC
+
+    %% Sorter decorators
+    KEYDEC["@sorters.keys&lt;br/&gt;sorters.py linha 357-378&lt;br/&gt;asks Choose your mode&lt;br/&gt;By Time ou By Actor"]:::sort
+    PPDEC["@sorters.participation_status&lt;br/&gt;sorters.py linha 381-402&lt;br/&gt;asks Choose your mode&lt;br/&gt;By Time ou Treemap"]:::sort
+    GUDEC["@sorters.group_users&lt;br/&gt;sorters.py linha 405-421&lt;br/&gt;SEM prompts&lt;br/&gt;so prepara dict por ator"]:::sort
+    NONE["sem decorator&lt;br/&gt;vai direto pro body"]:::sort
+
+    SORTDEC -->|sim KeysFrame| KEYDEC
+    SORTDEC -->|sim Participation| PPDEC
+    SORTDEC -->|sim Participation| GUDEC
+    SORTDEC -->|nao Public Opinion| NONE
+
+    SBT["_sort_by_time(chats)&lt;br/&gt;sorters.py linha 173-199&lt;br/&gt;group by created_at strftime %B %Y&lt;br/&gt;asks per chat All ou Choose an epoch"]:::sort
+    KEYDEC -->|By Time| SBT
+
+    SBA["_sort_by_actor(chats)&lt;br/&gt;sorters.py linha 202-250&lt;br/&gt;group by actor.display_name&lt;br/&gt;asks per chat All ou Choose actor"]:::sort
+    KEYDEC -->|By Actor| SBA
+
+    BODY["chart body&lt;br/&gt;frames.py varias linhas&lt;br/&gt;itera messages le Qty_char_X&lt;br/&gt;agrega em pandas.DataFrame"]:::body
+    SBT --> BODY
+    SBA --> BODY
+    PPDEC --> BODY
+    GUDEC --> BODY
+    NONE --> BODY
+
+    BODY_PROMPT["alguns charts pedem&lt;br/&gt;prompts adicionais no body:&lt;br/&gt;bots Index ou Components&lt;br/&gt;media_repertoire Choose Media...&lt;br/&gt;messages_per_actors_per_weekday User ou System&lt;br/&gt;laminations_per_actors Lam ou Average&lt;br/&gt;fabrications_per_actors idem&lt;br/&gt;keyword Enter the keyword&lt;br/&gt;messages/keyword Choose morph class"]:::body
+    BODY --> BODY_PROMPT
+
+    GENERATORS["generate_chart(df, bars, lines, title)&lt;br/&gt;generate_treemap()&lt;br/&gt;generate_wordcloud()&lt;br/&gt;generate_table()&lt;br/&gt;sorters.py linha 51-355"]:::body
+    BODY_PROMPT --> GENERATORS
+
+    PLT(["plotly&lt;br/&gt;graph_objs.Figure&lt;br/&gt;+ make_subplots"]):::ext
+    PLT -.->|build| GENERATORS
+
+    FIG["fig.show()&lt;br/&gt;chamado pelo generator"]:::body
+    GENERATORS --> FIG
+
+    DEST{"capturado&lt;br/&gt;ou aberto?"}:::body
+    FIG --> DEST
+
+    BROWSER["abre browser default&lt;br/&gt;com Plotly HTML estatico&lt;br/&gt;CLI"]:::cli
+    CAPTURED["coletado em lista&lt;br/&gt;captured.append(self)&lt;br/&gt;linha 163-165&lt;br/&gt;UI"]:::ui
+
+    DEST -->|CLI| BROWSER
+    DEST -->|UI monkey-patched| CAPTURED
+
+    RETURN["return figures lista&lt;br/&gt;ui/runtime.py linha 254"]:::ui
+    CAPTURED --> RETURN
+
+    STREAMLIT["for fig in figures:&lt;br/&gt;  st.plotly_chart(fig)&lt;br/&gt;ui/pages/X.py"]:::ui
+    RETURN --> STREAMLIT
+
+    classDef core fill:#E8DFCE,stroke:#7A6B5A,stroke-width:1.5px,color:#3A2F26
+    classDef sort fill:#F6E9C7,stroke:#B8860B,stroke-width:1.5px,color:#3A2F26
+    classDef body fill:#DCE5D6,stroke:#5B7553,stroke-width:1.5px,color:#3A2F26
+    classDef cli fill:#E8D8C4,stroke:#62352B,stroke-width:1.5px,color:#3A2F26
+    classDef ui fill:#F2D5CE,stroke:#A23A2D,stroke-width:1.5px,color:#3A2F26
+    classDef ext fill:#D9E1EC,stroke:#3F5B7E,stroke-width:1px,color:#3A2F26,stroke-dasharray: 4 4
+      </div>
+    </div>
+
+    <div class="code-refs">
+      <h3>Referências de código (chart pipeline)</h3>
+      <ul>
+        <li><strong>core.py:46-66</strong> — <code>Qualichat.__init__</code> + <code>.frames</code> property</li>
+        <li><strong>frames.py:128-165</strong> — <code>BaseFrame.__init__</code> auto-popula <code>self.charts</code> via <code>inspect.getmembers</code></li>
+        <li><strong>sorters.py:357-378</strong> — <code>@keys</code> decorator (modo By Time / By Actor)</li>
+        <li><strong>sorters.py:381-402</strong> — <code>@participation_status</code> (modo By Time / Treemap)</li>
+        <li><strong>sorters.py:405-421</strong> — <code>@group_users</code> (sem prompts, só prep dict por ator)</li>
+        <li><strong>sorters.py:173-199</strong> — <code>_sort_by_time</code> (agrupa por mês, ask <em>Choose an epoch</em>)</li>
+        <li><strong>sorters.py:202-250</strong> — <code>_sort_by_actor</code> (agrupa por ator, ask <em>Choose a specific actor</em>)</li>
+        <li><strong>sorters.py:51-128</strong> — <code>generate_chart</code> com bars+lines+rangeslider+buttons</li>
+        <li><strong>sorters.py:253-314</strong> — <code>generate_treemap</code></li>
+        <li><strong>sorters.py:317-354</strong> — <code>generate_wordcloud</code></li>
+        <li><strong>ui/runtime.py:109-142</strong> — <code>replay</code> monkey-patches questionary nos 3 módulos</li>
+        <li><strong>ui/runtime.py:150-170</strong> — <code>capture_figures</code> monkey-patches <code>BaseFigure.show</code></li>
+        <li><strong>ui/runtime.py:203-223</strong> — <code>silent_progress</code> monkey-patches progress bar</li>
+        <li><strong>ui/runtime.py:231-254</strong> — <code>run_chart</code> compõe os 3 contexts e executa</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════
+       TAB 3 — ANCORAGENS DA TESE
+       ════════════════════════════════════════════════════ -->
+  <section class="tab-content" id="ancoragens">
+    <h2 class="section-title">3. As 4 ancoragens da tese → campos do código</h2>
+    <p class="hint">
+      Cavalcante (2019) propõe 4 vínculos que ancoram a interação a frames temáticos.
+      Cada um tem ancoragem goffmaniana, evidência qualitativa, métrica
+      quantitativa, e um conjunto de campos no <code>Message._data</code>.
+      O qualichat implementa <strong>3 de 4</strong> — a Temporalidade está pendente.
+    </p>
+
+    <div class="diagram">
+      <div class="mermaid">
+flowchart LR
+    GOFFMAN["Goffman 1974&lt;br/&gt;Frame Analysis"]:::theory
+    GOFFMAN --> CAV["Cavalcante 2019&lt;br/&gt;tese UFRN&lt;br/&gt;(retraduz PT)"]:::theory
+
+    CAV --> A1["i) Efervescência&lt;br/&gt;atenção ao quadro&lt;br/&gt;notificações + status"]:::ok
+    CAV --> A2["ii) Modelagem&lt;br/&gt;maquinações + tons&lt;br/&gt;palavras iniciais finais&lt;br/&gt;+ risos + pontuação + números"]:::ok
+    CAV --> A3["iii) Reconhecimento&lt;br/&gt;laminações&lt;br/&gt;links + emails + chamadas + emojis"]:::ok
+    CAV --> A4["iv) Temporalidade&lt;br/&gt;silêncio + pausas&lt;br/&gt;super-rápida até longo"]:::gap
+
+    A1 -->|conta| F1[("Qty_messages&lt;br/&gt;contagem total&lt;br/&gt;de mensagens")]:::ok
+    A2 -->|len| F2[("Qty_char_text&lt;br/&gt;= net - laughs - marks - numbers&lt;br/&gt;models.py linha 224-231")]:::ok
+    A3 -->|len| F3[("Qty_char_net&lt;br/&gt;= content - calls - links - emails - emoji&lt;br/&gt;models.py linha 214-222")]:::ok
+    A4 -.->|gapi = tsi - tsi-1| F4[("NÃO IMPLEMENTADO&lt;br/&gt;nenhum cálculo de delta&lt;br/&gt;entre mensagens")]:::gap
+
+    F1 --> C1["ParticipationStatusFrame&lt;br/&gt;messages_per_actors&lt;br/&gt;messages_per_actors_per_weekday&lt;br/&gt;bots"]:::ok
+    F2 --> C2["ParticipationStatusFrame&lt;br/&gt;fabrications_per_actors&lt;br/&gt;(nome desalinhado&lt;br/&gt;deveria ser machinations)"]:::warn
+    F3 --> C3["KeysFrame&lt;br/&gt;laminations links calls emails&lt;br/&gt;ParticipationStatusFrame&lt;br/&gt;laminations_per_actors"]:::ok
+    F4 -.-> C4["Frame Tempo (a criar)&lt;br/&gt;5 charts pendentes&lt;br/&gt;YLAI_V2_Tempo.pdf"]:::gap
+
+    classDef theory fill:#E8DFCE,stroke:#3A2F26,stroke-width:2px,color:#3A2F26
+    classDef ok fill:#DCE5D6,stroke:#5B7553,stroke-width:1.5px,color:#3A2F26
+    classDef warn fill:#F6E9C7,stroke:#B8860B,stroke-width:1.5px,color:#3A2F26
+    classDef gap fill:#F2D5CE,stroke:#A23A2D,stroke-width:2px,color:#3A2F26,stroke-dasharray: 5 5
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch" style="background: #DCE5D6;"></span> Implementado</div>
+      <div class="legend-item"><span class="legend-swatch" style="background: #F6E9C7;"></span> Implementado com naming desalinhado</div>
+      <div class="legend-item"><span class="legend-swatch" style="background: #F2D5CE;"></span> NÃO implementado (gap)</div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════
+       TAB 4 — CHARTS × CAMPOS
+       ════════════════════════════════════════════════════ -->
+  <section class="tab-content" id="charts">
+    <h2 class="section-title">4. 17 charts × campos do <code>Message._data</code> consumidos</h2>
+    <p class="hint">
+      Cada chart lê um subconjunto específico. Útil pra ver qual campo é
+      "popular" (consumido por muitos charts) e qual chart é monocampo
+      vs multicampo. Setas indicam consumo direto.
+    </p>
+
+    <div class="diagram">
+      <div class="mermaid">
+flowchart LR
+    subgraph FIELDS["Message._data — campos"]
+        direction TB
+        QC[("Qty_char_calls")]:::field
+        QL[("Qty_char_links")]:::field
+        QE[("Qty_char_emails")]:::field
+        QJ[("Qty_char_emoji")]:::field
+        QM[("Qty_char_marks&lt;br/&gt;= emoji + emoticons")]:::field
+        QH[("Qty_char_laughs")]:::field
+        QN[("Qty_char_numbers")]:::field
+        QT[("Qty_char_text")]:::field
+        QNET[("Qty_char_net")]:::field
+        QMSG[("Qty_messages")]:::field
+        TP[("Type&lt;br/&gt;MessageType")]:::field
+        DP[("Day_period&lt;br/&gt;Day_sub_period")]:::field
+        CTX[("content + actor&lt;br/&gt;+ created_at")]:::field
+    end
+
+    KLAM[("KeysFrame.laminations")]:::keys
+    KLNK[("KeysFrame.links")]:::keys
+    KCAL[("KeysFrame.calls")]:::keys
+    KEML[("KeysFrame.emails")]:::keys
+    KSYM[("KeysFrame.textual_symbols")]:::keys
+    KMSG[("KeysFrame.messages&lt;br/&gt;wordcloud")]:::keys
+    KKEY[("KeysFrame.keyword&lt;br/&gt;wordcloud + filtro")]:::keys
+    KRAT[("KeysFrame.ratings&lt;br/&gt;requer YT API")]:::keys
+
+    QC --> KLAM
+    QL --> KLAM
+    QE --> KLAM
+    QJ --> KLAM
+
+    QL --> KLNK
+    QC --> KCAL
+    QE --> KEML
+
+    QM --> KSYM
+    QJ --> KSYM
+
+    QT --> KMSG
+    TP --> KMSG
+
+    QT --> KKEY
+    TP --> KKEY
+    CTX --> KKEY
+
+    QL --> KRAT
+    CTX --> KRAT
+
+    PMSG[("messages_per_actors")]:::part
+    PWEK[("messages_per_actors_per_weekday")]:::part
+    PBOT[("bots")]:::part
+    PMED[("media_repertoire")]:::part
+    PSTA[("message_statistics")]:::part
+    PLAM[("laminations_per_actors")]:::part
+    PFAB[("fabrications_per_actors")]:::part
+
+    QT --> PMSG
+    QNET --> PMSG
+    CTX --> PMSG
+    TP --> PMSG
+
+    DP --> PWEK
+
+    TP --> PBOT
+    QNET --> PBOT
+
+    QL --> PMED
+
+    QNET --> PSTA
+    QT --> PSTA
+
+    QC --> PLAM
+    QL --> PLAM
+    QE --> PLAM
+    QJ --> PLAM
+    QNET --> PLAM
+
+    QH --> PFAB
+    QM --> PFAB
+    QN --> PFAB
+    QT --> PFAB
+
+    OPOL[("matrix_polarity&lt;br/&gt;requer Google Translate&lt;br/&gt;+ spaCy en")]:::opin
+    OLNK[("linkage&lt;br/&gt;connector.csv temático")]:::opin
+
+    QT --> OPOL
+    TP --> OPOL
+    CTX --> OPOL
+
+    QNET --> OLNK
+    TP --> OLNK
+
+    classDef field fill:#F6E9C7,stroke:#B8860B,stroke-width:1px,color:#3A2F26
+    classDef keys fill:#DCE5D6,stroke:#5B7553,stroke-width:1px,color:#3A2F26
+    classDef part fill:#E8D8C4,stroke:#62352B,stroke-width:1px,color:#3A2F26
+    classDef opin fill:#D9E1EC,stroke:#3F5B7E,stroke-width:1px,color:#3A2F26
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch" style="background: #F6E9C7;"></span> Campo de Message._data</div>
+      <div class="legend-item"><span class="legend-swatch" style="background: #DCE5D6;"></span> KeysFrame (8 charts)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background: #E8D8C4;"></span> ParticipationStatusFrame (7 charts)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background: #D9E1EC;"></span> PublicOpinionFrame (2 charts)</div>
+    </div>
+  </section>
+
+  <footer>
+    <div>
+      qualichat · fluxograma · derivado de leitura linha-a-linha de
+      <a href="https://github.com/qualichat/qualichat/tree/feat/web-ui">github.com/qualichat/qualichat@feat/web-ui</a>
+    </div>
+    <div class="links">
+      <a href="qualichat-pipeline.html">Versão textual completa (pipeline.html)</a>
+      <a href="https://qualichat.streamlit.app/">App ao vivo</a>
+    </div>
+    <div style="margin-top: 8px;">
+      Single-file artefato — abra em qualquer browser, Mermaid renderiza via CDN.
+    </div>
+  </footer>
+</div>
+
+<script>
+  // Mermaid não consegue calcular layout em divs com display:none.
+  // Por isso renderizamos só o tab ativo, sob demanda.
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'base',
+    themeVariables: {
+      fontFamily: "Source Sans 3, sans-serif",
+      fontSize: '14px',
+      primaryColor: '#F4EFE6',
+      primaryBorderColor: '#7A6B5A',
+      primaryTextColor: '#3A2F26',
+      lineColor: '#7A6B5A',
+      textColor: '#3A2F26',
+      mainBkg: '#FAF7F1'
+    },
+    flowchart: {
+      curve: 'basis',
+      htmlLabels: true,
+      padding: 12,
+      nodeSpacing: 40,
+      rankSpacing: 55
+    }
+  });
+
+  const renderedTabs = new Set();
+
+  async function renderTab(target) {
+    if (renderedTabs.has(target)) return;
+    const diagrams = document.querySelectorAll('#' + target + ' .mermaid');
+    for (const d of diagrams) {
+      // Cache original source on first render
+      if (!d.hasAttribute('data-src')) {
+        d.setAttribute('data-src', d.textContent);
+      }
+      // Reset state — Mermaid mutates the node
+      d.removeAttribute('data-processed');
+      d.innerHTML = d.getAttribute('data-src');
+      try {
+        await mermaid.run({ nodes: [d] });
+      } catch (e) {
+        console.error('Mermaid render error:', e);
+      }
+    }
+    renderedTabs.add(target);
+  }
+
+  // Render initial active tab once DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      const initial = document.querySelector('section.tab-content.active');
+      if (initial) renderTab(initial.id);
+    });
+  } else {
+    const initial = document.querySelector('section.tab-content.active');
+    if (initial) renderTab(initial.id);
+  }
+
+  const buttons = document.querySelectorAll('nav.tabs button');
+  const sections = document.querySelectorAll('section.tab-content');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      buttons.forEach(b => b.classList.toggle('active', b === btn));
+      sections.forEach(s => s.classList.toggle('active', s.id === target));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      requestAnimationFrame(() => renderTab(target));
+    });
+  });
+</script>
+
+</body>
+</html>
