@@ -265,127 +265,127 @@ flowchart TD
     CHAT["Chat(path)&lt;br/&gt;chat.py linha 187"]:::input
     VAL["valida Path&lt;br/&gt;+ path.is_file()&lt;br/&gt;linha 188-192"]:::input
 
-    USER --> CHAT
-    CHAT --> VAL
+    USER -->|str ou Path| CHAT
+    CHAT -->|primeira coisa que faz| VAL
 
     PARSE["self._parse(self.path)&lt;br/&gt;chat.py linha 200&lt;br/&gt;(@staticmethod linha 236)"]:::parse
-    VAL --> PARSE
+    VAL -->|delega o trabalho pesado| PARSE
 
     ZIPCHK{".zip?&lt;br/&gt;linha 244"}:::parse
-    PARSE --> ZIPCHK
+    PARSE -->|checa extensão| ZIPCHK
 
     EXTR["_extract_txt_from_zip()&lt;br/&gt;chat.py linha 77-94&lt;br/&gt;procura _chat.txt&lt;br/&gt;OU primeiro .txt"]:::parse
-    ZIPCHK -->|sim| EXTR
+    ZIPCHK -->|sim, descompacta| EXTR
     USEDIR["source = path&lt;br/&gt;linha 250"]:::parse
-    ZIPCHK -->|não| USEDIR
+    ZIPCHK -->|não, usa direto| USEDIR
 
     CLN["_cleaned_copy(source)&lt;br/&gt;chat.py linha 58-74&lt;br/&gt;context manager"]:::parse
-    EXTR --> CLN
-    USEDIR --> CLN
+    EXTR -->|Path do .txt extraído| CLN
+    USEDIR -->|Path do .txt original| CLN
 
     READ["raw = src.read_text(utf-8)&lt;br/&gt;linha 61"]:::parse
-    CLN --> READ
+    CLN -->|abre o ExitStack| READ
 
     IMP["_clean_text(raw)&lt;br/&gt;chat.py linha 52-55&lt;br/&gt;loop sobre _IMPURITIES&lt;br/&gt;(U+200E, U+00A0, U+202F...)"]:::parse
-    READ --> IMP
+    READ -->|string bruta| IMP
 
     TMP["mkstemp prefix=qualichat_&lt;br/&gt;linha 64-68&lt;br/&gt;escreve cleaned no tempfile"]:::parse
-    IMP --> TMP
+    IMP -->|string limpa| TMP
 
     CAPP["_CapturingWhatsAppParser(tempfile)&lt;br/&gt;chat.py linha 97-156&lt;br/&gt;subclasse WhatsAppParser&lt;br/&gt;+ overrides _parse_message"]:::parse
-    TMP --> CAPP
+    TMP -->|caminho do tempfile| CAPP
 
     CM(["chat-miner&lt;br/&gt;WhatsAppParser&lt;br/&gt;infere fmt iOS Android locale"]):::ext
-    CM -.->|herança| CAPP
+    CM -.->|estende e sobrescreve| CAPP
 
     PF["parser.parse_file()&lt;br/&gt;linha 256"]:::parse
-    CAPP --> PF
+    CAPP -->|dispara o parser| PF
 
     GETDF["parser.parsed_messages.get_df(as_pandas=True)&lt;br/&gt;linha 257"]:::parse
-    PF --> GETDF
+    PF -->|popula parsed_messages| GETDF
     SYS["parser.system_events&lt;br/&gt;linha 267&lt;br/&gt;lista de (ts, body)&lt;br/&gt;recuperada pelo override"]:::parse
-    PF --> SYS
+    PF -->|popula system_events via override| SYS
 
     DFCHK{"df.empty?&lt;br/&gt;linha 269"}:::parse
-    GETDF --> DFCHK
+    GETDF -->|pandas.DataFrame| DFCHK
     ERR["raise ValueError&lt;br/&gt;linha 270-274"]:::parse
-    DFCHK -->|sim| ERR
+    DFCHK -->|sim, aborta| ERR
 
     RETP["return (df, system_events)&lt;br/&gt;linha 276"]:::parse
-    DFCHK -->|não| RETP
-    SYS --> RETP
+    DFCHK -->|não, segue| RETP
+    SYS -->|merge| RETP
 
     INITLISTS["self.messages = empty&lt;br/&gt;self.system_messages = SystemMessage list&lt;br/&gt;self._actors = empty dict&lt;br/&gt;linha 202-206"]:::store
-    RETP --> INITLISTS
+    RETP -->|tupla df, system_events| INITLISTS
 
     CFG["config[path_key] = {} se nao existe&lt;br/&gt;group = config[path_key]&lt;br/&gt;linha 208-211"]:::store
-    INITLISTS --> CFG
+    INITLISTS -->|prep listas vazias| CFG
 
     CFGFILE[("~/.qualichat/config.json&lt;br/&gt;utils.py Config")]:::ext
-    CFGFILE -.->|load/persist| CFG
+    CFGFILE -.->|carrega mapping antigo| CFG
 
     LOOP["for row in df.itertuples():&lt;br/&gt;linha 213"]:::msg
-    CFG --> LOOP
+    CFG -->|com group dict pronto| LOOP
 
     ACTORCHK{"actor existe?&lt;br/&gt;linha 216"}:::msg
-    LOOP --> ACTORCHK
+    LOOP -->|para cada linha| ACTORCHK
 
     GRPCHK{"contato em group?&lt;br/&gt;linha 217"}:::msg
-    ACTORCHK -->|não existe| GRPCHK
+    ACTORCHK -->|não está em _actors| GRPCHK
 
     GRN["get_random_name()&lt;br/&gt;utils.py linha 95-111&lt;br/&gt;random.choice(names)&lt;br/&gt;+ names.remove(name)"]:::msg
-    GRPCHK -->|não| GRN
+    GRPCHK -->|primeira vez deste contato| GRN
 
     BOOKS[("books.txt&lt;br/&gt;767 obras de arte&lt;br/&gt;brasileiras")]:::ext
-    BOOKS -.->|carregado em utils.py:114| GRN
+    BOOKS -.->|pool carregado em utils.py:114| GRN
 
     SAVEGRP["group[contato] = nome sorteado&lt;br/&gt;linha 218"]:::msg
-    GRN --> SAVEGRP
+    GRN -->|nome ainda livre| SAVEGRP
 
     NEWACTOR["Actor(display_name)&lt;br/&gt;models.py linha 78-99&lt;br/&gt;self._actors[contato] = actor&lt;br/&gt;linha 219"]:::msg
-    SAVEGRP --> NEWACTOR
-    GRPCHK -->|sim| NEWACTOR
+    SAVEGRP -->|mapping persistido| NEWACTOR
+    GRPCHK -->|já mapeado em sessão anterior| NEWACTOR
 
     GETA["actor = self._actors[contato]&lt;br/&gt;linha 221"]:::msg
-    ACTORCHK -->|existe| GETA
-    NEWACTOR --> GETA
+    ACTORCHK -->|já criado| GETA
+    NEWACTOR -->|recém-criado| GETA
 
     NEWMSG["Message(actor, content, ts)&lt;br/&gt;chat.py linha 222&lt;br/&gt;models.py linha 177-240"]:::msg
-    GETA --> NEWMSG
+    GETA -->|com Actor em mãos| NEWMSG
 
     INITM["Message.__init__&lt;br/&gt;13 regex + 3 enums"]:::msg
-    NEWMSG --> INITM
+    NEWMSG -->|instancia| INITM
 
     REGEX(["regex.py&lt;br/&gt;URL_RE EMAIL_RE&lt;br/&gt;MENTION_RE LAUGHS_RE&lt;br/&gt;EMOTICONS_RE NUMBERS_RE..."]):::ext
     EMOJI(["lib emojis&lt;br/&gt;iter() retorna Unicode"]):::ext
-    REGEX -.->|patterns| INITM
-    EMOJI -.->|iter content| INITM
+    REGEX -.->|patterns pré-compilados| INITM
+    EMOJI -.->|iter sobre o content| INITM
 
     QTY["preenche Qty_char_total&lt;br/&gt;+ 10 listas (emoji, links, emails,&lt;br/&gt;?, !, calls, numbers, laughs,&lt;br/&gt;emoticons, marks)&lt;br/&gt;linha 192-212"]:::msg
-    INITM --> QTY
+    INITM -->|roda regex em sequência| QTY
 
     DER["Qty_char_net = content - calls - links - emails - emoji&lt;br/&gt;Qty_char_text = net - laughs - marks - numbers&lt;br/&gt;linha 214-234"]:::msg
-    QTY --> DER
+    QTY -->|tem 11 campos primários| DER
 
     ENUMS["Type = get_message_type(content)&lt;br/&gt;Day_period = get_period(created_at)&lt;br/&gt;Day_sub_period = get_sub_period(created_at)&lt;br/&gt;enums.py linha 77-222&lt;br/&gt;linha 236-238"]:::msg
-    DER --> ENUMS
+    DER -->|tem 2 strings derivadas| ENUMS
 
     FREEZE["self._data = MappingProxyType(data)&lt;br/&gt;linha 240&lt;br/&gt;(imutavel)"]:::msg
-    ENUMS --> FREEZE
+    ENUMS -->|tem 3 classificações| FREEZE
 
     APPEND["self.messages.append(message)&lt;br/&gt;actor.messages.append(message)&lt;br/&gt;linha 224-225"]:::msg
-    FREEZE --> APPEND
+    FREEZE -->|dict congelado| APPEND
 
     LOOPBACK["próxima row"]:::msg
-    APPEND --> LOOPBACK
-    LOOPBACK -->|loop| ACTORCHK
+    APPEND -->|adiciona às 2 listas| LOOPBACK
+    LOOPBACK -->|while ainda há linhas| ACTORCHK
 
     DONE["config.save()&lt;br/&gt;linha 227&lt;br/&gt;persiste mapping autor → personagem"]:::store
     APPEND -->|fim do loop| DONE
-    DONE -.->|escreve| CFGFILE
+    DONE -.->|grava JSON| CFGFILE
 
     LOGEND["log Loaded N messages...&lt;br/&gt;linha 229-234"]:::store
-    DONE --> LOGEND
+    DONE -->|tudo concluído| LOGEND
 
     classDef input fill:#E8D8C4,stroke:#62352B,stroke-width:1.5px,color:#3A2F26
     classDef parse fill:#DCE5D6,stroke:#5B7553,stroke-width:1.5px,color:#3A2F26
@@ -429,46 +429,46 @@ flowchart TD
       <div class="mermaid">
 flowchart TD
     QC["Qualichat(chats)&lt;br/&gt;core.py linha 46-52"]:::core
-    QC --> KF["KeysFrame(chats)&lt;br/&gt;frames.py linha 167"]:::core
-    QC --> PF["ParticipationStatusFrame(chats)&lt;br/&gt;frames.py linha 483"]:::core
-    QC --> OF["PublicOpinionFrame(chats)&lt;br/&gt;frames.py linha 963"]:::core
+    QC -->|instancia 3 Frames| KF["KeysFrame(chats)&lt;br/&gt;frames.py linha 167"]:::core
+    QC -->|instancia 3 Frames| PF["ParticipationStatusFrame(chats)&lt;br/&gt;frames.py linha 483"]:::core
+    QC -->|instancia 3 Frames| OF["PublicOpinionFrame(chats)&lt;br/&gt;frames.py linha 963"]:::core
 
     BF["BaseFrame.__init__&lt;br/&gt;frames.py linha 147-161&lt;br/&gt;inspect.getmembers + _normalize_frame_name&lt;br/&gt;popula self.charts dict"]:::core
-    KF --> BF
-    PF --> BF
-    OF --> BF
+    KF -->|herda init| BF
+    PF -->|herda init| BF
+    OF -->|herda init| BF
 
     CHARTS["self.charts = dict&lt;br/&gt;key=title-cased nome&lt;br/&gt;value=bound method&lt;br/&gt;ex Laminations Bots Linkage..."]:::core
-    BF --> CHARTS
+    BF -->|auto-descobre métodos| CHARTS
 
     INVOC["qc.frames[frame_name].charts[chart_name](chats)&lt;br/&gt;invocação do chart"]:::core
-    CHARTS --> INVOC
+    CHARTS -->|dict pronto| INVOC
 
     MODE{"de onde?"}:::core
-    INVOC --> MODE
+    INVOC -->|chamada| MODE
 
     CLI_PATH["CLI direto&lt;br/&gt;questionary prompts terminal"]:::cli
     UI_PATH["Streamlit UI&lt;br/&gt;runtime.run_chart(callable, [chat], answers)&lt;br/&gt;ui/runtime.py linha 231-254"]:::ui
 
-    MODE -->|python ou REPL| CLI_PATH
+    MODE -->|terminal ou REPL| CLI_PATH
     MODE -->|via ui/pages/*.py| UI_PATH
 
     %% UI path
     MP1["capture_figures()&lt;br/&gt;ui/runtime.py linha 150-170&lt;br/&gt;monkey-patch BaseFigure.show&lt;br/&gt;= coleta em lista"]:::ui
-    UI_PATH --> MP1
+    UI_PATH -->|1º context manager| MP1
 
     MP2["silent_progress()&lt;br/&gt;linha 203-223&lt;br/&gt;monkey-patch progress_bar&lt;br/&gt;= _NoopProgress"]:::ui
-    MP1 --> MP2
+    MP1 -->|2º context manager| MP2
 
     MP3["replay(answers)&lt;br/&gt;linha 109-142&lt;br/&gt;monkey-patch select checkbox&lt;br/&gt;input password&lt;br/&gt;nos modulos _partials frames sorters"]:::ui
-    MP2 --> MP3
+    MP2 -->|3º context manager| MP3
 
     CALL["chart_callable(chats)&lt;br/&gt;roda o mesmo codigo CLI"]:::core
-    MP3 --> CALL
-    CLI_PATH --> CALL
+    MP3 -->|dentro dos 3 patches| CALL
+    CLI_PATH -->|sem patches, prompts reais| CALL
 
     SORTDEC{"tem decorator?"}:::core
-    CALL --> SORTDEC
+    CALL -->|primeira linha executada| SORTDEC
 
     %% Sorter decorators
     KEYDEC["@sorters.keys&lt;br/&gt;sorters.py linha 357-378&lt;br/&gt;asks Choose your mode&lt;br/&gt;By Time ou By Actor"]:::sort
@@ -476,50 +476,50 @@ flowchart TD
     GUDEC["@sorters.group_users&lt;br/&gt;sorters.py linha 405-421&lt;br/&gt;SEM prompts&lt;br/&gt;so prepara dict por ator"]:::sort
     NONE["sem decorator&lt;br/&gt;vai direto pro body"]:::sort
 
-    SORTDEC -->|sim KeysFrame| KEYDEC
-    SORTDEC -->|sim Participation| PPDEC
-    SORTDEC -->|sim Participation| GUDEC
-    SORTDEC -->|nao Public Opinion| NONE
+    SORTDEC -->|chart de KeysFrame| KEYDEC
+    SORTDEC -->|alguns de Participation| PPDEC
+    SORTDEC -->|alguns de Participation| GUDEC
+    SORTDEC -->|todos de Public Opinion| NONE
 
     SBT["_sort_by_time(chats)&lt;br/&gt;sorters.py linha 173-199&lt;br/&gt;group by created_at strftime %B %Y&lt;br/&gt;asks per chat All ou Choose an epoch"]:::sort
-    KEYDEC -->|By Time| SBT
+    KEYDEC -->|usuário escolhe By Time| SBT
 
     SBA["_sort_by_actor(chats)&lt;br/&gt;sorters.py linha 202-250&lt;br/&gt;group by actor.display_name&lt;br/&gt;asks per chat All ou Choose actor"]:::sort
-    KEYDEC -->|By Actor| SBA
+    KEYDEC -->|usuário escolhe By Actor| SBA
 
     BODY["chart body&lt;br/&gt;frames.py varias linhas&lt;br/&gt;itera messages le Qty_char_X&lt;br/&gt;agrega em pandas.DataFrame"]:::body
-    SBT --> BODY
-    SBA --> BODY
-    PPDEC --> BODY
-    GUDEC --> BODY
-    NONE --> BODY
+    SBT -->|Dict Chat → Dict mês → List Message| BODY
+    SBA -->|Dict Chat → Dict ator → List Message| BODY
+    PPDEC -->|modo escolhido| BODY
+    GUDEC -->|Dict Chat → Dict ator → List Message| BODY
+    NONE -->|chats raw| BODY
 
     BODY_PROMPT["alguns charts pedem&lt;br/&gt;prompts adicionais no body:&lt;br/&gt;bots Index ou Components&lt;br/&gt;media_repertoire Choose Media...&lt;br/&gt;messages_per_actors_per_weekday User ou System&lt;br/&gt;laminations_per_actors Lam ou Average&lt;br/&gt;fabrications_per_actors idem&lt;br/&gt;keyword Enter the keyword&lt;br/&gt;messages/keyword Choose morph class"]:::body
-    BODY --> BODY_PROMPT
+    BODY -->|durante a iteração| BODY_PROMPT
 
     GENERATORS["generate_chart(df, bars, lines, title)&lt;br/&gt;generate_treemap()&lt;br/&gt;generate_wordcloud()&lt;br/&gt;generate_table()&lt;br/&gt;sorters.py linha 51-355"]:::body
-    BODY_PROMPT --> GENERATORS
+    BODY_PROMPT -->|com DataFrame agregada| GENERATORS
 
     PLT(["plotly&lt;br/&gt;graph_objs.Figure&lt;br/&gt;+ make_subplots"]):::ext
-    PLT -.->|build| GENERATORS
+    PLT -.->|biblioteca de chart| GENERATORS
 
     FIG["fig.show()&lt;br/&gt;chamado pelo generator"]:::body
-    GENERATORS --> FIG
+    GENERATORS -->|tem plotly.Figure| FIG
 
     DEST{"capturado&lt;br/&gt;ou aberto?"}:::body
-    FIG --> DEST
+    FIG -->|behavior depende do patch| DEST
 
     BROWSER["abre browser default&lt;br/&gt;com Plotly HTML estatico&lt;br/&gt;CLI"]:::cli
     CAPTURED["coletado em lista&lt;br/&gt;captured.append(self)&lt;br/&gt;linha 163-165&lt;br/&gt;UI"]:::ui
 
-    DEST -->|CLI| BROWSER
-    DEST -->|UI monkey-patched| CAPTURED
+    DEST -->|CLI, sem patch| BROWSER
+    DEST -->|UI, BaseFigure.show patched| CAPTURED
 
     RETURN["return figures lista&lt;br/&gt;ui/runtime.py linha 254"]:::ui
-    CAPTURED --> RETURN
+    CAPTURED -->|após chart_callable retornar| RETURN
 
     STREAMLIT["for fig in figures:&lt;br/&gt;  st.plotly_chart(fig)&lt;br/&gt;ui/pages/X.py"]:::ui
-    RETURN --> STREAMLIT
+    RETURN -->|page itera e renderiza| STREAMLIT
 
     classDef core fill:#E8DFCE,stroke:#7A6B5A,stroke-width:1.5px,color:#3A2F26
     classDef sort fill:#F6E9C7,stroke:#B8860B,stroke-width:1.5px,color:#3A2F26
